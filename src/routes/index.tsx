@@ -72,7 +72,9 @@ function ErrorParserPage() {
     setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 2800);
   }
 
-  function triggerAnalysis() {
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  async function triggerAnalysis() {
     const log = logText.trim();
     const code = codeText.trim();
     if (!log && !code) {
@@ -83,48 +85,12 @@ function ErrorParserPage() {
       return;
     }
 
-    const selected = platform === "auto" ? undefined : platform;
-    const analysis = analyzeErrorAndCode(log, code, selected);
+    setIsAnalyzing(true);
+    try {
+      const selected = platform === "auto" ? undefined : platform;
+      const analysis = await analyzeErrorAndCode(log, code, selected);
 
-    if (analysis.matched) {
-      const matchData: MatchResult = {
-        entry: {
-          id: analysis.ruleId,
-          title: analysis.title,
-          platform: analysis.platform,
-        },
-        analysis: {
-          explanation: analysis.rootCause,
-          causes: [{ percent: 100, text: analysis.rootCause }],
-          fixes: [analysis.fix],
-          example: analysis.correctedExample,
-        },
-      };
-
-      setResult({
-        kind: "match",
-        data: matchData,
-        analysis: matchData.analysis,
-        logSnapshot: log || code,
-      });
-      setAnimateResult(false);
-      requestAnimationFrame(() => setAnimateResult(true));
-    } else {
-      setResult({ kind: "generic" });
-      setTimeout(() => genericRef.current?.focus(), 0);
-    }
-  }
-
-  function insertExample(triggerAfter = false) {
-    const ex = EXAMPLES[exampleIndex % EXAMPLES.length];
-    setExampleIndex((i) => i + 1);
-    setLogText(ex.error);
-    setCodeText(ex.code);
-    setPlatform("auto");
-    showToast(`Loaded ${capitalize(ex.platform)} example`);
-    if (triggerAfter) {
-      setTimeout(() => {
-        const analysis = analyzeErrorAndCode(ex.error, ex.code, "auto");
+      if (analysis.matched) {
         const matchData: MatchResult = {
           entry: {
             id: analysis.ruleId,
@@ -136,8 +102,67 @@ function ErrorParserPage() {
             causes: [{ percent: 100, text: analysis.rootCause }],
             fixes: [analysis.fix],
             example: analysis.correctedExample,
+            confidence: analysis.confidence,
+            evidence: analysis.evidence,
+            executionPath: analysis.executionPath,
+            alternatives: analysis.alternatives,
+            why: analysis.why,
+            regressions: analysis.possibleRegressions,
           },
         };
+
+        // attach timings if present
+        if ((analysis as any).timings) {
+          (matchData.analysis as any).timings = (analysis as any).timings;
+        }
+
+        setResult({
+          kind: "match",
+          data: matchData,
+          analysis: matchData.analysis,
+          logSnapshot: log || code,
+        });
+        setAnimateResult(false);
+        requestAnimationFrame(() => setAnimateResult(true));
+      } else {
+        setResult({ kind: "generic" });
+        setTimeout(() => genericRef.current?.focus(), 0);
+      }
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }
+
+  function insertExample(triggerAfter = false) {
+    const ex = EXAMPLES[exampleIndex % EXAMPLES.length];
+    setExampleIndex((i) => i + 1);
+    setLogText(ex.error);
+    setCodeText(ex.code);
+    setPlatform("auto");
+    showToast(`Loaded ${capitalize(ex.platform)} example`);
+    if (triggerAfter) {
+      setTimeout(async () => {
+        const analysis = await analyzeErrorAndCode(ex.error, ex.code, "auto");
+        const matchData: MatchResult = {
+          entry: {
+            id: analysis.ruleId,
+            title: analysis.title,
+            platform: analysis.platform,
+          },
+          analysis: {
+            explanation: analysis.rootCause,
+            causes: [{ percent: 100, text: analysis.rootCause }],
+            fixes: [analysis.fix],
+            example: analysis.correctedExample,
+            confidence: analysis.confidence,
+            evidence: analysis.evidence,
+            executionPath: analysis.executionPath,
+            alternatives: analysis.alternatives,
+            why: analysis.why,
+            regressions: analysis.possibleRegressions,
+          },
+        };
+        if ((analysis as any).timings) (matchData.analysis as any).timings = (analysis as any).timings;
         setResult({
           kind: "match",
           data: matchData,
@@ -366,11 +391,11 @@ function ErrorParserPage() {
               <div className="flex items-center gap-2 pt-1 flex-wrap">
                 <button
                   type="button"
-                  disabled={!canAnalyze}
+                  disabled={!canAnalyze || isAnalyzing}
                   onClick={triggerAnalysis}
                   className="ep-cta px-5 py-2.5 rounded-lg text-xs font-semibold tracking-wide"
                 >
-                  Analyze Root Cause →
+                  {isAnalyzing ? "Analyzing…" : "Analyze Root Cause →"}
                 </button>
                 <span className="text-[10px] text-zinc-600 hidden sm:inline font-mono">
                   ⌘/Ctrl + ↵
@@ -463,6 +488,13 @@ function ErrorParserPage() {
                       {analysis.why && (
                         <div className="text-xs text-zinc-500">
                           Why: {analysis.why}
+                        </div>
+                      )}
+                      {(analysis as any).timings && (
+                        <div className="text-xs text-zinc-500 mt-1">
+                          Timings: {Object.entries((analysis as any).timings)
+                            .map(([k, v]) => `${k}: ${Math.round(v as number)}ms`)
+                            .join(" • ")}
                         </div>
                       )}
                     </section>

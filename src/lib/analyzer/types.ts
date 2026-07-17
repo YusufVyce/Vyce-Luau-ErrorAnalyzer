@@ -21,6 +21,7 @@ export type MatchedAnalysis = {
   why: string;
   possibleRegressions: string[];
   alternatives: AlternativeHypothesis[];
+  timings?: Record<string, number>;
 };
 
 export type AnalyzerResult = MatchedAnalysis | { matched: false };
