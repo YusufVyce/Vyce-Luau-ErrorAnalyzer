@@ -7,6 +7,7 @@ const JS_HINTS = [/\bawait\b/, /\basync\b/, /require\(/, /module\.exports/, /imp
 const JAVA_HINTS = [/\bimport\s+org\.bukkit\./, /\bclass\b/, /public\s+void\s+onPlayerInteract\(/, /NullPointerException/];
 
 export function detectCodeLanguage(codeText: string): CodeLanguage {
+  console.time('[language] detectCodeLanguage');
   const text = codeText.toLowerCase();
   const score = {
     lua: LUA_HINTS.reduce((sum, re) => sum + (re.test(text) ? 1 : 0), 0),
@@ -16,11 +17,12 @@ export function detectCodeLanguage(codeText: string): CodeLanguage {
   };
 
   const winner = Object.entries(score).reduce(
-    (best, entry) => (entry[1] > best[1] ? { lang: entry[0] as CodeLanguage, score: entry[1] } : best),
+    (best, entry) => (entry[1] > best.score ? { lang: entry[0] as CodeLanguage, score: entry[1] } : best),
     { lang: "unknown" as CodeLanguage, score: 0 },
   );
-
-  return winner.score > 0 ? winner.lang : "unknown";
+  const result = winner.score > 0 ? winner.lang : "unknown";
+  console.timeEnd('[language] detectCodeLanguage');
+  return result;
 }
 
 export function resolvePlatform(

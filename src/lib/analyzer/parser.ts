@@ -50,10 +50,13 @@ function accessRoots(accesses: string[]): string[] {
 }
 
 export function buildCodeFacts(codeText: string, language: CodeLanguage): CodeFacts {
+  console.time('[parser] buildCodeFacts');
   const lines = codeText.split(/\r?\n/);
+  console.log(`[parser] parsing ${lines.length} lines, ${codeText.length} chars`);
   const facts: CodeFact[] = [];
   const symbolTable: Record<string, SymbolSummary> = {};
 
+  console.time('[parser] main loop');
   for (let index = 0; index < lines.length; index += 1) {
     const raw = lines[index];
     const normalized = raw.replace(/\s+/g, " ").trim();
@@ -130,6 +133,8 @@ export function buildCodeFacts(codeText: string, language: CodeLanguage): CodeFa
     });
   }
 
+  console.timeEnd('[parser] main loop');
+  console.time('[parser] symbol analysis');
   for (const summary of Object.values(symbolTable)) {
     const firstAssignment = summary.assignments[0] ?? Number.MAX_SAFE_INTEGER;
     for (const accessLine of summary.accesses) {
@@ -141,6 +146,8 @@ export function buildCodeFacts(codeText: string, language: CodeLanguage): CodeFa
       summary.asyncAssignments.length > 0 &&
       summary.accesses.some((line) => summary.asyncAssignments.some((assignLine) => assignLine < line));
   }
+  console.timeEnd('[parser] symbol analysis');
+  console.timeEnd('[parser] buildCodeFacts');
 
   return { language, lines, facts, symbolTable };
 }

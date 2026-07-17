@@ -77,6 +77,7 @@ function ErrorParserPage() {
   async function triggerAnalysis() {
     const log = logText.trim();
     const code = codeText.trim();
+    console.log(`[ui] triggerAnalysis START: log=${log.length} chars, code=${code.length} chars`);
     if (!log && !code) {
       setErrorFlash(true);
       errorRef.current?.focus();
@@ -86,15 +87,21 @@ function ErrorParserPage() {
     }
 
     setIsAnalyzing(true);
+    console.log(`[ui] isAnalyzing=true, calling analyzer`);
     try {
       const selected = platform === "auto" ? undefined : platform;
+      const startTime = performance.now();
       const analysis = await analyzeErrorAndCode(log, code, selected);
+      const elapsed = performance.now() - startTime;
+      console.log(`[ui] analyzer returned after ${elapsed}ms`);
 
       // Watchdog / error diagnostics from engine
       if ((analysis as any).__timeout) {
+        console.error(`[ui] TIMEOUT detected`);
         showToast((analysis as any).__timeoutMessage || "Analysis timed out", "error");
       }
       if ((analysis as any).__workerError || (analysis as any).__postError) {
+        console.error(`[ui] ERROR detected`);
         const msg = (analysis as any).__workerError ? (analysis as any).message : (analysis as any).__postError;
         showToast(`Analysis failed: ${msg ?? "unknown"}`, "error");
       }
@@ -119,12 +126,7 @@ function ErrorParserPage() {
             regressions: analysis.possibleRegressions,
           },
         };
-
-        // attach timings if present
-        if ((analysis as any).timings) {
-          (matchData.analysis as any).timings = (analysis as any).timings;
-        }
-
+        if ((analysis as any).timings) (matchData.analysis as any).timings = (analysis as any).timings;
         setResult({
           kind: "match",
           data: matchData,
@@ -138,6 +140,7 @@ function ErrorParserPage() {
         setTimeout(() => genericRef.current?.focus(), 0);
       }
     } finally {
+      console.log(`[ui] clearing isAnalyzing`);
       setIsAnalyzing(false);
     }
   }
@@ -159,34 +162,39 @@ function ErrorParserPage() {
           const msg = (analysis as any).__workerError ? (analysis as any).message : (analysis as any).__postError;
           showToast(`Analysis failed: ${msg ?? "unknown"}`, "error");
         }
-        const matchData: MatchResult = {
-          entry: {
-            id: analysis.ruleId,
-            title: analysis.title,
-            platform: analysis.platform,
-          },
-          analysis: {
-            explanation: analysis.rootCause,
-            causes: [{ percent: 100, text: analysis.rootCause }],
-            fixes: [analysis.fix],
-            example: analysis.correctedExample,
-            confidence: analysis.confidence,
-            evidence: analysis.evidence,
-            executionPath: analysis.executionPath,
-            alternatives: analysis.alternatives,
-            why: analysis.why,
-            regressions: analysis.possibleRegressions,
-          },
-        };
-        if ((analysis as any).timings) (matchData.analysis as any).timings = (analysis as any).timings;
-        setResult({
-          kind: "match",
-          data: matchData,
-          analysis: matchData.analysis,
-          logSnapshot: ex.error,
-        });
-        setAnimateResult(false);
-        requestAnimationFrame(() => setAnimateResult(true));
+        if (analysis.matched) {
+          const matchData: MatchResult = {
+            entry: {
+              id: analysis.ruleId,
+              title: analysis.title,
+              platform: analysis.platform,
+            },
+            analysis: {
+              explanation: analysis.rootCause,
+              causes: [{ percent: 100, text: analysis.rootCause }],
+              fixes: [analysis.fix],
+              example: analysis.correctedExample,
+              confidence: analysis.confidence,
+              evidence: analysis.evidence,
+              executionPath: analysis.executionPath,
+              alternatives: analysis.alternatives,
+              why: analysis.why,
+              regressions: analysis.possibleRegressions,
+            },
+          };
+          if ((analysis as any).timings) (matchData.analysis as any).timings = (analysis as any).timings;
+          setResult({
+            kind: "match",
+            data: matchData,
+            analysis: matchData.analysis,
+            logSnapshot: ex.error,
+          });
+          setAnimateResult(false);
+          requestAnimationFrame(() => setAnimateResult(true));
+        } else {
+          showToast("No match produced by analyzer", "error");
+          setResult({ kind: "generic" });
+        }
       }, 0);
     }
   }
@@ -237,7 +245,7 @@ function ErrorParserPage() {
     ? result.data.entry
     : { id: "unknown", title: "Unknown error", platform: "roblox" as Platform };
 
-  const logSnapshot = result?.logSnapshot ?? "";
+  const logSnapshot = result?.kind === "match" ? result.logSnapshot : "";
 
   const metaLabel = useMemo(() => {
     if (result?.kind !== "match") return "";

@@ -8,9 +8,12 @@ export type SymbolIssue = {
 };
 
 export function analyzeSymbolIssues(codeFacts: CodeFacts): SymbolIssue[] {
+  console.time('[semantic] analyzeSymbolIssues');
   const issues: SymbolIssue[] = [];
+  const symbols = Object.values(codeFacts.symbolTable);
+  console.log(`[semantic] analyzing ${symbols.length} symbols`);
 
-  for (const symbol of Object.values(codeFacts.symbolTable)) {
+  for (const symbol of symbols) {
     if (symbol.referencedBeforeAssigned.length > 0) {
       issues.push({
         symbol: symbol.name,
@@ -46,7 +49,9 @@ export function analyzeSymbolIssues(codeFacts: CodeFacts): SymbolIssue[] {
     }
   }
 
-  return issues.sort((a, b) => b.confidence - a.confidence);
+  const sorted = issues.sort((a, b) => b.confidence - a.confidence);
+  console.timeEnd('[semantic] analyzeSymbolIssues');
+  return sorted;
 }
 
 export function buildExecutionPath(codeFacts: CodeFacts): string[] {

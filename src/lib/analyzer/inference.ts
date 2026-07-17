@@ -1,9 +1,9 @@
-import { Platform, AnalyzerResult } from "./types";
+import { Platform, AnalyzerResult, MatchedAnalysis } from "./types";
 import { CodeFacts } from "./types";
 import { findMatch, type ErrorEntry } from "@/lib/error-parser";
 import { analyzeSymbolIssues, buildExecutionPath } from "./semantic";
 
-function buildBaseResult(entry: ErrorEntry | null, platform: Platform | undefined): Omit<AnalyzerResult, "rootCause" | "fix" | "correctedExample" | "evidence" | "executionPath" | "confidence" | "why" | "possibleRegressions" | "alternatives"> {
+function buildBaseResult(entry: ErrorEntry | null, platform: Platform | undefined): MatchedAnalysis {
   const title = entry?.title ?? "Issue detected";
   const ruleId = entry ? entry.id : "code-analysis";
   return {
@@ -28,15 +28,29 @@ export function inferCause(
   codeFacts: CodeFacts,
   platform: Platform | undefined,
 ): AnalyzerResult {
+  console.time('[inference] inferCause');
+  console.log(`[inference] start with log=${logText.length}ch, code=${codeFacts.lines.length}L`);
+  
+  console.time('[inference] findMatch');
   const signal = logText.trim() ? findMatch(logText, codeFacts.lines.join("\n"), platform ?? "auto") : null;
+  console.timeEnd('[inference] findMatch');
   const entry = signal?.entry ?? null;
+  
+  console.time('[inference] semantic');
   const semanticIssues = analyzeSymbolIssues(codeFacts).map((issue) => ({
     reason: issue.reason,
     evidence: issue.evidence,
     confidence: issue.confidence,
   }));
+  console.timeEnd('[inference] semantic');
+  
+  console.time('[inference] fallback');
   const fallbackIssues = analyzeCodeFacts(logText, codeFacts, entry);
+  console.timeEnd('[inference] fallback');
+  
+  console.time('[inference] merge');
   const issues = [...semanticIssues, ...fallbackIssues].sort((a, b) => b.confidence - a.confidence);
+  console.timeEnd('[inference] merge');
   const evidence = issues.flatMap((issue) => issue.evidence);
   const executionPath = buildExecutionPath(codeFacts);
   const confidence = Math.min(1, Math.max(0.35, evidence.length * 0.15 + (entry ? 0.2 : 0)));
@@ -49,7 +63,7 @@ export function inferCause(
   );
   const why = buildWhy(rootCause, issues, entry);
 
-  return {
+  const result = {
     ...buildBaseResult(entry, platform),
     rootCause,
     fix,
@@ -61,6 +75,8 @@ export function inferCause(
     possibleRegressions,
     alternatives,
   };
+  console.timeEnd('[inference] inferCause');
+  return result;
 }
 
 function analyzeCodeFacts(logText: string, codeFacts: CodeFacts, entry: ErrorEntry | null) {

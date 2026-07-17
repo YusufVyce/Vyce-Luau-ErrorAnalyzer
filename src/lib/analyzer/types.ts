@@ -1,12 +1,6 @@
 export type Platform = "roblox" | "unity" | "discord" | "minecraft";
 export type CodeLanguage = "lua" | "cs" | "js" | "ts" | "java" | "unknown";
 
-export type AlternativeHypothesis = {
-  hypothesis: string;
-  confidence: number;
-  evidence: string[];
-};
-
 export type MatchedAnalysis = {
   matched: true;
   ruleId: string;
@@ -20,7 +14,7 @@ export type MatchedAnalysis = {
   confidence: number;
   why: string;
   possibleRegressions: string[];
-  alternatives: AlternativeHypothesis[];
+  alternatives: string[];
   timings?: Record<string, number>;
 };
 

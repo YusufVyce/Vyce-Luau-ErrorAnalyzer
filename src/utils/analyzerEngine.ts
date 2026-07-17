@@ -13,21 +13,29 @@ const pending = new Map<string, PendingEntry>();
 
 function initWorker() {
   if (typeof window === "undefined" || typeof Worker === "undefined") return null;
+  // Disable workers in test environments to avoid hangs in vitest/jsdom
+  if (typeof process !== "undefined" && (process.env.VITEST || process.env.JEST_WORKER_ID)) {
+    return null;
+  }
   if (worker) return worker;
   try {
-    // worker is located relative to this file: ../lib/analyzer/worker.ts
-    // Vite will bundle this when using new URL(..., import.meta.url)
-    // @ts-ignore
-    worker = new Worker(new URL("../lib/analyzer/worker.ts", import.meta.url), { type: "module" });
+    // Try to create worker; in some environments (jsdom, test runners), this will fail
+    // @ts-ignore - import.meta.url is available in browser/bundler context
+    const workerUrl = new URL("../lib/analyzer/worker.ts", import.meta.url);
+    worker = new Worker(workerUrl, { type: "module" });
     worker.addEventListener("message", (ev: MessageEvent) => {
       const { id, result } = ev.data as { id: string; result: AnalyzerResult | any };
+      console.log(`[engine] worker message received id=${id}`);
       const entry = pending.get(id);
       if (entry) {
+        console.log(`[engine] resolving pending id=${id}`);
         try {
           if (entry.timer) clearTimeout(entry.timer);
         } catch {}
         entry.resolve(result as AnalyzerResult);
         pending.delete(id);
+      } else {
+        console.warn(`[engine] received message for unknown id=${id}`);
       }
     });
     worker.addEventListener("error", (err) => {
@@ -53,9 +61,12 @@ export async function analyzeErrorAndCode(
   codeText: string,
   platformFilter?: Platform | "auto",
 ): Promise<AnalyzerResult> {
+  const analysisId = `${Date.now()}_${Math.random()}`;
+  console.log(`[engine] analyzeErrorAndCode START id=${analysisId}`);
   // If running in an environment without a Window or Worker, fall back to sync analysis
   const w = initWorker();
   if (!w) {
+    console.log(`[engine] worker unavailable, using sync fallback`);
     // run synchronously (SSR or unsupported) but still measure per-stage timings
     const timings: Record<string, number> = {};
     const totalStart = typeof performance !== "undefined" ? performance.now() : Date.now();
@@ -77,16 +88,21 @@ export async function analyzeErrorAndCode(
     timings.inferCause = (typeof performance !== "undefined" ? performance.now() : Date.now()) - t3;
 
     timings.total = (typeof performance !== "undefined" ? performance.now() : Date.now()) - totalStart;
+    console.log(`[engine] sync analysis complete: ${JSON.stringify(timings)}`);
     try {
       (result as any).timings = timings;
     } catch {}
+    console.log(`[engine] analyzeErrorAndCode END (sync) id=${analysisId}`);
     return result;
   }
 
+  console.log(`[engine] using worker for analysis`);
   return await new Promise<AnalyzerResult>((resolve) => {
     const id = String(Date.now()) + Math.random();
+    console.log(`[engine] posting message to worker id=${id}`);
     const timer = setTimeout(() => {
       if (pending.has(id)) {
+        console.warn(`[engine] TIMEOUT after 5000ms id=${id}`);
         pending.delete(id);
         const timeoutResult: AnalyzerResult = { matched: false } as any;
         (timeoutResult as any).__timeout = true;
@@ -101,7 +117,9 @@ export async function analyzeErrorAndCode(
     pending.set(id, { resolve, timer });
     try {
       w.postMessage({ id, logText, codeText, platform: platformFilter });
+      console.log(`[engine] message posted to worker`);
     } catch (e) {
+      console.error(`[engine] failed to post message to worker`, e);
       if (timer) clearTimeout(timer as any);
       pending.delete(id);
       const errRes: AnalyzerResult = { matched: false } as any;
