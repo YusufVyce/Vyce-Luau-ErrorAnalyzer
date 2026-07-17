@@ -58,7 +58,7 @@ function ErrorParserPage() {
     return () => document.body.classList.remove("ep-body");
   }, []);
 
-  const canAnalyze = logText.trim().length > 0;
+  const canAnalyze = logText.trim().length > 0 || codeText.trim().length > 0;
 
   function showToast(message: string, variant: "info" | "error" = "info") {
     const id = Date.now() + Math.random();
@@ -69,10 +69,10 @@ function ErrorParserPage() {
   function triggerAnalysis() {
     const log = logText.trim();
     const code = codeText.trim();
-    if (!log) {
+    if (!log && !code) {
       setErrorFlash(true);
       errorRef.current?.focus();
-      showToast("Paste an error message first", "error");
+      showToast("Paste an error message or code first", "error");
       setTimeout(() => setErrorFlash(false), 900);
       return;
     }
@@ -99,7 +99,7 @@ function ErrorParserPage() {
         kind: "match",
         data: matchData,
         analysis: matchData.analysis,
-        logSnapshot: log,
+        logSnapshot: log || code,
       });
       setAnimateResult(false);
       requestAnimationFrame(() => setAnimateResult(true));
