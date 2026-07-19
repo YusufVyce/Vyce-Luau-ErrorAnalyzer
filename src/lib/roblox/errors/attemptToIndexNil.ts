@@ -14,7 +14,32 @@ import type {
 export const ATTEMPT_TO_INDEX_NIL: ErrorEntry = {
   id: "roblox-index-nil",
   title: "Attempt to index nil",
-  pattern: /attempt to index/i,
+  pattern: /attempt to index (?:a )?nil value|attempt to index nil(?:\s|$)/i,
+
+keywords: [
+  "attempt",
+  "index",
+  "nil",
+  "value",
+  "field",
+  "property",
+  "table",
+  "leaderstats",
+  "waitforchild",
+  "findfirstchild",
+  "module",
+  "require"
+],
+
+aliases: [
+  "attempt to index nil",
+  "attempt to index a nil value",
+  "attempted to index nil",
+  "attempt to index field",
+  "attempt to index property",
+  "attempt to index value",
+  "attempt to index with value"
+],
 
   analyze(logText, codeText) {
     const propMatch = logText.match(/with ['"]?([^'"]+)['"]?/i);

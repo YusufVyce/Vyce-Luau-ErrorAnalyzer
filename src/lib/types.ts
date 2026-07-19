@@ -37,6 +37,12 @@ export type Analysis = {
 
   codeInsights?: CodeInsight[];
 
+  scanWarnings?: {
+  title: string;
+  severity: "low" | "medium" | "high";
+  message: string;
+}[];
+
   deprecatedApis?: DeprecatedApi[];
 
   performanceIssues?: {
@@ -55,6 +61,27 @@ export type Analysis = {
 export type ErrorEntry = {
   id: string;
   title: string;
+
+  // Regex used for exact matching
   pattern: RegExp;
+
+  // Used by the smart matcher
+  keywords?: string[];
+
+  // Alternative error message variations
+  aliases?: string[];
+
+  // Future ranking system
+  priority?: number;
+
+  // Future categorization
+  category?:
+    | "runtime"
+    | "network"
+    | "datastore"
+    | "ui"
+    | "performance"
+    | "security";
+
   analyze: (logText: string, codeText: string) => Analysis;
 };

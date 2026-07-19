@@ -1,8 +1,12 @@
+import { extractVariableFlow } from "@/lib/analyzer/codeFlow";
+import { runScanRules } from "@/lib/analyzer/scanner/rules";
+import { scanCode } from "@/lib/analyzer/scanner/scanCode";
 import {
   findMatch,
   ERROR_DICT,
-  type DeprecatedApi,
 } from "@/lib/error-parser";
+
+import type { DeprecatedApi } from "@/lib/types";
 
 export type AnalyzerResult =
   | {
@@ -31,8 +35,22 @@ export function analyzeErrorAndCode(
   // Prefer log-based matching when logText is provided
   if (logText && logText.trim().length > 0) {
     const match = findMatch(logText);
-    if (!match) return { matched: false };
-    const analysis = match.entry.analyze(logText, codeText);
+
+if (!match) return { matched: false };
+
+const detectedConfidence = match.confidence;
+const detectedMatchType = match.matchType;
+
+const analysis = match.entry.analyze(logText, codeText);
+const scan = scanCode(codeText);
+
+console.log(scan);
+const warnings = runScanRules(scan);
+
+console.log(warnings);
+const flow = extractVariableFlow(codeText);
+
+console.log(flow);
     return {
   matched: true,
   ruleId: match.entry.id,
@@ -42,7 +60,7 @@ export function analyzeErrorAndCode(
   correctedExample: analysis.example,
 
   severity: analysis.severity,
-  confidence: analysis.confidence,
+  confidence: detectedConfidence || analysis.confidence,
 
   codeInsights: analysis.codeInsights,
   deprecatedApis: analysis.deprecatedApis,
