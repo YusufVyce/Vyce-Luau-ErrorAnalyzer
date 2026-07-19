@@ -83,7 +83,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Paste a console error and related code to get an instant, context-aware root cause analysis and fix for Roblox, Unity, Discord.js, and Minecraft plugin errors.",
+          "Paste a console error and related code to get an instant, context-aware root cause analysis and fix for Roblox script errors.",
       },
       {
         property: "og:title",
@@ -92,7 +92,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         property: "og:description",
         content:
-          "Instant, context-aware root cause analysis for Roblox, Unity, Discord.js, and Minecraft errors.",
+          "Instant, context-aware root cause analysis for Roblox script errors.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

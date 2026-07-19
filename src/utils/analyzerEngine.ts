@@ -1,55 +1,57 @@
 import {
   findMatch,
-  type Platform,
   ERROR_DICT,
-  detectPlatform,
+  type DeprecatedApi,
 } from "@/lib/error-parser";
 
 export type AnalyzerResult =
   | {
+      severity?: "Low" | "Medium" | "High" | "Critical";
+      confidence?: number;
       matched: true;
       ruleId: string;
       title: string;
-      platform: Platform;
       rootCause: string;
       fix: string;
       correctedExample: string | undefined;
+
+      codeInsights?: {
+  title: string;
+  description: string;
+}[];
+
+deprecatedApis?: DeprecatedApi[];
     }
   | { matched: false };
-
-export type { Platform } from "@/lib/error-parser";
 
 export function analyzeErrorAndCode(
   logText: string,
   codeText: string,
-  platformFilter?: Platform,
 ): AnalyzerResult {
   // Prefer log-based matching when logText is provided
-  const platformArg = platformFilter === undefined ? "auto" : platformFilter;
   if (logText && logText.trim().length > 0) {
-    const match = findMatch(logText, codeText, platformArg as any);
+    const match = findMatch(logText);
     if (!match) return { matched: false };
     const analysis = match.entry.analyze(logText, codeText);
     return {
-      matched: true,
-      ruleId: match.entry.id,
-      title: match.entry.title,
-      platform: match.entry.platform,
-      rootCause: analysis.explanation,
-      fix: analysis.fixes[0] ?? "No recommended fix available.",
-      correctedExample: analysis.example,
-    };
+  matched: true,
+  ruleId: match.entry.id,
+  title: match.entry.title,
+  rootCause: analysis.explanation,
+  fix: analysis.fixes[0] ?? "No recommended fix available.",
+  correctedExample: analysis.example,
+
+  severity: analysis.severity,
+  confidence: analysis.confidence,
+
+  codeInsights: analysis.codeInsights,
+  deprecatedApis: analysis.deprecatedApis,
+};
   }
 
   // If no log provided but code exists, attempt code-only analysis using rule heuristics.
   if (codeText && codeText.trim().length > 0) {
-    const detected =
-      platformFilter === "auto" || platformFilter === undefined
-        ? detectPlatform(codeText)
-        : platformFilter;
-    const candidates = detected
-      ? ERROR_DICT.filter((e) => e.platform === detected)
-      : ERROR_DICT;
+    const candidates = ERROR_DICT;
 
     // Score candidates by whether their analyze() returns useful fixes/examples
     const scored = candidates
@@ -69,14 +71,19 @@ export function analyzeErrorAndCode(
 
     const best = scored[0];
     return {
-      matched: true,
-      ruleId: `code-only-${best.entry.id}`,
-      title: best.entry.title + " (code-only)",
-      platform: best.entry.platform,
-      rootCause: best.analysis?.explanation ?? "Potential issue detected in code.",
-      fix: best.analysis?.fixes?.[0] ?? "Review the code for reported issues.",
-      correctedExample: best.analysis?.example,
-    };
+  matched: true,
+  ruleId: `code-only-${best.entry.id}`,
+  title: best.entry.title + " (code-only)",
+  rootCause: best.analysis?.explanation ?? "Potential issue detected in code.",
+  fix: best.analysis?.fixes?.[0] ?? "Review the code for reported issues.",
+  correctedExample: best.analysis?.example,
+
+  severity: best.analysis?.severity,
+  confidence: best.analysis?.confidence,
+
+  codeInsights: best.analysis?.codeInsights,
+  deprecatedApis: best.analysis?.deprecatedApis,
+};
   }
 
   return { matched: false };

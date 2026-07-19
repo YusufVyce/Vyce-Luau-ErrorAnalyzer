@@ -1,44 +1,46 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { capitalize, EXAMPLES } from "@/lib/error-parser";
+import { EXAMPLES } from "@/lib/error-parser";
 import {
   analyzeErrorAndCode,
   type AnalyzerResult,
-  type Platform,
 } from "@/utils/analyzerEngine";
 
 export const Route = createFileRoute("/")({
   component: ErrorParserPage,
 });
 
-type PlatformFilter = "auto" | Platform;
-
 type Analysis = {
   explanation: string;
   causes: { percent: number; text: string }[];
   fixes: string[];
   example?: string;
+
+  severity?: "Low" | "Medium" | "High" | "Critical";
+  confidence?: number;
+
+  codeInsights?: {
+  title: string;
+  description: string;
+}[];
+
+deprecatedApis?: {
+  api: string;
+  replacement: string;
+  reason: string;
+}[];
 };
 
 type MatchResult = {
-  entry: { id: string; title: string; platform: Platform };
+  entry: { id: string; title: string };
   analysis: Analysis;
 };
-
-const PLATFORMS: { value: PlatformFilter; label: string }[] = [
-  { value: "auto", label: "Auto-detect" },
-  { value: "roblox", label: "Roblox" },
-  { value: "unity", label: "Unity" },
-  { value: "discord", label: "Discord" },
-  { value: "minecraft", label: "Minecraft" },
-];
 
 type Toast = { id: number; message: string; variant: "info" | "error" };
 
 function ErrorParserPage() {
   const [logText, setLogText] = useState("");
   const [codeText, setCodeText] = useState("");
-  const [platform, setPlatform] = useState<PlatformFilter>("auto");
   const [result, setResult] = useState<
     | { kind: "match"; data: MatchResult; analysis: Analysis; logSnapshot: string }
     | { kind: "generic" }
@@ -77,22 +79,26 @@ function ErrorParserPage() {
       return;
     }
 
-    const selected = platform === "auto" ? undefined : platform;
-    const analysis = analyzeErrorAndCode(log, code, selected);
+    const analysis = analyzeErrorAndCode(log, code);
 
     if (analysis.matched) {
       const matchData: MatchResult = {
         entry: {
           id: analysis.ruleId,
           title: analysis.title,
-          platform: analysis.platform,
         },
         analysis: {
-          explanation: analysis.rootCause,
-          causes: [{ percent: 100, text: analysis.rootCause }],
-          fixes: [analysis.fix],
-          example: analysis.correctedExample,
-        },
+  explanation: analysis.rootCause,
+  causes: [{ percent: 100, text: analysis.rootCause }],
+  fixes: [analysis.fix],
+  example: analysis.correctedExample,
+
+  severity: analysis.severity,
+  confidence: analysis.confidence,
+
+  codeInsights: analysis.codeInsights,
+  deprecatedApis: analysis.deprecatedApis,
+},
       };
 
       setResult({
@@ -114,32 +120,41 @@ function ErrorParserPage() {
     setExampleIndex((i) => i + 1);
     setLogText(ex.error);
     setCodeText(ex.code);
-    setPlatform("auto");
-    showToast(`Loaded ${capitalize(ex.platform)} example`);
+    showToast("Loaded Roblox Script example");
     if (triggerAfter) {
       setTimeout(() => {
-        const analysis = analyzeErrorAndCode(ex.error, ex.code, "auto");
-        const matchData: MatchResult = {
-          entry: {
-            id: analysis.ruleId,
-            title: analysis.title,
-            platform: analysis.platform,
-          },
-          analysis: {
-            explanation: analysis.rootCause,
-            causes: [{ percent: 100, text: analysis.rootCause }],
-            fixes: [analysis.fix],
-            example: analysis.correctedExample,
-          },
-        };
-        setResult({
-          kind: "match",
-          data: matchData,
-          analysis: matchData.analysis,
-          logSnapshot: ex.error,
-        });
-        setAnimateResult(false);
-        requestAnimationFrame(() => setAnimateResult(true));
+        const analysis = analyzeErrorAndCode(ex.error, ex.code);
+        
+        if (analysis.matched) {
+          const matchData: MatchResult = {
+            entry: {
+              id: analysis.ruleId,
+              title: analysis.title,
+            },
+            analysis: {
+  explanation: analysis.rootCause,
+  causes: [{ percent: 100, text: analysis.rootCause }],
+  fixes: [analysis.fix],
+  example: analysis.correctedExample,
+
+  severity: analysis.severity,
+  confidence: analysis.confidence,
+
+  codeInsights: analysis.codeInsights,
+  deprecatedApis: analysis.deprecatedApis,
+},
+          };
+          setResult({
+            kind: "match",
+            data: matchData,
+            analysis: matchData.analysis,
+            logSnapshot: ex.error,
+          });
+          setAnimateResult(false);
+          requestAnimationFrame(() => setAnimateResult(true));
+        } else {
+          setResult({ kind: "generic" });
+        }
       }, 0);
     }
   }
@@ -187,14 +202,14 @@ function ErrorParserPage() {
     : { explanation: "", causes: [], fixes: [], example: undefined };
 
   const entry = result?.kind === "match"
-    ? result.data.entry
-    : { id: "unknown", title: "Unknown error", platform: "roblox" as Platform };
+  ? result.data.entry
+  : { id: "unknown", title: "Unknown error" };
 
-  const logSnapshot = result?.logSnapshot ?? "";
+  const logSnapshot = result?.kind === "match" ? result.logSnapshot : "";
 
   const metaLabel = useMemo(() => {
     if (result?.kind !== "match") return "";
-    return `${capitalize(entry.platform)} • ${entry.id}`;
+    return `Roblox • ${entry.id}`;
   }, [entry, result]);
 
   return (
@@ -228,110 +243,88 @@ function ErrorParserPage() {
       </div>
 
       <div className="relative min-h-screen flex flex-col items-center px-6 pb-10">
-        <div className="ep-aurora" aria-hidden="true" />
+  <div className="ep-aurora" aria-hidden="true" />
 
-        <header className="relative z-10 w-full max-w-5xl pt-14 md:pt-20 pb-8 space-y-6 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/5 text-[10px] tracking-[0.2em] uppercase text-emerald-300 mx-auto">
-            <span className="ep-dot" />
-            Dynamic Root Cause Analyzer
-          </div>
-          <h1 className="serif-title text-4xl md:text-6xl leading-[1.05] text-zinc-50">
-            Got a broken code?
-            <br />
-            Let&apos;s{" "}
-            <span className="italic bg-gradient-to-r from-emerald-300 to-teal-400 bg-clip-text text-transparent">
-              parse it.
-            </span>
-          </h1>
-          <p className="text-sm md:text-base text-zinc-400 max-w-xl mx-auto leading-relaxed">
-            Paste your console error and the related script lines. The analyzer
-            reads context to find the{" "}
-            <span className="text-zinc-200">exact root cause</span> — not
-            generic guesses.
-          </p>
-          <div className="mt-3 text-xs text-zinc-500">Made by YusufVyce</div>
-          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-zinc-500">
-            <span className="flex items-center gap-1.5">
-              <span className="text-emerald-400">✓</span> 100% client-side
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="text-emerald-400">✓</span> Roblox · Unity ·
-              Discord · Minecraft
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="text-emerald-400">✓</span> Instant analysis
-            </span>
-          </div>
-        </header>
+  <header className="relative z-10 w-full max-w-5xl pt-14 md:pt-20 pb-8 space-y-6 text-center">
+    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/5 text-[10px] tracking-[0.2em] uppercase text-emerald-300 mx-auto">
+      <span className="ep-dot" />
+      Dynamic Root Cause Analyzer
+    </div>
 
-        <main
-          id="main"
-          tabIndex={-1}
-          className="relative z-10 w-full max-w-5xl space-y-6 outline-none"
-        >
-          <div className="flex flex-wrap gap-3 items-center justify-between">
-            <div
-              role="group"
-              aria-label="Filter by platform"
-              className="flex gap-1.5 flex-wrap p-1 rounded-full border border-zinc-800/70 bg-zinc-950/60 backdrop-blur-sm"
-            >
-              {PLATFORMS.map((p) => {
-                const active = p.value === platform;
-                return (
-                  <button
-                    key={p.value}
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() => setPlatform(p.value)}
-                    className={`px-3.5 py-1.5 text-xs rounded-full transition-all ${
-                      active
-                        ? "bg-emerald-500/15 text-emerald-300 shadow-[inset_0_0_0_1px_rgba(16,185,129,0.3)]"
-                        : "text-zinc-500 hover:text-zinc-300"
-                    }`}
-                  >
-                    {p.label}
-                  </button>
-                );
-              })}
-            </div>
-            <div className="text-xs text-zinc-500">
-              Detecting as{" "}
-              <span className="text-emerald-300 font-medium">
-                {PLATFORMS.find((p) => p.value === platform)?.label}
-              </span>
-            </div>
-          </div>
+    <h1 className="serif-title text-4xl md:text-6xl leading-[1.05] text-zinc-50">
+      Got a broken code?
+      <br />
+      Let&apos;s{" "}
+      <span className="italic bg-gradient-to-r from-emerald-300 to-teal-400 bg-clip-text text-transparent">
+        parse it.
+      </span>
+    </h1>
 
-          <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <div className="lg:col-span-5 space-y-5 ep-card p-5">
-              <div>
-                <label
-                  htmlFor="errorInput"
-                  className="flex items-center gap-2 text-xs text-zinc-400 uppercase tracking-wider mb-2"
-                >
-                  <span className="ep-step">1</span>
-                  Console Error Log
-                </label>
-                <div
-                  className={`bg-black/40 border rounded-lg p-3 transition-all ${
-                    errorFlash
-                      ? "border-red-500/60 ring-2 ring-red-500/60"
-                      : "border-zinc-800/70 focus-within:border-emerald-500/40 focus-within:shadow-[0_0_0_3px_rgba(16,185,129,0.08)]"
-                  }`}
-                >
-                  <textarea
-                    id="errorInput"
-                    ref={errorRef}
-                    rows={5}
-                    aria-required
-                    value={logText}
-                    onChange={(e) => setLogText(e.target.value)}
-                    onKeyDown={onKeyDown}
-                    placeholder="ServerScriptService.Inventory:41: attempt to index nil with 'Value'"
-                    className="w-full bg-transparent text-sm text-zinc-300 placeholder-zinc-700 focus:outline-none resize-y"
-                  />
-                </div>
-              </div>
+    <p className="text-sm md:text-base text-zinc-400 max-w-xl mx-auto leading-relaxed">
+      Paste your console error and the related script lines. The analyzer
+      reads context to find the{" "}
+      <span className="text-zinc-200">exact root cause</span> — not generic
+      guesses.
+    </p>
+
+    <div className="mt-3 text-xs text-zinc-500">
+      Made by YusufVyce
+    </div>
+
+    <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-zinc-500">
+      <span className="flex items-center gap-1.5">
+        <span className="text-emerald-400">✓</span>
+        100% Studio Integrated
+      </span>
+
+      <span className="flex items-center gap-1.5">
+        <span className="text-emerald-400">✓</span>
+        Roblox script focused
+      </span>
+
+      <span className="flex items-center gap-1.5">
+        <span className="text-emerald-400">✓</span>
+        Instant helper
+      </span>
+    </div>
+  </header>
+
+  <main
+    id="main"
+    tabIndex={-1}
+    className="relative z-10 w-full max-w-5xl space-y-6 outline-none"
+  >
+    <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className="lg:col-span-5 space-y-5 ep-card p-5">
+        <div>
+          <label
+            htmlFor="errorInput"
+            className="flex items-center gap-2 text-xs text-zinc-400 uppercase tracking-wider mb-2"
+          >
+            <span className="ep-step">1</span>
+            Console Error Log
+          </label>
+
+          <div
+            className={`bg-black/40 border rounded-lg p-3 transition-all ${
+              errorFlash
+                ? "border-red-500/60 ring-2 ring-red-500/60"
+                : "border-zinc-800/70 focus-within:border-emerald-500/40 focus-within:shadow-[0_0_0_3px_rgba(16,185,129,0.08)]"
+            }`}
+          >
+            <textarea
+              id="errorInput"
+              ref={errorRef}
+              rows={5}
+              aria-required
+              value={logText}
+              onChange={(e) => setLogText(e.target.value)}
+              onKeyDown={onKeyDown}
+              placeholder="ServerScriptService.Inventory:41: attempt to index nil with 'Value'"
+              className="w-full bg-transparent text-sm text-zinc-300 placeholder-zinc-700 focus:outline-none resize-y"
+            />
+          </div>
+        </div>
 
               <div>
                 <label
@@ -422,6 +415,19 @@ function ErrorParserPage() {
                       <h2 className="text-2xl font-bold text-zinc-50 serif-title">
                         {entry.title}
                       </h2>
+                      <div className="mt-3 flex flex-wrap gap-2">
+  {analysis.severity && (
+    <div className="px-3 py-1 rounded-full border border-red-500/30 bg-red-500/10 text-red-300 text-xs font-medium">
+      🔥 Severity: {analysis.severity}
+    </div>
+  )}
+
+  {analysis.confidence !== undefined && (
+    <div className="px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-xs font-medium">
+      🎯 Confidence: {analysis.confidence}%
+    </div>
+  )}
+</div>
                     </div>
                     <div className="text-right shrink-0">
                       <div className="inline-flex items-center gap-1.5 text-[11px] text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1 rounded-full font-medium">
@@ -477,6 +483,58 @@ function ErrorParserPage() {
                         ))}
                       </ol>
                     </section>
+
+                        {analysis.codeInsights && analysis.codeInsights.length > 0 && (
+                  <section className="space-y-2">
+    <h3 className="flex items-center gap-2 text-xs uppercase tracking-wider text-zinc-400 font-semibold">
+  <span className="ep-step">5</span>
+  Code Insights
+</h3>
+
+    <div className="space-y-3">
+      {analysis.codeInsights.map((insight, index) => (
+        <div
+          key={index}
+          className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4"
+        >
+          <div className="text-sm font-semibold text-emerald-300">
+            {insight.title}
+          </div>
+
+          <div className="mt-1 text-xs text-zinc-300 leading-relaxed">
+            {insight.description}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+)}
+
+{analysis.deprecatedApis && analysis.deprecatedApis.length > 0 && (
+  <section className="space-y-2">
+    <h3 className="flex items-center gap-2 text-xs uppercase tracking-wider text-zinc-400 font-semibold">
+      <span className="ep-step">6</span>
+      Deprecated APIs
+    </h3>
+
+    <div className="space-y-3">
+      {analysis.deprecatedApis.map((api, index) => (
+        <div
+          key={index}
+          className="rounded-lg border border-yellow-500/20 bg-yellow-500/5 p-4"
+        >
+          <div className="text-sm font-semibold text-yellow-300">
+            {api.api} → {api.replacement}
+          </div>
+
+          <div className="mt-1 text-xs text-zinc-300">
+            {api.reason}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+)}
 
                     {analysis.example && (
                       <section className="space-y-2 border-t border-emerald-500/10 pt-5">

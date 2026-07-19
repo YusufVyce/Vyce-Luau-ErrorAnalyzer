@@ -1,6 +1,6 @@
 # Error Parser Solution Guide
 
-Lightweight web tool to analyze runtime errors and suggest fixes for Roblox, Unity, Discord.js, and Minecraft (Paper).
+Lightweight web tool to analyze runtime errors and suggest fixes for Roblox Scripts.
 
 - Short: Paste an error and related code, click Analyze.
 - Author: Made by YusufVyce
