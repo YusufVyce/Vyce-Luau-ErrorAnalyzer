@@ -6,8 +6,8 @@
   
   <br>
   
-  <!-- Buraya sitenin canlı ekran görüntüsünü eklemeni şiddetle öneririm -->
-  <img src="[https://via.placeholder.com/800x400?text=Projenin+Ekran+Goruntusu](https://media.discordapp.net/attachments/1424119180764119181/1528536118859923506/image.png?ex=6a5ea7b1&is=6a5d5631&hm=0c6361d641f93ac1ddd3de271f569867a74677971c847832cd77684d16ec7862&=&format=webp&quality=lossless&width=1005&height=768)" alt="Error Parser UI">
+ <!-- Bu kısmı README.md'deki ilgili yere yapıştır -->
+  <img src="https://media.discordapp.net/attachments/1424119180764119181/1528536118859923506/image.png" alt="Error Parser UI" width="800">
   
   <br>
   
