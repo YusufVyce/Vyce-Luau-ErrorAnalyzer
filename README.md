@@ -6,7 +6,7 @@
   
   <br>
   
- <img src="assets/preview.png" alt="Error Parser UI" width="800">
+ <img src="images/preview.png" width="800">
   
   <br>
   
