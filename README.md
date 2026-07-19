@@ -1,7 +1,7 @@
 <div align="center">
   <br>
   <h1>Error Parser & Solution Guide</h1>
-  <p><b>Dynamic root cause analyzer for Roblox, Unity, and Discord.js.</b></p>
+  <p><b>Dynamic root cause analyzer for Roblox Scripts.</b></p>
   <p><i>Stop guessing. Start fixing.</i></p>
   
   <br>
@@ -22,7 +22,6 @@ Debugging takes time. Context switching between console logs and script lines dr
 
 ### ✨ Features
 *   **Intelligent Analysis**: Context-aware root cause detection.
-*   **Multi-Platform**: Tailored rulesets for Roblox (Luau), Unity (C#), and Discord.js (TS/JS).
 *   **Fast**: Optimized for the developer workflow.
 *   **98% Fixer Rate**: High accuracy in diagnosing common runtime exceptions.
 
