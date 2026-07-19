@@ -2,6 +2,7 @@ import { ROBLOX_INSIGHTS } from "../insights";
 import { ROBLOX_DEPRECATED } from "../deprecated";
 import { ROBLOX_PERFORMANCE } from "../performance";
 import { ROBLOX_SECURITY } from "../security";
+import { enrichAnalysis } from "@/lib/analyzer/contextAnalyzer";
 
 import type {
   Analysis,
@@ -16,10 +17,9 @@ export const DATASTORE_ERROR: ErrorEntry = {
   title: "DataStore error",
 
   pattern:
-/datastore|getasync failed|setasync failed|updateasync failed|request was throttled|request was added to queue|studioaccesstoapisnotallowed|invalid utf-8|key name exceeds maximum length|cannot store/i,
+    /datastore|getasync failed|setasync failed|updateasync failed|request was throttled|request was added to queue|studioaccesstoapisnotallowed|invalid utf-8|key name exceeds maximum length|cannot store/i,
 
   analyze(logText, codeText) {
-
     const causes: Cause[] = [];
     const fixes: string[] = [];
     let example = "";
@@ -71,26 +71,6 @@ export const DATASTORE_ERROR: ErrorEntry = {
       }
     }
 
-    if (/studioaccesstoapisnotallowed/i.test(logText)) {
-
-      causes.push({
-        percent:99,
-        text:"Studio API access is disabled."
-      });
-
-      causes.push({
-        percent:1,
-        text:"Game Settings > Security has API access disabled."
-      });
-
-      fixes.push(
-        "Enable Studio Access to API Services."
-      );
-
-      example =
-`Game Settings
-→ Security
-→ Enable Studio Access to API Services`;
 
     }
 
@@ -307,7 +287,7 @@ end)`;
 
     }
 
-    return {
+    return enrichAnalysis({
       explanation:
         "A DataStore operation failed. The issue may be caused by API configuration, request limits, invalid data, or a temporary Roblox service problem.",
 
@@ -344,6 +324,6 @@ end)`;
       deprecatedApis,
       performanceIssues,
       securityIssues,
-    };
+    }, logText, codeText);
   },
 };

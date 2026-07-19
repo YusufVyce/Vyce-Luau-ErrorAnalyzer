@@ -88,17 +88,17 @@ function ErrorParserPage() {
           title: analysis.title,
         },
         analysis: {
-  explanation: analysis.rootCause,
-  causes: [{ percent: 100, text: analysis.rootCause }],
-  fixes: [analysis.fix],
-  example: analysis.correctedExample,
+          explanation: analysis.rootCause,
+          causes: analysis.causes || [{ percent: 100, text: analysis.rootCause }],
+          fixes: analysis.fixes || [analysis.fix],
+          example: analysis.correctedExample,
 
-  severity: analysis.severity,
-  confidence: analysis.confidence,
+          severity: analysis.severity,
+          confidence: analysis.confidence,
 
-  codeInsights: analysis.codeInsights,
-  deprecatedApis: analysis.deprecatedApis,
-},
+          codeInsights: analysis.codeInsights,
+          deprecatedApis: analysis.deprecatedApis,
+        },
       };
 
       setResult({
@@ -132,17 +132,17 @@ function ErrorParserPage() {
               title: analysis.title,
             },
             analysis: {
-  explanation: analysis.rootCause,
-  causes: [{ percent: 100, text: analysis.rootCause }],
-  fixes: [analysis.fix],
-  example: analysis.correctedExample,
+              explanation: analysis.rootCause,
+              causes: analysis.causes || [{ percent: 100, text: analysis.rootCause }],
+              fixes: analysis.fixes || [analysis.fix],
+              example: analysis.correctedExample,
 
-  severity: analysis.severity,
-  confidence: analysis.confidence,
+              severity: analysis.severity,
+              confidence: analysis.confidence,
 
-  codeInsights: analysis.codeInsights,
-  deprecatedApis: analysis.deprecatedApis,
-},
+              codeInsights: analysis.codeInsights,
+              deprecatedApis: analysis.deprecatedApis,
+            },
           };
           setResult({
             kind: "match",

@@ -5,8 +5,9 @@ import {
   findMatch,
   ERROR_DICT,
 } from "@/lib/error-parser";
+import { enrichAnalysis } from "@/lib/analyzer/contextAnalyzer";
 
-import type { DeprecatedApi } from "@/lib/types";
+import type { Cause, DeprecatedApi } from "@/lib/types";
 
 export type AnalyzerResult =
   | {
@@ -18,13 +19,15 @@ export type AnalyzerResult =
       rootCause: string;
       fix: string;
       correctedExample: string | undefined;
+      causes?: Cause[];
+      fixes?: string[];
 
       codeInsights?: {
-  title: string;
-  description: string;
-}[];
+        title: string;
+        description: string;
+      }[];
 
-deprecatedApis?: DeprecatedApi[];
+      deprecatedApis?: DeprecatedApi[];
     }
   | { matched: false };
 
@@ -36,35 +39,34 @@ export function analyzeErrorAndCode(
   if (logText && logText.trim().length > 0) {
     const match = findMatch(logText);
 
-if (!match) return { matched: false };
+    if (!match) return { matched: false };
 
-const detectedConfidence = match.confidence;
-const detectedMatchType = match.matchType;
+    const detectedConfidence = match.confidence;
 
-const analysis = match.entry.analyze(logText, codeText);
-const scan = scanCode(codeText);
+    const rawAnalysis = match.entry.analyze(logText, codeText);
+    const analysis = enrichAnalysis(rawAnalysis, logText, codeText);
 
-console.log(scan);
-const warnings = runScanRules(scan);
+    const scan = scanCode(codeText);
+    console.log(scan);
+    const warnings = runScanRules(scan);
+    console.log(warnings);
+    const flow = extractVariableFlow(codeText);
+    console.log(flow);
 
-console.log(warnings);
-const flow = extractVariableFlow(codeText);
-
-console.log(flow);
     return {
-  matched: true,
-  ruleId: match.entry.id,
-  title: match.entry.title,
-  rootCause: analysis.explanation,
-  fix: analysis.fixes[0] ?? "No recommended fix available.",
-  correctedExample: analysis.example,
-
-  severity: analysis.severity,
-  confidence: detectedConfidence || analysis.confidence,
-
-  codeInsights: analysis.codeInsights,
-  deprecatedApis: analysis.deprecatedApis,
-};
+      matched: true,
+      ruleId: match.entry.id,
+      title: match.entry.title,
+      rootCause: analysis.explanation,
+      fix: analysis.fixes[0] ?? "No recommended fix available.",
+      correctedExample: analysis.example,
+      severity: analysis.severity,
+      confidence: analysis.confidence !== undefined ? analysis.confidence : (detectedConfidence || analysis.confidence),
+      codeInsights: analysis.codeInsights,
+      deprecatedApis: analysis.deprecatedApis,
+      causes: analysis.causes,
+      fixes: analysis.fixes,
+    };
   }
 
   // If no log provided but code exists, attempt code-only analysis using rule heuristics.
@@ -88,21 +90,29 @@ console.log(flow);
     if (scored.length === 0) return { matched: false };
 
     const best = scored[0];
+    const rawAnalysis = best.analysis ?? {
+      explanation: "Potential issue detected in code.",
+      causes: [],
+      fixes: [],
+      example: undefined,
+    };
+    const analysis = enrichAnalysis(rawAnalysis, "", codeText);
+
     return {
-  matched: true,
-  ruleId: `code-only-${best.entry.id}`,
-  title: best.entry.title + " (code-only)",
-  rootCause: best.analysis?.explanation ?? "Potential issue detected in code.",
-  fix: best.analysis?.fixes?.[0] ?? "Review the code for reported issues.",
-  correctedExample: best.analysis?.example,
-
-  severity: best.analysis?.severity,
-  confidence: best.analysis?.confidence,
-
-  codeInsights: best.analysis?.codeInsights,
-  deprecatedApis: best.analysis?.deprecatedApis,
-};
+      matched: true,
+      ruleId: `code-only-${best.entry.id}`,
+      title: best.entry.title + " (code-only)",
+      rootCause: analysis.explanation ?? "Potential issue detected in code.",
+      fix: analysis.fixes?.[0] ?? "Review the code for reported issues.",
+      correctedExample: analysis.example,
+      severity: analysis.severity,
+      confidence: analysis.confidence,
+      codeInsights: analysis.codeInsights,
+      deprecatedApis: analysis.deprecatedApis,
+      causes: analysis.causes,
+      fixes: analysis.fixes,
+    };
   }
 
   return { matched: false };
-}
+}

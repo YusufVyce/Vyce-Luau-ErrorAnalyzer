@@ -2,6 +2,7 @@ import { ROBLOX_INSIGHTS } from "../insights";
 import { ROBLOX_DEPRECATED } from "../deprecated";
 import { ROBLOX_PERFORMANCE } from "../performance";
 import { ROBLOX_SECURITY } from "../security";
+import { enrichAnalysis } from "@/lib/analyzer/contextAnalyzer";
 
 import type {
   Analysis,
@@ -71,16 +72,10 @@ export const ATTEMPT_TO_CALL_NIL: ErrorEntry = {
       }
     }
 
+    // Checking code specific patterns
     if (!codeText) {
       causes.push({
         percent: 90,
-        text: "A function that should have been called is actually nil. Add the relevant script for a more accurate analysis.",
-      });
-
-      causes.push({
-        percent: 10,
-        text: "The function may belong to a ModuleScript that failed to initialize.",
-      });
 
       fixes.push("Ensure the function exists before calling it.");
       fixes.push("Provide the related script for a deeper analysis.");
@@ -242,7 +237,7 @@ DoSomething()`;
 myFunction()`;
     }
 
-    return {
+    return enrichAnalysis({
       explanation:
         "The script attempted to execute a value as a function, but that value is nil. This usually means the function does not exist, failed to load, or was never assigned.",
 
@@ -258,6 +253,6 @@ myFunction()`;
 
       performanceIssues,
       securityIssues,
-    };
+    }, logText, codeText);
   },
 };

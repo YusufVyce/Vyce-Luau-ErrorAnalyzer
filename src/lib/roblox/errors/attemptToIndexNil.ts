@@ -2,6 +2,7 @@ import { ROBLOX_INSIGHTS } from "../insights";
 import { ROBLOX_DEPRECATED } from "../deprecated";
 import { ROBLOX_PERFORMANCE } from "../performance";
 import { ROBLOX_SECURITY } from "../security";
+import { enrichAnalysis } from "@/lib/analyzer/contextAnalyzer";
 
 import type {
   Analysis,
@@ -205,7 +206,7 @@ if obj then
 end`;
     }
 
-    return {
+    return enrichAnalysis({
       explanation: `The script tried to read or modify the '${targetProperty}' property of an object, but that object does not exist in memory (it is nil).`,
 
       causes,
@@ -220,6 +221,6 @@ end`;
 
       performanceIssues,
       securityIssues,
-    };
+    }, logText, codeText);
   },
 };
