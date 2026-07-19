@@ -6,8 +6,7 @@
   
   <br>
   
- <!-- Bu kısmı README.md'deki ilgili yere yapıştır -->
-  <img src="https://media.discordapp.net/attachments/1424119180764119181/1528536118859923506/image.png" alt="Error Parser UI" width="800">
+ <img src="assets/preview.png" alt="Error Parser UI" width="800">
   
   <br>
   
