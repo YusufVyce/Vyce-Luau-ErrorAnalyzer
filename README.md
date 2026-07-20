@@ -2,45 +2,70 @@
 
 # Vyce LuaUtility
 
-### Advanced Error Analysis Toolkit for Roblox Luau
+### Advanced Error Analysis Toolkit for Roblox Studio (Luau)
 
-Analyze Roblox runtime errors, identify their root causes, and receive actionable debugging insights.
+Analyze Roblox runtime errors, identify root causes, and receive accurate debugging guidance.
 
-**Built exclusively for Roblox Studio (Luau).**
+**Built exclusively for Roblox Studio.**
 
-<img src="images/preview.png" width="850">
+<img src="images/preview.png" width="900"/>
 
-[Live Demo](https://vyce-lua-utility.vercel.app) •
-[Documentation](#documentation) •
-[Features](#features)
+<p>
+  <a href="https://vyce-lua-utility.vercel.app"><strong>Live Demo</strong></a> •
+  <a href="#features"><strong>Features</strong></a> •
+  <a href="#installation"><strong>Installation</strong></a> •
+  <a href="#contributing"><strong>Contributing</strong></a>
+</p>
 
 </div>
 
 ---
 
-## 📖 About
+# About
 
-Vyce LuaUtility is a developer toolkit designed specifically for **Roblox Studio**.
+Vyce LuaUtility is an open-source developer toolkit built specifically for **Roblox Studio (Luau)**.
 
-Instead of matching errors with simple regex patterns, it analyzes the error, surrounding context, and code structure to determine the most likely root cause and provide practical debugging guidance.
+Unlike traditional regex-based error parsers, Vyce LuaUtility analyzes runtime errors together with surrounding context to determine the most likely root cause and provide practical debugging guidance.
 
-> ⚠️ This project is built exclusively for Roblox (Luau). It is **not** intended for FiveM, Love2D, Defold, or other Lua platforms.
+It helps Roblox developers understand **why** an error occurred instead of only showing **where** it happened.
+
+> **Note**
+>
+> This project is designed exclusively for **Roblox Studio (Luau)**.
+>
+> It is **not** intended for FiveM, GTA V, Love2D, Defold, Garry's Mod, or any other Lua platform.
 
 ---
 
-## ✨ Features
+# Features
 
-- 🔍 Context-aware error analysis
+- 🔍 Context-aware runtime error analysis
 - 🧠 Root cause detection
+- 💡 Actionable debugging suggestions
+- 📚 Human-readable explanations
 - ⚡ Fast analysis engine
-- 📚 Detailed explanations
-- 💡 Fix suggestions
 - 🛡️ Roblox-specific diagnostics
 - 🧩 Supports common Luau runtime errors
 
 ---
 
-## 🛠 Tech Stack
+# Supported Errors
+
+Examples include:
+
+- attempt to index nil
+- attempt to call nil
+- arithmetic on nil
+- invalid argument
+- infinite yield
+- stack overflow
+- table index is nil
+
+...and more.
+
+---
+
+# Tech Stack
 
 - TypeScript
 - React
@@ -50,7 +75,7 @@ Instead of matching errors with simple regex patterns, it analyzes the error, su
 
 ---
 
-## 💻 Installation
+# Installation
 
 ```bash
 git clone https://github.com/YusufVyce/Vyce-LuaUtility.git
@@ -60,3 +85,18 @@ cd Vyce-LuaUtility
 bun install
 
 bun run dev
+```
+
+---
+
+# Contributing
+
+Contributions are welcome.
+
+If you have ideas, bug reports, or improvements, feel free to open an Issue or start a Discussion.
+
+---
+
+# License
+
+GNU General Public License v3.0
