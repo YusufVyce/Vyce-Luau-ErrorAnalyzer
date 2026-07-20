@@ -10,7 +10,7 @@
   
   <br>
   
-  <a href="https://error-parser-solution-guide.vercel.app/"><b>Live Demo</b></a> • 
+  <a href="https://vyce-lua-utility.vercel.app"><b>Live Demo</b></a> • 
   <a href="#features">Features</a> • 
   <a href="#installation">Installation</a>
 </div>
