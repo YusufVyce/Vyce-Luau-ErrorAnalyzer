@@ -3,10 +3,9 @@ import {
   buildAdvancedAnalysis,
   type AdvancedAnalyzerOutput,
 } from "@/lib/analyzer/advancedRobloxAnalyzer";
+import { runDynamicRobloxPipeline } from "@/lib/analyzer/pipeline";
 import { runScanRules, type ScanWarning } from "@/lib/analyzer/scanner/rules";
 import { scanCode } from "@/lib/analyzer/scanner/scanCode";
-import { findMatch, ERROR_DICT } from "@/lib/error-parser";
-import { enrichAnalysis } from "@/lib/analyzer/contextAnalyzer";
 
 import type { Analysis, Cause, DeprecatedApi } from "@/lib/types";
 
@@ -39,29 +38,8 @@ export type AnalyzerResult =
   | { matched: false; error?: string };
 
 /**
- * Runs a single ErrorEntry's analyze() in isolation so that one misbehaving
- * (or third-party/community-contributed) rule can never take down the whole
- * analysis pipeline. Failures are logged with enough context to debug which
- * rule broke, then treated as "no useful signal" rather than a crash.
- */
-function safeAnalyze(
-  entry: (typeof ERROR_DICT)[number],
-  logText: string,
-  codeText: string,
-): Analysis | null {
-  try {
-    return entry.analyze(logText, codeText);
-  } catch (error) {
-    console.error(`[analyzerEngine] rule "${entry.id}" threw during analyze():`, error);
-    return null;
-  }
-}
-
-/**
- * Analyzes a Roblox error log and/or the surrounding Lua code, returning a
- * best-effort diagnosis. Prefers matching against the log text (fast, high
- * confidence); when no log is supplied it falls back to scoring code-only
- * heuristics across the rule dictionary.
+ * Analyzes a Roblox error log and/or surrounding Luau code using a modular,
+ * evidence-scored pipeline.
  *
  * This function never throws: any unexpected failure is caught, logged, and
  * surfaced to the caller as `{ matched: false, error }` so the UI can show a
@@ -72,107 +50,101 @@ export function analyzeErrorAndCode(
   codeText: string,
 ): AnalyzerResult {
   try {
-    if (logText.length > MAX_INPUT_LENGTH || codeText.length > MAX_INPUT_LENGTH) {
+    const safeLogText = typeof logText === "string" ? logText : "";
+    const safeCodeText = typeof codeText === "string" ? codeText : "";
+
+    if (safeLogText.length > MAX_INPUT_LENGTH || safeCodeText.length > MAX_INPUT_LENGTH) {
       return {
         matched: false,
         error: `Input too large to analyze (limit is ${MAX_INPUT_LENGTH.toLocaleString()} characters).`,
       };
     }
 
-    // Prefer log-based matching when logText is provided: it's a direct
-    // regex/alias match against known Roblox error signatures, so it's both
-    // cheaper and more reliable than scoring every rule against raw code.
-    if (logText.trim().length > 0) {
-      return analyzeFromLog(logText, codeText);
-    }
-
-    // No log to anchor on: fall back to scoring code-only heuristics.
-    if (codeText.trim().length > 0) {
-      return analyzeFromCodeOnly(codeText);
-    }
-
-    return { matched: false };
+    return analyzeWithPipeline(safeLogText, safeCodeText);
   } catch (error) {
     console.error("[analyzerEngine] analyzeErrorAndCode failed unexpectedly:", error);
     return { matched: false, error: "An unexpected error occurred while analyzing this input." };
   }
 }
 
-function analyzeFromLog(logText: string, codeText: string): AnalyzerResult {
-  const match = findMatch(logText);
-  if (!match) return { matched: false };
+const LEGACY_RULE_IDS: Record<string, string> = {
+  INDEX_NIL: "roblox-index-nil",
+  CALL_NIL: "roblox-call-nil",
+  CONCAT_NIL: "roblox-concat-nil",
+  ARITHMETIC_NIL: "roblox-arithmetic-nil",
+  COMPARE_NIL: "roblox-compare-nil",
+  INVALID_ARGUMENT: "roblox-invalid-argument",
+  INVALID_MEMBER: "roblox-invalid-member",
+  INVALID_TYPE: "roblox-invalid-type",
+  DATASTORE: "roblox-datastore",
+  REMOTE: "roblox-remote",
+  TWEEN: "roblox-tween",
+  CHARACTER: "roblox-character",
+  WAIT: "roblox-wait",
+  TIMEOUT: "roblox-timeout",
+  HTTP: "roblox-http",
+  MEMORY: "roblox-memory",
+  UNKNOWN: "roblox-unknown",
+};
 
-  const rawAnalysis = safeAnalyze(match.entry, logText, codeText);
-  if (!rawAnalysis) {
-    return { matched: false, error: `The "${match.entry.title}" rule failed to analyze this input.` };
+function analyzeWithPipeline(logText: string, codeText: string): AnalyzerResult {
+  if (logText.trim().length === 0 && codeText.trim().length === 0) {
+    return { matched: false };
   }
 
-  const analysis = enrichAnalysis(rawAnalysis, logText, codeText);
+  const dynamic = runDynamicRobloxPipeline(logText, codeText);
+  if (!dynamic) {
+    return { matched: false };
+  }
 
-  // Structural scan of the code (variable declarations, WaitForChild usage,
-  // property-access chains) feeds additional lint-style warnings. These are
-  // computed but not currently attached to the result — surfaced here as
-  // `scanWarnings` so callers/UI can opt into them without recomputing.
-  const scan = scanCode(codeText);
-  const scanWarnings = runScanRules(scan);
+  const fixes = [dynamic.fixes.minimal, dynamic.fixes.better, dynamic.fixes.production];
+  const causes: Cause[] = dynamic.hypotheses.map((item) => ({
+    percent: item.confidence,
+    text: `${item.title}: ${item.rootCause}`,
+  }));
+
+  const analysisLike: Analysis = {
+    explanation: dynamic.explanation,
+    causes,
+    fixes,
+    severity: dynamic.severity,
+    confidence: dynamic.confidence,
+    codeInsights: dynamic.bestPractices.map((item) => ({
+      title: item.title,
+      description: item.description,
+    })),
+    deprecatedApis: [],
+    performanceIssues: dynamic.performanceNotes.map((item) => ({
+      title: item.title,
+      impact: "Medium" as const,
+      description: item.description,
+    })),
+    securityIssues: dynamic.securityNotes.map((item) => ({
+      title: item.title,
+      severity: "High" as const,
+      description: item.description,
+    })),
+  };
+
+  const advanced = buildAdvancedAnalysis(logText, codeText, fixes);
+  const scanWarnings = runScanRules(scanCode(codeText));
   const variableFlow = extractVariableFlow(codeText);
-  const advanced = buildAdvancedAnalysis(logText, codeText, analysis.fixes);
 
   return {
     matched: true,
-    ruleId: match.entry.id,
-    title: match.entry.title,
-    rootCause: analysis.explanation,
-    fix: analysis.fixes[0] ?? "No recommended fix available.",
-    correctedExample: analysis.example,
-    severity: analysis.severity,
-    confidence: analysis.confidence ?? match.confidence,
-    codeInsights: analysis.codeInsights,
-    deprecatedApis: analysis.deprecatedApis,
-    causes: analysis.causes,
-    fixes: analysis.fixes,
+    ruleId: LEGACY_RULE_IDS[dynamic.family] ?? "roblox-unknown",
+    title: dynamic.title,
+    rootCause: analysisLike.explanation,
+    fix: fixes[0],
+    correctedExample: undefined,
+    severity: analysisLike.severity,
+    confidence: analysisLike.confidence,
+    codeInsights: analysisLike.codeInsights,
+    deprecatedApis: analysisLike.deprecatedApis as DeprecatedApi[],
+    causes: analysisLike.causes,
+    fixes: analysisLike.fixes,
     advanced,
     ...(scanWarnings.length > 0 ? { scanWarnings } : {}),
     ...(variableFlow.length > 0 ? { variableFlow } : {}),
-  };
-}
-
-function analyzeFromCodeOnly(codeText: string): AnalyzerResult {
-  // Score every rule by how much useful signal its analyze() call produces
-  // for this code (more fixes / an example / more causes = a better guess).
-  const scored = ERROR_DICT.map((entry) => {
-    const analysis = safeAnalyze(entry, "", codeText);
-    if (!analysis) return { entry, analysis: null, score: 0 };
-
-    const score =
-      (analysis.fixes?.length ?? 0) * 2 +
-      (analysis.example ? 1 : 0) +
-      (analysis.causes?.length ?? 0);
-
-    return { entry, analysis, score };
-  })
-    .filter((candidate) => candidate.score > 0)
-    .sort((a, b) => b.score - a.score);
-
-  const best = scored[0];
-  if (!best || !best.analysis) return { matched: false };
-
-  const analysis = enrichAnalysis(best.analysis, "", codeText);
-  const advanced = buildAdvancedAnalysis("", codeText, analysis.fixes);
-
-  return {
-    matched: true,
-    ruleId: `code-only-${best.entry.id}`,
-    title: `${best.entry.title} (code-only)`,
-    rootCause: analysis.explanation,
-    fix: analysis.fixes[0] ?? "Review the code for reported issues.",
-    correctedExample: analysis.example,
-    severity: analysis.severity,
-    confidence: analysis.confidence,
-    codeInsights: analysis.codeInsights,
-    deprecatedApis: analysis.deprecatedApis,
-    causes: analysis.causes,
-    fixes: analysis.fixes,
-    advanced,
   };
 }

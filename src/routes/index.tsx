@@ -600,6 +600,101 @@ function ErrorParserPage() {
                         </summary>
 
                         <div className="mt-4 space-y-5">
+                          {(advanced.quickSummary || advanced.likelyRootCause) && (
+                            <section className="space-y-2">
+                              <div className="text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">
+                                Executive Summary
+                              </div>
+                              {advanced.quickSummary && (
+                                <p className="text-sm text-zinc-200 leading-relaxed">{advanced.quickSummary}</p>
+                              )}
+                              {advanced.likelyRootCause && (
+                                <p className="text-xs text-zinc-400 leading-relaxed">Likely root cause: {advanced.likelyRootCause}</p>
+                              )}
+                            </section>
+                          )}
+
+                          {advanced.hypotheses && advanced.hypotheses.length > 0 && (
+                            <section className="space-y-2">
+                              <div className="text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">
+                                Ranked Hypotheses
+                              </div>
+                              <div className="space-y-2">
+                                {advanced.hypotheses.map((hypothesis, idx) => (
+                                  <div
+                                    key={`${hypothesis.title}-${idx}`}
+                                    className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3"
+                                  >
+                                    <div className="flex items-start justify-between gap-3">
+                                      <p className="text-sm text-zinc-100 leading-relaxed">{hypothesis.rootCause}</p>
+                                      <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono shrink-0">
+                                        {hypothesis.confidence}%
+                                      </span>
+                                    </div>
+                                    <div className="mt-1 text-[11px] text-zinc-500">{hypothesis.title}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            </section>
+                          )}
+
+                          {advanced.evidence && advanced.evidence.length > 0 && (
+                            <section className="space-y-2">
+                              <div className="text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">
+                                Evidence
+                              </div>
+                              <div className="space-y-2">
+                                {advanced.evidence.map((item) => (
+                                  <div key={item.id} className="rounded-lg border border-zinc-800 bg-black/30 p-2.5 text-xs text-zinc-300">
+                                    <div className="flex items-center justify-between gap-3">
+                                      <span>{item.message}</span>
+                                      <span className="text-emerald-400 font-mono">+{item.score}</span>
+                                    </div>
+                                    {item.line && <div className="text-[10px] text-zinc-500 mt-1">line {item.line}</div>}
+                                  </div>
+                                ))}
+                              </div>
+                            </section>
+                          )}
+
+                          {advanced.matchingRules && advanced.matchingRules.length > 0 && (
+                            <section className="space-y-2">
+                              <div className="text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">
+                                Matching Rules
+                              </div>
+                              <div className="flex flex-wrap gap-2">
+                                {advanced.matchingRules.map((rule) => (
+                                  <span key={rule} className="px-2 py-1 rounded-md border border-zinc-700 bg-zinc-900/70 text-[11px] text-zinc-300 font-mono">
+                                    {rule}
+                                  </span>
+                                ))}
+                              </div>
+                            </section>
+                          )}
+
+                          {advanced.highlightedCode && advanced.highlightedCode.length > 0 && (
+                            <section className="space-y-2">
+                              <div className="text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">
+                                Highlighted Code
+                              </div>
+                              <div className="space-y-2">
+                                {advanced.highlightedCode.map((line, idx) => (
+                                  <div key={`${line.line}-${idx}`} className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-3">
+                                    <div className="text-[10px] text-zinc-500 mb-1">line {line.line}</div>
+                                    <pre className="text-xs text-zinc-200 font-mono whitespace-pre-wrap break-words">{line.text}</pre>
+                                    <div className="mt-1 text-[10px] text-emerald-300">
+                                      {line.variable ? `variable: ${line.variable}` : ""}
+                                      {line.variable && line.functionName ? " • " : ""}
+                                      {line.functionName ? `function: ${line.functionName}` : ""}
+                                      {(line.variable || line.functionName) && line.property ? " • " : ""}
+                                      {line.property ? `property: ${line.property}` : ""}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </section>
+                          )}
+
                           {advanced.errorSymbols.length > 0 && (
                             <section className="space-y-2">
                               <div className="text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">
@@ -680,7 +775,7 @@ function ErrorParserPage() {
                           {advanced.fixTemplates.length > 0 && (
                             <section className="space-y-2">
                               <div className="text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">
-                                Fix Templates
+                                Fixes
                               </div>
                               <div className="space-y-3">
                                 {advanced.fixTemplates.map((template) => {
@@ -722,6 +817,140 @@ function ErrorParserPage() {
                                   </div>
                                   );
                                 })}
+                              </div>
+                            </section>
+                          )}
+
+                          {advanced.docs && advanced.docs.length > 0 && (
+                            <section className="space-y-2">
+                              <div className="text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">
+                                Roblox Docs
+                              </div>
+                              <div className="grid gap-2">
+                                {advanced.docs.map((doc) => (
+                                  <a
+                                    key={doc}
+                                    href={doc}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-xs text-cyan-300 hover:text-cyan-200 underline underline-offset-2 break-all"
+                                  >
+                                    {doc}
+                                  </a>
+                                ))}
+                              </div>
+                            </section>
+                          )}
+
+                          {advanced.relatedDiagnostics && advanced.relatedDiagnostics.length > 0 && (
+                            <section className="space-y-2">
+                              <div className="text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">
+                                Similar Errors
+                              </div>
+                              <div className="flex flex-wrap gap-2">
+                                {advanced.relatedDiagnostics.map((item) => (
+                                  <span key={item} className="px-2 py-1 rounded border border-zinc-700 bg-zinc-900/70 text-xs text-zinc-300">
+                                    {item}
+                                  </span>
+                                ))}
+                              </div>
+                            </section>
+                          )}
+
+                          {advanced.relatedApis && advanced.relatedApis.length > 0 && (
+                            <section className="space-y-2">
+                              <div className="text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">
+                                Related APIs
+                              </div>
+                              <div className="flex flex-wrap gap-2">
+                                {advanced.relatedApis.map((item) => (
+                                  <span key={item} className="px-2 py-1 rounded border border-zinc-700 bg-zinc-900/70 text-xs text-zinc-300">
+                                    {item}
+                                  </span>
+                                ))}
+                              </div>
+                            </section>
+                          )}
+
+                          {advanced.performanceNotes && advanced.performanceNotes.length > 0 && (
+                            <section className="space-y-2">
+                              <div className="text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">
+                                Performance Notes
+                              </div>
+                              <div className="space-y-2">
+                                {advanced.performanceNotes.map((note) => (
+                                  <div key={note.title} className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
+                                    <div className="text-xs text-amber-300 font-semibold">{note.title}</div>
+                                    <p className="text-xs text-zinc-300 mt-1">{note.description}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </section>
+                          )}
+
+                          {advanced.securityNotes && advanced.securityNotes.length > 0 && (
+                            <section className="space-y-2">
+                              <div className="text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">
+                                Security Notes
+                              </div>
+                              <div className="space-y-2">
+                                {advanced.securityNotes.map((note) => (
+                                  <div key={note.title} className="rounded-lg border border-red-500/20 bg-red-500/5 p-3">
+                                    <div className="text-xs text-red-300 font-semibold">{note.title}</div>
+                                    <p className="text-xs text-zinc-300 mt-1">{note.description}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </section>
+                          )}
+
+                          {advanced.bestPractices && advanced.bestPractices.length > 0 && (
+                            <section className="space-y-2">
+                              <div className="text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">
+                                Best Practices
+                              </div>
+                              <div className="space-y-2">
+                                {advanced.bestPractices.map((note) => (
+                                  <div key={note.title} className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
+                                    <div className="text-xs text-emerald-300 font-semibold">{note.title}</div>
+                                    <p className="text-xs text-zinc-300 mt-1">{note.description}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </section>
+                          )}
+
+                          {(advanced.estimatedFixTime || advanced.difficulty) && (
+                            <section className="space-y-2">
+                              <div className="text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">
+                                Fix Effort
+                              </div>
+                              <div className="flex flex-wrap gap-2 text-xs">
+                                {advanced.estimatedFixTime && (
+                                  <span className="px-2 py-1 rounded border border-zinc-700 bg-zinc-900/70 text-zinc-300">
+                                    Estimated fix time: {advanced.estimatedFixTime}
+                                  </span>
+                                )}
+                                {advanced.difficulty && (
+                                  <span className="px-2 py-1 rounded border border-zinc-700 bg-zinc-900/70 text-zinc-300">
+                                    Difficulty: {advanced.difficulty}
+                                  </span>
+                                )}
+                              </div>
+                            </section>
+                          )}
+
+                          {advanced.commonMistakes && advanced.commonMistakes.length > 0 && (
+                            <section className="space-y-2">
+                              <div className="text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">
+                                Common Mistakes
+                              </div>
+                              <div className="flex flex-wrap gap-2">
+                                {advanced.commonMistakes.map((item) => (
+                                  <span key={item} className="px-2 py-1 rounded border border-zinc-700 bg-zinc-900/70 text-xs text-zinc-300">
+                                    {item}
+                                  </span>
+                                ))}
                               </div>
                             </section>
                           )}

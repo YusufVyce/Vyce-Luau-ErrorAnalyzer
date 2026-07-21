@@ -128,7 +128,7 @@ function similarity(a: string, b: string): number {
 }
 
 /** Alias similarity at or above this threshold counts as a match. */
-const ALIAS_MATCH_THRESHOLD = 0.6;
+const ALIAS_MATCH_THRESHOLD = 0.65;
 
 /**
  * Finds the best-matching ErrorEntry for a raw Roblox log/error message.
