@@ -506,6 +506,7 @@ function ErrorParserPage() {
                     animateResult ? "slide-fade-enter-active" : "slide-fade-enter"
                   }`}
                 >
+                  <div className="analysis-panel-content space-y-6">
                   <div className="flex items-start justify-between gap-4 border-b border-emerald-500/10 pb-4">
                     <div className="space-y-1.5">
                       <div className="text-[10px] text-emerald-400 tracking-[0.2em] uppercase font-semibold">
@@ -553,7 +554,7 @@ function ErrorParserPage() {
                     </div>
                   </div>
 
-                  <div className="grid gap-6">
+                  <div className="space-y-6">
                     <section className="space-y-2">
                       <h3 className="flex items-center gap-2 text-xs uppercase tracking-wider text-zinc-400 font-semibold">
                         <span className="ep-step">1</span> Error Context
@@ -1033,6 +1034,7 @@ function ErrorParserPage() {
                         </div>
                       </section>
                     )}
+                  </div>
                   </div>
                 </div>
               )}
