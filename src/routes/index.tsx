@@ -341,7 +341,7 @@ function ErrorParserPage() {
         ))}
       </div>
 
-      <div className="analyzer-container relative min-h-screen flex flex-col items-center pb-10">
+      <div className="analyzer-container relative min-h-screen overflow-y-auto flex flex-col items-center pb-10">
   <div className="ep-aurora" aria-hidden="true" />
 
   <header className="relative z-10 w-full max-w-5xl pt-14 md:pt-20 pb-8 space-y-6 text-center">

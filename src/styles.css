@@ -146,6 +146,8 @@
 /* ---------- Error Parser page ---------- */
 .ep-body {
   font-family: "JetBrains Mono", monospace;
+  min-height: 100vh;
+  overflow-y: auto;
   background-color: #05080a;
   background-image:
     radial-gradient(
@@ -337,7 +339,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 1rem;
-  overflow-x: hidden;
+  overflow: visible;
 }
 
 .ep-body,
