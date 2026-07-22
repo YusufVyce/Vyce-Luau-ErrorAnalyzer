@@ -2,9 +2,9 @@
 
 # Vyce LuaUtility
 
-### Advanced Runtime Error Analysis Toolkit for Roblox Studio (Luau)
+### AST-Powered Runtime Diagnostics for Roblox Studio (Luau)
 
-Analyze Roblox runtime errors, identify their root causes, and receive practical debugging guidance.
+Offline runtime error analysis with semantic understanding, root cause detection, and actionable debugging guidance.
 
 **Built exclusively for Roblox Studio (Luau).**
 
@@ -13,10 +13,10 @@ Analyze Roblox runtime errors, identify their root causes, and receive practical
 <p>
   <a href="https://vyce-lua-utility.vercel.app"><strong>🌐 Live Demo</strong></a> •
   <a href="#features"><strong>✨ Features</strong></a> •
+  <a href="#architecture"><strong>🏗 Architecture</strong></a> •
   <a href="#example"><strong>📖 Example</strong></a> •
   <a href="#installation"><strong>💻 Installation</strong></a> •
-  <a href="#roadmap"><strong>🛣 Roadmap</strong></a> •
-  <a href="#contributing"><strong>🤝 Contributing</strong></a>
+  <a href="#roadmap"><strong>🛣 Roadmap</strong></a>
 </p>
 
 </div>
@@ -25,34 +25,86 @@ Analyze Roblox runtime errors, identify their root causes, and receive practical
 
 # About
 
-Vyce LuaUtility is an open-source runtime error analysis toolkit built specifically for **Roblox Studio (Luau)**.
+Vyce LuaUtility is an open-source runtime diagnostics engine built specifically for **Roblox Studio (Luau)**.
 
-Instead of relying on simple error matching, Vyce LuaUtility combines runtime error information with execution context to determine the most likely root cause and provide practical debugging guidance.
+Unlike traditional analyzers that rely primarily on regex matching, Vyce LuaUtility parses Luau source code into a lightweight Abstract Syntax Tree (AST), extracts semantic information, and combines it with runtime error data to determine the most likely root cause.
 
-Its goal is to help Roblox developers understand **why** an error occurred—not just **where** it occurred.
+Everything runs locally.
 
-> **Scope**
->
-> Vyce LuaUtility is designed exclusively for **Roblox Studio (Luau)**.
->
-> It is not intended for FiveM, GTA V, Love2D, Defold, Garry's Mod, or any other Lua platform.
+No AI.
+
+No API keys.
+
+No cloud services.
+
+No internet connection required.
+
+Its purpose is not only to tell you **where** an error occurred—but to explain **why** it happened and how to fix it.
 
 ---
 
 # Features
 
-- 🔍 Context-aware runtime error analysis
-- 🧠 Root cause detection
+- 🌳 Lightweight Luau AST parser
+- 🧠 Semantic runtime analysis
+- 🔍 Context-aware root cause detection
 - 💡 Practical debugging suggestions
 - 📚 Human-readable explanations
-- ⚡ Fast local analysis
-- 🛡️ Roblox-specific diagnostics
-- 🧩 Support for common Luau runtime errors
-- 🔒 No external AI services required
+- ⚡ Fully offline execution
+- 🛡 Roblox-specific diagnostics
+- 📈 Confidence-based hypothesis ranking
+- 🔒 No AI or external services
+- 🧩 Extensible diagnostics pipeline
 
 ---
 
-# Supported Errors
+# Architecture
+
+```
+Console Error
+        │
+        ▼
+Normalization
+        │
+        ▼
+Error Classification
+        │
+        ▼
+Lexer
+        │
+        ▼
+Tokenizer
+        │
+        ▼
+Parser
+        │
+        ▼
+Luau AST
+        │
+        ▼
+Semantic Analysis
+        │
+        ▼
+Evidence Engine
+        │
+        ▼
+Hypothesis Engine
+        │
+        ▼
+Confidence Scoring
+        │
+        ▼
+Explanation Generator
+        │
+        ▼
+Fix Generator
+```
+
+The runtime analysis pipeline is fully deterministic and executes locally without external dependencies.
+
+---
+
+# Supported Analysis
 
 Examples include:
 
@@ -63,6 +115,10 @@ Examples include:
 - infinite yield
 - stack overflow
 - table index is nil
+- invalid service
+- invalid class
+- coroutine errors
+- module loading issues
 
 ...and many more.
 
@@ -84,22 +140,34 @@ Line: 42
 ```text
 Root Cause
 
-FindFirstChild() returned nil, so the "enemy" variable was never assigned.
+FindFirstChild() returned nil, therefore the "enemy" reference was never assigned.
+
+Evidence
+
+The analyzer detected an object lookup without a successful assignment before property access.
 
 Suggestion
 
-Verify that the object exists before accessing enemy.Health.
+Verify the object exists before accessing enemy.Health.
+
+Confidence
+
+94%
 ```
 
 ---
 
 # Why Vyce LuaUtility?
 
-Traditional error messages often tell you **what** failed.
+Most runtime analyzers stop after recognizing an error message.
 
-Vyce LuaUtility focuses on explaining **why** it failed by analyzing runtime context and providing Roblox-specific debugging guidance.
+Vyce LuaUtility goes further by understanding the surrounding Luau code structure through semantic analysis, allowing it to generate more accurate explanations and practical debugging guidance.
 
-This helps reduce debugging time and makes common runtime errors easier to understand.
+The project is designed around three principles:
+
+- Deterministic diagnostics
+- Roblox-first development
+- 100% offline execution
 
 ---
 
@@ -107,8 +175,8 @@ This helps reduce debugging time and makes common runtime errors easier to under
 
 - TypeScript
 - React
-- TanStack Router
 - Vite
+- TanStack Router
 - Bun
 
 ---
@@ -129,29 +197,41 @@ bun run dev
 
 # Roadmap
 
-- [x] Runtime error analysis
-- [x] Root cause detection
-- [x] Roblox-specific diagnostics
-- [x] Human-readable explanations
-- [ ] Additional runtime error definitions
-- [ ] Community-contributed error database
-- [ ] Roblox Studio plugin
+## Completed
+
+- ✅ Lightweight Luau parser
+- ✅ AST generation
+- ✅ Semantic analysis engine
+- ✅ Evidence engine
+- ✅ Hypothesis engine
+- ✅ Confidence scoring
+- ✅ Human-readable explanations
+- ✅ Roblox-specific diagnostics
+- ✅ Fully offline runtime analysis
+
+## Planned
+
+- More Luau syntax coverage
+- Additional Roblox API semantics
+- Expanded diagnostics database
+- Roblox Studio plugin
+- Performance optimizations
+- Community-contributed diagnostics
 
 ---
 
 # Contributing
 
-Contributions are always welcome.
+Contributions are welcome.
 
 You can help by:
 
 - Reporting bugs
-- Suggesting improvements
-- Adding new runtime error definitions
-- Improving documentation
+- Improving parser coverage
+- Adding new diagnostics
+- Improving semantic analysis
+- Expanding Roblox API support
 - Opening pull requests
-
-If you have ideas or questions, feel free to open a GitHub Discussion.
 
 ---
 
