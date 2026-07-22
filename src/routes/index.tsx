@@ -479,7 +479,7 @@ function ErrorParserPage() {
             </div>
 
             <div
-              className="relative min-h-[420px] results-panel"
+              className="relative h-auto results-panel"
               aria-live="polite"
             >
               {result.kind === "idle" && (

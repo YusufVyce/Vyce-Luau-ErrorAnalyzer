@@ -391,28 +391,7 @@
 }
 
 .results-panel {
-  max-height: calc(100vh - 400px);
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #2d2d44 #0d0d1a;
-}
-
-.results-panel::-webkit-scrollbar {
-  width: 8px;
-}
-
-.results-panel::-webkit-scrollbar-track {
-  background: #0d0d1a;
-  border-radius: 4px;
-}
-
-.results-panel::-webkit-scrollbar-thumb {
-  background: #2d2d44;
-  border-radius: 4px;
-}
-
-.results-panel::-webkit-scrollbar-thumb:hover {
-  background: #3d3d5c;
+  height: auto;
 }
 
 .badge {
