@@ -8,7 +8,7 @@ Offline runtime error analysis with semantic understanding, root cause detection
 
 **Built exclusively for Roblox Studio (Luau).**
 
-<img src="images/parserv2.png" width="1920"/>
+<img src="images/görsel_2026-07-22_045124401.png" width="1920"/>
 
 <p>
   <a href="https://vyce-lua-utility.vercel.app"><strong>🌐 Live Demo</strong></a> •
