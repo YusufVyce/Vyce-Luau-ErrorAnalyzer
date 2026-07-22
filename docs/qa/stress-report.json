@@ -1,0 +1,4338 @@
+{
+  "generatedAt": "2026-07-22T01:02:43.528Z",
+  "totalScenarios": 691,
+  "expectedPositives": 497,
+  "expectedNegatives": 194,
+  "metrics": {
+    "detectionAccuracy": 74.53,
+    "rootCauseAccuracy": 39.65,
+    "confidenceAccuracy": 100,
+    "fixAccuracy": 67.58,
+    "falsePositiveRate": 90.72,
+    "falseNegativeRate": 0,
+    "diagnosisAccuracy": 90.74
+  },
+  "failedPredictionCount": 641,
+  "failedCheckTotals": {
+    "wrong-severity": 305,
+    "wrong-hypothesis-title": 144,
+    "wrong-root-cause": 417,
+    "wrong-fix": 224,
+    "wrong-diagnosis": 64,
+    "false-positive": 176
+  },
+  "topFailures": [
+    {
+      "id": "concat-nil-33",
+      "category": "concat-nil",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-concat-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil concatenation",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          60,
+          99
+        ],
+        "expectedFixes": [
+          "tostring",
+          "default",
+          "guard"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-concat-nil",
+        "title": "Stale Reference Lifecycle",
+        "rootCause": "Primary Cause: nil concatenation: a stale reference survived across a timing boundary Intermediate Cause(s): A stale reference crossed an async or respawn boundary without a freshness check Surface Error: attempt to concatenate nil at the string boundary",
+        "severity": "Medium",
+        "confidence": 92,
+        "fix": "Refresh the reference after the lifecycle boundary and guard against nil."
+      }
+    },
+    {
+      "id": "concat-nil-34",
+      "category": "concat-nil",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-concat-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil concatenation",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          60,
+          99
+        ],
+        "expectedFixes": [
+          "tostring",
+          "default",
+          "guard"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-concat-nil",
+        "title": "Stale Reference Lifecycle",
+        "rootCause": "Primary Cause: nil concatenation: a stale reference survived across a timing boundary Intermediate Cause(s): A stale reference crossed an async or respawn boundary without a freshness check Surface Error: attempt to concatenate nil at the string boundary",
+        "severity": "Medium",
+        "confidence": 92,
+        "fix": "Refresh the reference after the lifecycle boundary and guard against nil."
+      }
+    },
+    {
+      "id": "concat-nil-35",
+      "category": "concat-nil",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-concat-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil concatenation",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          60,
+          99
+        ],
+        "expectedFixes": [
+          "tostring",
+          "default",
+          "guard"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-concat-nil",
+        "title": "Stale Reference Lifecycle",
+        "rootCause": "Primary Cause: nil concatenation: a stale reference survived across a timing boundary Intermediate Cause(s): A stale reference crossed an async or respawn boundary without a freshness check Surface Error: attempt to concatenate nil at the string boundary",
+        "severity": "Medium",
+        "confidence": 92,
+        "fix": "Refresh the reference after the lifecycle boundary and guard against nil."
+      }
+    },
+    {
+      "id": "concat-nil-36",
+      "category": "concat-nil",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-concat-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil concatenation",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          60,
+          99
+        ],
+        "expectedFixes": [
+          "tostring",
+          "default",
+          "guard"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-concat-nil",
+        "title": "Stale Reference Lifecycle",
+        "rootCause": "Primary Cause: nil concatenation: a stale reference survived across a timing boundary Intermediate Cause(s): A stale reference crossed an async or respawn boundary without a freshness check Surface Error: attempt to concatenate nil at the string boundary",
+        "severity": "Medium",
+        "confidence": 92,
+        "fix": "Refresh the reference after the lifecycle boundary and guard against nil."
+      }
+    },
+    {
+      "id": "concat-nil-37",
+      "category": "concat-nil",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-concat-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil concatenation",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          60,
+          99
+        ],
+        "expectedFixes": [
+          "tostring",
+          "default",
+          "guard"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-concat-nil",
+        "title": "Stale Reference Lifecycle",
+        "rootCause": "Primary Cause: nil concatenation: a stale reference survived across a timing boundary Intermediate Cause(s): A stale reference crossed an async or respawn boundary without a freshness check Surface Error: attempt to concatenate nil at the string boundary",
+        "severity": "Medium",
+        "confidence": 92,
+        "fix": "Refresh the reference after the lifecycle boundary and guard against nil."
+      }
+    },
+    {
+      "id": "concat-nil-38",
+      "category": "concat-nil",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-concat-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil concatenation",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          60,
+          99
+        ],
+        "expectedFixes": [
+          "tostring",
+          "default",
+          "guard"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-concat-nil",
+        "title": "Stale Reference Lifecycle",
+        "rootCause": "Primary Cause: nil concatenation: a stale reference survived across a timing boundary Intermediate Cause(s): A stale reference crossed an async or respawn boundary without a freshness check Surface Error: attempt to concatenate nil at the string boundary",
+        "severity": "Medium",
+        "confidence": 92,
+        "fix": "Refresh the reference after the lifecycle boundary and guard against nil."
+      }
+    },
+    {
+      "id": "concat-nil-39",
+      "category": "concat-nil",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-concat-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil concatenation",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          60,
+          99
+        ],
+        "expectedFixes": [
+          "tostring",
+          "default",
+          "guard"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-concat-nil",
+        "title": "Stale Reference Lifecycle",
+        "rootCause": "Primary Cause: nil concatenation: a stale reference survived across a timing boundary Intermediate Cause(s): A stale reference crossed an async or respawn boundary without a freshness check Surface Error: attempt to concatenate nil at the string boundary",
+        "severity": "Medium",
+        "confidence": 92,
+        "fix": "Refresh the reference after the lifecycle boundary and guard against nil."
+      }
+    },
+    {
+      "id": "concat-nil-40",
+      "category": "concat-nil",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-concat-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil concatenation",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          60,
+          99
+        ],
+        "expectedFixes": [
+          "tostring",
+          "default",
+          "guard"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-concat-nil",
+        "title": "Stale Reference Lifecycle",
+        "rootCause": "Primary Cause: nil concatenation: a stale reference survived across a timing boundary Intermediate Cause(s): A stale reference crossed an async or respawn boundary without a freshness check Surface Error: attempt to concatenate nil at the string boundary",
+        "severity": "Medium",
+        "confidence": 92,
+        "fix": "Refresh the reference after the lifecycle boundary and guard against nil."
+      }
+    },
+    {
+      "id": "concat-nil-41",
+      "category": "concat-nil",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-concat-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil concatenation",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          60,
+          99
+        ],
+        "expectedFixes": [
+          "tostring",
+          "default",
+          "guard"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-concat-nil",
+        "title": "Stale Reference Lifecycle",
+        "rootCause": "Primary Cause: nil concatenation: a stale reference survived across a timing boundary Intermediate Cause(s): A stale reference crossed an async or respawn boundary without a freshness check Surface Error: attempt to concatenate nil at the string boundary",
+        "severity": "Medium",
+        "confidence": 92,
+        "fix": "Refresh the reference after the lifecycle boundary and guard against nil."
+      }
+    },
+    {
+      "id": "concat-nil-42",
+      "category": "concat-nil",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-concat-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil concatenation",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          60,
+          99
+        ],
+        "expectedFixes": [
+          "tostring",
+          "default",
+          "guard"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-concat-nil",
+        "title": "Stale Reference Lifecycle",
+        "rootCause": "Primary Cause: nil concatenation: a stale reference survived across a timing boundary Intermediate Cause(s): A stale reference crossed an async or respawn boundary without a freshness check Surface Error: attempt to concatenate nil at the string boundary",
+        "severity": "Medium",
+        "confidence": 92,
+        "fix": "Refresh the reference after the lifecycle boundary and guard against nil."
+      }
+    },
+    {
+      "id": "concat-nil-43",
+      "category": "concat-nil",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-concat-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil concatenation",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          60,
+          99
+        ],
+        "expectedFixes": [
+          "tostring",
+          "default",
+          "guard"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-concat-nil",
+        "title": "Stale Reference Lifecycle",
+        "rootCause": "Primary Cause: nil concatenation: a stale reference survived across a timing boundary Intermediate Cause(s): A stale reference crossed an async or respawn boundary without a freshness check Surface Error: attempt to concatenate nil at the string boundary",
+        "severity": "Medium",
+        "confidence": 92,
+        "fix": "Refresh the reference after the lifecycle boundary and guard against nil."
+      }
+    },
+    {
+      "id": "concat-nil-44",
+      "category": "concat-nil",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-concat-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil concatenation",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          60,
+          99
+        ],
+        "expectedFixes": [
+          "tostring",
+          "default",
+          "guard"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-concat-nil",
+        "title": "Stale Reference Lifecycle",
+        "rootCause": "Primary Cause: nil concatenation: a stale reference survived across a timing boundary Intermediate Cause(s): A stale reference crossed an async or respawn boundary without a freshness check Surface Error: attempt to concatenate nil at the string boundary",
+        "severity": "Medium",
+        "confidence": 92,
+        "fix": "Refresh the reference after the lifecycle boundary and guard against nil."
+      }
+    },
+    {
+      "id": "concat-nil-45",
+      "category": "concat-nil",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-concat-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil concatenation",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          60,
+          99
+        ],
+        "expectedFixes": [
+          "tostring",
+          "default",
+          "guard"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-concat-nil",
+        "title": "Stale Reference Lifecycle",
+        "rootCause": "Primary Cause: nil concatenation: a stale reference survived across a timing boundary Intermediate Cause(s): A stale reference crossed an async or respawn boundary without a freshness check Surface Error: attempt to concatenate nil at the string boundary",
+        "severity": "Medium",
+        "confidence": 92,
+        "fix": "Refresh the reference after the lifecycle boundary and guard against nil."
+      }
+    },
+    {
+      "id": "concat-nil-46",
+      "category": "concat-nil",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-concat-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil concatenation",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          60,
+          99
+        ],
+        "expectedFixes": [
+          "tostring",
+          "default",
+          "guard"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-concat-nil",
+        "title": "Stale Reference Lifecycle",
+        "rootCause": "Primary Cause: nil concatenation: a stale reference survived across a timing boundary Intermediate Cause(s): A stale reference crossed an async or respawn boundary without a freshness check Surface Error: attempt to concatenate nil at the string boundary",
+        "severity": "Medium",
+        "confidence": 92,
+        "fix": "Refresh the reference after the lifecycle boundary and guard against nil."
+      }
+    },
+    {
+      "id": "concat-nil-47",
+      "category": "concat-nil",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-concat-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil concatenation",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          60,
+          99
+        ],
+        "expectedFixes": [
+          "tostring",
+          "default",
+          "guard"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-concat-nil",
+        "title": "Stale Reference Lifecycle",
+        "rootCause": "Primary Cause: nil concatenation: a stale reference survived across a timing boundary Intermediate Cause(s): A stale reference crossed an async or respawn boundary without a freshness check Surface Error: attempt to concatenate nil at the string boundary",
+        "severity": "Medium",
+        "confidence": 92,
+        "fix": "Refresh the reference after the lifecycle boundary and guard against nil."
+      }
+    },
+    {
+      "id": "concat-nil-48",
+      "category": "concat-nil",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-concat-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil concatenation",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          60,
+          99
+        ],
+        "expectedFixes": [
+          "tostring",
+          "default",
+          "guard"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-concat-nil",
+        "title": "Stale Reference Lifecycle",
+        "rootCause": "Primary Cause: nil concatenation: a stale reference survived across a timing boundary Intermediate Cause(s): A stale reference crossed an async or respawn boundary without a freshness check Surface Error: attempt to concatenate nil at the string boundary",
+        "severity": "Medium",
+        "confidence": 92,
+        "fix": "Refresh the reference after the lifecycle boundary and guard against nil."
+      }
+    },
+    {
+      "id": "arithmetic-nil-49",
+      "category": "arithmetic-nil",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-root-cause",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-arithmetic-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil arithmetic",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "default",
+          "pcall",
+          "retry"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-arithmetic-nil",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 86,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "arithmetic-nil-50",
+      "category": "arithmetic-nil",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-root-cause",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-arithmetic-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil arithmetic",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "default",
+          "pcall",
+          "retry"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-arithmetic-nil",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 86,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "arithmetic-nil-51",
+      "category": "arithmetic-nil",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-root-cause",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-arithmetic-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil arithmetic",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "default",
+          "pcall",
+          "retry"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-arithmetic-nil",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 86,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "arithmetic-nil-52",
+      "category": "arithmetic-nil",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-root-cause",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-arithmetic-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil arithmetic",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "default",
+          "pcall",
+          "retry"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-arithmetic-nil",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 86,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "arithmetic-nil-53",
+      "category": "arithmetic-nil",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-root-cause",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-arithmetic-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil arithmetic",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "default",
+          "pcall",
+          "retry"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-arithmetic-nil",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 86,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "arithmetic-nil-54",
+      "category": "arithmetic-nil",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-root-cause",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-arithmetic-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil arithmetic",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "default",
+          "pcall",
+          "retry"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-arithmetic-nil",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 86,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "arithmetic-nil-55",
+      "category": "arithmetic-nil",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-root-cause",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-arithmetic-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil arithmetic",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "default",
+          "pcall",
+          "retry"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-arithmetic-nil",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 86,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "arithmetic-nil-56",
+      "category": "arithmetic-nil",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-root-cause",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-arithmetic-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil arithmetic",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "default",
+          "pcall",
+          "retry"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-arithmetic-nil",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 86,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "arithmetic-nil-57",
+      "category": "arithmetic-nil",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-root-cause",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-arithmetic-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil arithmetic",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "default",
+          "pcall",
+          "retry"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-arithmetic-nil",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 86,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "arithmetic-nil-58",
+      "category": "arithmetic-nil",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-root-cause",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-arithmetic-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil arithmetic",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "default",
+          "pcall",
+          "retry"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-arithmetic-nil",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 86,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "arithmetic-nil-59",
+      "category": "arithmetic-nil",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-root-cause",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-arithmetic-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil arithmetic",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "default",
+          "pcall",
+          "retry"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-arithmetic-nil",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 86,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "arithmetic-nil-60",
+      "category": "arithmetic-nil",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-root-cause",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-arithmetic-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil arithmetic",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "default",
+          "pcall",
+          "retry"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-arithmetic-nil",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 86,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "arithmetic-nil-61",
+      "category": "arithmetic-nil",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-root-cause",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-arithmetic-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil arithmetic",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "default",
+          "pcall",
+          "retry"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-arithmetic-nil",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 86,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "arithmetic-nil-62",
+      "category": "arithmetic-nil",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-root-cause",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-arithmetic-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil arithmetic",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "default",
+          "pcall",
+          "retry"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-arithmetic-nil",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 86,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "arithmetic-nil-63",
+      "category": "arithmetic-nil",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-root-cause",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-arithmetic-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil arithmetic",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "default",
+          "pcall",
+          "retry"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-arithmetic-nil",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 86,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "arithmetic-nil-64",
+      "category": "arithmetic-nil",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-root-cause",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-arithmetic-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil arithmetic",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "default",
+          "pcall",
+          "retry"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-arithmetic-nil",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 86,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "compare-nil-65",
+      "category": "compare-nil",
+      "sourceType": "ModuleScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-compare-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil comparison",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          50,
+          99
+        ],
+        "expectedFixes": [
+          "guard",
+          "default value"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-compare-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil comparison: the dependency was not initialized before first use Intermediate Cause(s): A lookup, return, or sync boundary propagated nil into the failing access Surface Error: attempt to compare nil at the comparison boundary",
+        "severity": "Medium",
+        "confidence": 76,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "compare-nil-66",
+      "category": "compare-nil",
+      "sourceType": "ModuleScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-compare-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil comparison",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          50,
+          99
+        ],
+        "expectedFixes": [
+          "guard",
+          "default value"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-compare-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil comparison: the dependency was not initialized before first use Intermediate Cause(s): A lookup, return, or sync boundary propagated nil into the failing access Surface Error: attempt to compare nil at the comparison boundary",
+        "severity": "Medium",
+        "confidence": 76,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "compare-nil-67",
+      "category": "compare-nil",
+      "sourceType": "ModuleScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-compare-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil comparison",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          50,
+          99
+        ],
+        "expectedFixes": [
+          "guard",
+          "default value"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-compare-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil comparison: the dependency was not initialized before first use Intermediate Cause(s): A lookup, return, or sync boundary propagated nil into the failing access Surface Error: attempt to compare nil at the comparison boundary",
+        "severity": "Medium",
+        "confidence": 76,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "compare-nil-68",
+      "category": "compare-nil",
+      "sourceType": "ModuleScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-compare-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil comparison",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          50,
+          99
+        ],
+        "expectedFixes": [
+          "guard",
+          "default value"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-compare-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil comparison: the dependency was not initialized before first use Intermediate Cause(s): A lookup, return, or sync boundary propagated nil into the failing access Surface Error: attempt to compare nil at the comparison boundary",
+        "severity": "Medium",
+        "confidence": 76,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "compare-nil-69",
+      "category": "compare-nil",
+      "sourceType": "ModuleScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-compare-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil comparison",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          50,
+          99
+        ],
+        "expectedFixes": [
+          "guard",
+          "default value"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-compare-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil comparison: the dependency was not initialized before first use Intermediate Cause(s): A lookup, return, or sync boundary propagated nil into the failing access Surface Error: attempt to compare nil at the comparison boundary",
+        "severity": "Medium",
+        "confidence": 76,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "compare-nil-70",
+      "category": "compare-nil",
+      "sourceType": "ModuleScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-compare-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil comparison",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          50,
+          99
+        ],
+        "expectedFixes": [
+          "guard",
+          "default value"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-compare-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil comparison: the dependency was not initialized before first use Intermediate Cause(s): A lookup, return, or sync boundary propagated nil into the failing access Surface Error: attempt to compare nil at the comparison boundary",
+        "severity": "Medium",
+        "confidence": 76,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "compare-nil-71",
+      "category": "compare-nil",
+      "sourceType": "ModuleScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-compare-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil comparison",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          50,
+          99
+        ],
+        "expectedFixes": [
+          "guard",
+          "default value"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-compare-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil comparison: the dependency was not initialized before first use Intermediate Cause(s): A lookup, return, or sync boundary propagated nil into the failing access Surface Error: attempt to compare nil at the comparison boundary",
+        "severity": "Medium",
+        "confidence": 76,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "compare-nil-72",
+      "category": "compare-nil",
+      "sourceType": "ModuleScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-compare-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil comparison",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          50,
+          99
+        ],
+        "expectedFixes": [
+          "guard",
+          "default value"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-compare-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil comparison: the dependency was not initialized before first use Intermediate Cause(s): A lookup, return, or sync boundary propagated nil into the failing access Surface Error: attempt to compare nil at the comparison boundary",
+        "severity": "Medium",
+        "confidence": 76,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "compare-nil-73",
+      "category": "compare-nil",
+      "sourceType": "ModuleScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-compare-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil comparison",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          50,
+          99
+        ],
+        "expectedFixes": [
+          "guard",
+          "default value"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-compare-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil comparison: the dependency was not initialized before first use Intermediate Cause(s): A lookup, return, or sync boundary propagated nil into the failing access Surface Error: attempt to compare nil at the comparison boundary",
+        "severity": "Medium",
+        "confidence": 76,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "compare-nil-74",
+      "category": "compare-nil",
+      "sourceType": "ModuleScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-compare-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil comparison",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          50,
+          99
+        ],
+        "expectedFixes": [
+          "guard",
+          "default value"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-compare-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil comparison: the dependency was not initialized before first use Intermediate Cause(s): A lookup, return, or sync boundary propagated nil into the failing access Surface Error: attempt to compare nil at the comparison boundary",
+        "severity": "Medium",
+        "confidence": 76,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "compare-nil-75",
+      "category": "compare-nil",
+      "sourceType": "ModuleScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-compare-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil comparison",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          50,
+          99
+        ],
+        "expectedFixes": [
+          "guard",
+          "default value"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-compare-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil comparison: the dependency was not initialized before first use Intermediate Cause(s): A lookup, return, or sync boundary propagated nil into the failing access Surface Error: attempt to compare nil at the comparison boundary",
+        "severity": "Medium",
+        "confidence": 76,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "compare-nil-76",
+      "category": "compare-nil",
+      "sourceType": "ModuleScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-compare-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil comparison",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          50,
+          99
+        ],
+        "expectedFixes": [
+          "guard",
+          "default value"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-compare-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil comparison: the dependency was not initialized before first use Intermediate Cause(s): A lookup, return, or sync boundary propagated nil into the failing access Surface Error: attempt to compare nil at the comparison boundary",
+        "severity": "Medium",
+        "confidence": 76,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "compare-nil-77",
+      "category": "compare-nil",
+      "sourceType": "ModuleScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-compare-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil comparison",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          50,
+          99
+        ],
+        "expectedFixes": [
+          "guard",
+          "default value"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-compare-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil comparison: the dependency was not initialized before first use Intermediate Cause(s): A lookup, return, or sync boundary propagated nil into the failing access Surface Error: attempt to compare nil at the comparison boundary",
+        "severity": "Medium",
+        "confidence": 76,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "compare-nil-78",
+      "category": "compare-nil",
+      "sourceType": "ModuleScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-compare-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil comparison",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          50,
+          99
+        ],
+        "expectedFixes": [
+          "guard",
+          "default value"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-compare-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil comparison: the dependency was not initialized before first use Intermediate Cause(s): A lookup, return, or sync boundary propagated nil into the failing access Surface Error: attempt to compare nil at the comparison boundary",
+        "severity": "Medium",
+        "confidence": 76,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "compare-nil-79",
+      "category": "compare-nil",
+      "sourceType": "ModuleScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-compare-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil comparison",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          50,
+          99
+        ],
+        "expectedFixes": [
+          "guard",
+          "default value"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-compare-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil comparison: the dependency was not initialized before first use Intermediate Cause(s): A lookup, return, or sync boundary propagated nil into the failing access Surface Error: attempt to compare nil at the comparison boundary",
+        "severity": "Medium",
+        "confidence": 76,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "compare-nil-80",
+      "category": "compare-nil",
+      "sourceType": "ModuleScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-compare-nil",
+        "expectedDiagnosis": "Nil Lifetime Breakdown",
+        "expectedRootCause": "nil comparison",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          50,
+          99
+        ],
+        "expectedFixes": [
+          "guard",
+          "default value"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-compare-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil comparison: the dependency was not initialized before first use Intermediate Cause(s): A lookup, return, or sync boundary propagated nil into the failing access Surface Error: attempt to compare nil at the comparison boundary",
+        "severity": "Medium",
+        "confidence": 76,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "invalid-argument-81",
+      "category": "invalid-argument",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-argument",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid argument",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "validate",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-argument",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-argument-82",
+      "category": "invalid-argument",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-argument",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid argument",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "validate",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-argument",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-argument-83",
+      "category": "invalid-argument",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-argument",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid argument",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "validate",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-argument",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-argument-84",
+      "category": "invalid-argument",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-argument",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid argument",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "validate",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-argument",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-argument-85",
+      "category": "invalid-argument",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-argument",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid argument",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "validate",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-argument",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-argument-86",
+      "category": "invalid-argument",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-argument",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid argument",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "validate",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-argument",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-argument-87",
+      "category": "invalid-argument",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-argument",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid argument",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "validate",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-argument",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-argument-88",
+      "category": "invalid-argument",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-argument",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid argument",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "validate",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-argument",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-argument-89",
+      "category": "invalid-argument",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-argument",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid argument",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "validate",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-argument",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-argument-90",
+      "category": "invalid-argument",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-argument",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid argument",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "validate",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-argument",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-argument-91",
+      "category": "invalid-argument",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-argument",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid argument",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "validate",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-argument",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-argument-92",
+      "category": "invalid-argument",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-argument",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid argument",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "validate",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-argument",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-argument-93",
+      "category": "invalid-argument",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-argument",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid argument",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "validate",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-argument",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-argument-94",
+      "category": "invalid-argument",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-argument",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid argument",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "validate",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-argument",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-argument-95",
+      "category": "invalid-argument",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-argument",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid argument",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "validate",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-argument",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-argument-96",
+      "category": "invalid-argument",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-argument",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid argument",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "validate",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-argument",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-member-97",
+      "category": "invalid-member",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-member",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid member",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "property",
+          "spell",
+          "member"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-member",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 77,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-member-98",
+      "category": "invalid-member",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-member",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid member",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "property",
+          "spell",
+          "member"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-member",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 77,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-member-99",
+      "category": "invalid-member",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-member",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid member",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "property",
+          "spell",
+          "member"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-member",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 77,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-member-100",
+      "category": "invalid-member",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-member",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid member",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "property",
+          "spell",
+          "member"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-member",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 77,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-member-101",
+      "category": "invalid-member",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-member",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid member",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "property",
+          "spell",
+          "member"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-member",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 77,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-member-102",
+      "category": "invalid-member",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-member",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid member",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "property",
+          "spell",
+          "member"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-member",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 77,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-member-103",
+      "category": "invalid-member",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-member",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid member",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "property",
+          "spell",
+          "member"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-member",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 77,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-member-104",
+      "category": "invalid-member",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-member",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid member",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "property",
+          "spell",
+          "member"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-member",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 77,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-member-105",
+      "category": "invalid-member",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-member",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid member",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "property",
+          "spell",
+          "member"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-member",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 77,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-member-106",
+      "category": "invalid-member",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-member",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid member",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "property",
+          "spell",
+          "member"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-member",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 77,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-member-107",
+      "category": "invalid-member",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-member",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid member",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "property",
+          "spell",
+          "member"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-member",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 77,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-member-108",
+      "category": "invalid-member",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-member",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid member",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "property",
+          "spell",
+          "member"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-member",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 77,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-member-109",
+      "category": "invalid-member",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-member",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid member",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "property",
+          "spell",
+          "member"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-member",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 77,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-member-110",
+      "category": "invalid-member",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-member",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid member",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "property",
+          "spell",
+          "member"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-member",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 77,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-member-111",
+      "category": "invalid-member",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-member",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid member",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "property",
+          "spell",
+          "member"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-member",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 77,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-member-112",
+      "category": "invalid-member",
+      "sourceType": "LocalScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-member",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "invalid member",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "property",
+          "spell",
+          "member"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-member",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 77,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-type-113",
+      "category": "invalid-type",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-type",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "type mismatch",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "Vector3",
+          "tonumber",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-type",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-type-114",
+      "category": "invalid-type",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-type",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "type mismatch",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "Vector3",
+          "tonumber",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-type",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-type-115",
+      "category": "invalid-type",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-type",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "type mismatch",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "Vector3",
+          "tonumber",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-type",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-type-116",
+      "category": "invalid-type",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-type",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "type mismatch",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "Vector3",
+          "tonumber",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-type",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-type-117",
+      "category": "invalid-type",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-type",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "type mismatch",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "Vector3",
+          "tonumber",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-type",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-type-118",
+      "category": "invalid-type",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-type",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "type mismatch",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "Vector3",
+          "tonumber",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-type",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-type-119",
+      "category": "invalid-type",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-type",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "type mismatch",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "Vector3",
+          "tonumber",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-type",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-type-120",
+      "category": "invalid-type",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-type",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "type mismatch",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "Vector3",
+          "tonumber",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-type",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-type-121",
+      "category": "invalid-type",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-type",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "type mismatch",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "Vector3",
+          "tonumber",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-type",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-type-122",
+      "category": "invalid-type",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-type",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "type mismatch",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "Vector3",
+          "tonumber",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-type",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-type-123",
+      "category": "invalid-type",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-type",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "type mismatch",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "Vector3",
+          "tonumber",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-type",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-type-124",
+      "category": "invalid-type",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-type",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "type mismatch",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "Vector3",
+          "tonumber",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-type",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-type-125",
+      "category": "invalid-type",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-type",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "type mismatch",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "Vector3",
+          "tonumber",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-type",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-type-126",
+      "category": "invalid-type",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-type",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "type mismatch",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "Vector3",
+          "tonumber",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-type",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-type-127",
+      "category": "invalid-type",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-type",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "type mismatch",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "Vector3",
+          "tonumber",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-type",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "invalid-type-128",
+      "category": "invalid-type",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity",
+        "wrong-root-cause",
+        "wrong-fix"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-invalid-type",
+        "expectedDiagnosis": "Generic Runtime Context",
+        "expectedRootCause": "type mismatch",
+        "expectedSeverity": "Medium",
+        "expectedConfidenceRange": [
+          30,
+          99
+        ],
+        "expectedFixes": [
+          "Vector3",
+          "tonumber",
+          "type"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-invalid-type",
+        "title": "Generic Runtime Context",
+        "rootCause": "Primary Cause: Value is nil at runtime: initialization or dependency resolution failed before the access Intermediate Cause(s): The dependency or object state propagated without a verified readiness signal Surface Error: The runtime failure reached the generic fallback path",
+        "severity": "High",
+        "confidence": 84,
+        "fix": "Trace the highlighted symbol and add runtime guards at the failing access line."
+      }
+    },
+    {
+      "id": "datastore-throttle-129",
+      "category": "datastore-throttle",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-datastore",
+        "expectedDiagnosis": "DataStore Reliability",
+        "expectedRootCause": "missing resiliency",
+        "expectedSeverity": "Critical",
+        "expectedConfidenceRange": [
+          65,
+          99
+        ],
+        "expectedFixes": [
+          "pcall",
+          "retry",
+          "budget"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-datastore",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 90,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "datastore-throttle-130",
+      "category": "datastore-throttle",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-datastore",
+        "expectedDiagnosis": "DataStore Reliability",
+        "expectedRootCause": "missing resiliency",
+        "expectedSeverity": "Critical",
+        "expectedConfidenceRange": [
+          65,
+          99
+        ],
+        "expectedFixes": [
+          "pcall",
+          "retry",
+          "budget"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-datastore",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 90,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "datastore-throttle-131",
+      "category": "datastore-throttle",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-datastore",
+        "expectedDiagnosis": "DataStore Reliability",
+        "expectedRootCause": "missing resiliency",
+        "expectedSeverity": "Critical",
+        "expectedConfidenceRange": [
+          65,
+          99
+        ],
+        "expectedFixes": [
+          "pcall",
+          "retry",
+          "budget"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-datastore",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 90,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "datastore-throttle-132",
+      "category": "datastore-throttle",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-datastore",
+        "expectedDiagnosis": "DataStore Reliability",
+        "expectedRootCause": "missing resiliency",
+        "expectedSeverity": "Critical",
+        "expectedConfidenceRange": [
+          65,
+          99
+        ],
+        "expectedFixes": [
+          "pcall",
+          "retry",
+          "budget"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-datastore",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 90,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "datastore-throttle-133",
+      "category": "datastore-throttle",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-datastore",
+        "expectedDiagnosis": "DataStore Reliability",
+        "expectedRootCause": "missing resiliency",
+        "expectedSeverity": "Critical",
+        "expectedConfidenceRange": [
+          65,
+          99
+        ],
+        "expectedFixes": [
+          "pcall",
+          "retry",
+          "budget"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-datastore",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 90,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "datastore-throttle-134",
+      "category": "datastore-throttle",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-datastore",
+        "expectedDiagnosis": "DataStore Reliability",
+        "expectedRootCause": "missing resiliency",
+        "expectedSeverity": "Critical",
+        "expectedConfidenceRange": [
+          65,
+          99
+        ],
+        "expectedFixes": [
+          "pcall",
+          "retry",
+          "budget"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-datastore",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 90,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "datastore-throttle-135",
+      "category": "datastore-throttle",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-datastore",
+        "expectedDiagnosis": "DataStore Reliability",
+        "expectedRootCause": "missing resiliency",
+        "expectedSeverity": "Critical",
+        "expectedConfidenceRange": [
+          65,
+          99
+        ],
+        "expectedFixes": [
+          "pcall",
+          "retry",
+          "budget"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-datastore",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 90,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "datastore-throttle-136",
+      "category": "datastore-throttle",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-datastore",
+        "expectedDiagnosis": "DataStore Reliability",
+        "expectedRootCause": "missing resiliency",
+        "expectedSeverity": "Critical",
+        "expectedConfidenceRange": [
+          65,
+          99
+        ],
+        "expectedFixes": [
+          "pcall",
+          "retry",
+          "budget"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-datastore",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 90,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "datastore-throttle-137",
+      "category": "datastore-throttle",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-datastore",
+        "expectedDiagnosis": "DataStore Reliability",
+        "expectedRootCause": "missing resiliency",
+        "expectedSeverity": "Critical",
+        "expectedConfidenceRange": [
+          65,
+          99
+        ],
+        "expectedFixes": [
+          "pcall",
+          "retry",
+          "budget"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-datastore",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 90,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "datastore-throttle-138",
+      "category": "datastore-throttle",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-datastore",
+        "expectedDiagnosis": "DataStore Reliability",
+        "expectedRootCause": "missing resiliency",
+        "expectedSeverity": "Critical",
+        "expectedConfidenceRange": [
+          65,
+          99
+        ],
+        "expectedFixes": [
+          "pcall",
+          "retry",
+          "budget"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-datastore",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 90,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "datastore-throttle-139",
+      "category": "datastore-throttle",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-datastore",
+        "expectedDiagnosis": "DataStore Reliability",
+        "expectedRootCause": "missing resiliency",
+        "expectedSeverity": "Critical",
+        "expectedConfidenceRange": [
+          65,
+          99
+        ],
+        "expectedFixes": [
+          "pcall",
+          "retry",
+          "budget"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-datastore",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 90,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "datastore-throttle-140",
+      "category": "datastore-throttle",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-datastore",
+        "expectedDiagnosis": "DataStore Reliability",
+        "expectedRootCause": "missing resiliency",
+        "expectedSeverity": "Critical",
+        "expectedConfidenceRange": [
+          65,
+          99
+        ],
+        "expectedFixes": [
+          "pcall",
+          "retry",
+          "budget"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-datastore",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 90,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "datastore-throttle-141",
+      "category": "datastore-throttle",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-datastore",
+        "expectedDiagnosis": "DataStore Reliability",
+        "expectedRootCause": "missing resiliency",
+        "expectedSeverity": "Critical",
+        "expectedConfidenceRange": [
+          65,
+          99
+        ],
+        "expectedFixes": [
+          "pcall",
+          "retry",
+          "budget"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-datastore",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 90,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "datastore-throttle-142",
+      "category": "datastore-throttle",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-datastore",
+        "expectedDiagnosis": "DataStore Reliability",
+        "expectedRootCause": "missing resiliency",
+        "expectedSeverity": "Critical",
+        "expectedConfidenceRange": [
+          65,
+          99
+        ],
+        "expectedFixes": [
+          "pcall",
+          "retry",
+          "budget"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-datastore",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 90,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "datastore-throttle-143",
+      "category": "datastore-throttle",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-datastore",
+        "expectedDiagnosis": "DataStore Reliability",
+        "expectedRootCause": "missing resiliency",
+        "expectedSeverity": "Critical",
+        "expectedConfidenceRange": [
+          65,
+          99
+        ],
+        "expectedFixes": [
+          "pcall",
+          "retry",
+          "budget"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-datastore",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 90,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "datastore-throttle-144",
+      "category": "datastore-throttle",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-severity"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-datastore",
+        "expectedDiagnosis": "DataStore Reliability",
+        "expectedRootCause": "missing resiliency",
+        "expectedSeverity": "Critical",
+        "expectedConfidenceRange": [
+          65,
+          99
+        ],
+        "expectedFixes": [
+          "pcall",
+          "retry",
+          "budget"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-datastore",
+        "title": "DataStore Reliability",
+        "rootCause": "Primary Cause: missing resiliency: the request was executed without pcall, retry, or budget awareness Intermediate Cause(s): The failure propagated as a throttled or transient request error Surface Error: A DataStore failure surfaced at the request boundary",
+        "severity": "High",
+        "confidence": 90,
+        "fix": "Wrap DataStore calls in pcall and handle failures."
+      }
+    },
+    {
+      "id": "remote-side-mismatch-145",
+      "category": "remote-side-mismatch",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-diagnosis",
+        "wrong-root-cause",
+        "wrong-fix",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-remote",
+        "expectedDiagnosis": "Remote Boundary Validation",
+        "expectedRootCause": "call direction mismatch",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "FireClient",
+          "server",
+          "schema"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-call-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil at call site: the dependency was not initialized before first use Intermediate Cause(s): WaitForChild resolves the dependency before use Surface Error: attempt to call nil at the invocation site",
+        "severity": "High",
+        "confidence": 82,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "remote-side-mismatch-146",
+      "category": "remote-side-mismatch",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-diagnosis",
+        "wrong-root-cause",
+        "wrong-fix",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-remote",
+        "expectedDiagnosis": "Remote Boundary Validation",
+        "expectedRootCause": "call direction mismatch",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "FireClient",
+          "server",
+          "schema"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-call-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil at call site: the dependency was not initialized before first use Intermediate Cause(s): WaitForChild resolves the dependency before use Surface Error: attempt to call nil at the invocation site",
+        "severity": "High",
+        "confidence": 82,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "remote-side-mismatch-147",
+      "category": "remote-side-mismatch",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-diagnosis",
+        "wrong-root-cause",
+        "wrong-fix",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-remote",
+        "expectedDiagnosis": "Remote Boundary Validation",
+        "expectedRootCause": "call direction mismatch",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "FireClient",
+          "server",
+          "schema"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-call-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil at call site: the dependency was not initialized before first use Intermediate Cause(s): WaitForChild resolves the dependency before use Surface Error: attempt to call nil at the invocation site",
+        "severity": "High",
+        "confidence": 82,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "remote-side-mismatch-148",
+      "category": "remote-side-mismatch",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-diagnosis",
+        "wrong-root-cause",
+        "wrong-fix",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-remote",
+        "expectedDiagnosis": "Remote Boundary Validation",
+        "expectedRootCause": "call direction mismatch",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "FireClient",
+          "server",
+          "schema"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-call-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil at call site: the dependency was not initialized before first use Intermediate Cause(s): WaitForChild resolves the dependency before use Surface Error: attempt to call nil at the invocation site",
+        "severity": "High",
+        "confidence": 82,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "remote-side-mismatch-149",
+      "category": "remote-side-mismatch",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-diagnosis",
+        "wrong-root-cause",
+        "wrong-fix",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-remote",
+        "expectedDiagnosis": "Remote Boundary Validation",
+        "expectedRootCause": "call direction mismatch",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "FireClient",
+          "server",
+          "schema"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-call-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil at call site: the dependency was not initialized before first use Intermediate Cause(s): WaitForChild resolves the dependency before use Surface Error: attempt to call nil at the invocation site",
+        "severity": "High",
+        "confidence": 82,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "remote-side-mismatch-150",
+      "category": "remote-side-mismatch",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-diagnosis",
+        "wrong-root-cause",
+        "wrong-fix",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-remote",
+        "expectedDiagnosis": "Remote Boundary Validation",
+        "expectedRootCause": "call direction mismatch",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "FireClient",
+          "server",
+          "schema"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-call-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil at call site: the dependency was not initialized before first use Intermediate Cause(s): WaitForChild resolves the dependency before use Surface Error: attempt to call nil at the invocation site",
+        "severity": "High",
+        "confidence": 82,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "remote-side-mismatch-151",
+      "category": "remote-side-mismatch",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-diagnosis",
+        "wrong-root-cause",
+        "wrong-fix",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-remote",
+        "expectedDiagnosis": "Remote Boundary Validation",
+        "expectedRootCause": "call direction mismatch",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "FireClient",
+          "server",
+          "schema"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-call-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil at call site: the dependency was not initialized before first use Intermediate Cause(s): WaitForChild resolves the dependency before use Surface Error: attempt to call nil at the invocation site",
+        "severity": "High",
+        "confidence": 82,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    },
+    {
+      "id": "remote-side-mismatch-152",
+      "category": "remote-side-mismatch",
+      "sourceType": "ServerScript",
+      "failedChecks": [
+        "wrong-diagnosis",
+        "wrong-root-cause",
+        "wrong-fix",
+        "wrong-hypothesis-title"
+      ],
+      "expected": {
+        "shouldMatch": true,
+        "expectedRuleId": "roblox-remote",
+        "expectedDiagnosis": "Remote Boundary Validation",
+        "expectedRootCause": "call direction mismatch",
+        "expectedSeverity": "High",
+        "expectedConfidenceRange": [
+          55,
+          99
+        ],
+        "expectedFixes": [
+          "FireClient",
+          "server",
+          "schema"
+        ]
+      },
+      "actual": {
+        "matched": true,
+        "ruleId": "roblox-call-nil",
+        "title": "Nil Lifetime Breakdown",
+        "rootCause": "Primary Cause: nil at call site: the dependency was not initialized before first use Intermediate Cause(s): WaitForChild resolves the dependency before use Surface Error: attempt to call nil at the invocation site",
+        "severity": "High",
+        "confidence": 82,
+        "fix": "Guard the exact access/call with a nil check before using the value."
+      }
+    }
+  ],
+  "categoryCoverage": {
+    "nil-index": {
+      "total": 16,
+      "failed": 0,
+      "accuracy": 100
+    },
+    "call-nil": {
+      "total": 16,
+      "failed": 0,
+      "accuracy": 100
+    },
+    "concat-nil": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "arithmetic-nil": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "compare-nil": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "invalid-argument": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "invalid-member": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "invalid-type": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "datastore-throttle": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "remote-side-mismatch": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "remotefunction-timeout": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "tween-invalid-property": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "character-race": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "animation": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "physics": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "wait-infinite-yield": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "httpservice-json": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "memorystore": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "messagingservice": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "pathfinding": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "raycast": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "constraints": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "camera": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "marketplace": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "teleport": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "coroutine-dead": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "task-library-race": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "bindables": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "stack-overflow": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "plugin": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "streaming-enabled": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "attributes": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "collectionservice": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "modules-circular-require": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "serialization-jsonencode": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "ansi-colored-log": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "unicode-emoji-log": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "malformed-log": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "mixed-errors": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "huge-stacktrace": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "only-code-no-log": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "only-log-no-code": {
+      "total": 16,
+      "failed": 16,
+      "accuracy": 0
+    },
+    "empty-log-empty-code": {
+      "total": 16,
+      "failed": 0,
+      "accuracy": 100
+    },
+    "size-guard": {
+      "total": 1,
+      "failed": 0,
+      "accuracy": 100
+    },
+    "format-noise": {
+      "total": 1,
+      "failed": 1,
+      "accuracy": 0
+    },
+    "huge-modulescript": {
+      "total": 1,
+      "failed": 0,
+      "accuracy": 100
+    }
+  }
+}

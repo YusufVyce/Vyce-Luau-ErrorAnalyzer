@@ -18,12 +18,21 @@ import type {
   TypeAliasStatement,
   WhileStatement,
 } from "./ast";
-import type { ExtractedContext, HighlightRange, SymbolRef } from "../types";
+import type {
+  ExtractedContext,
+  FlowTrace,
+  HighlightRange,
+  RuntimeState,
+  RuntimeStateSnapshot,
+  SymbolRef,
+} from "../types";
 
 interface SemanticState {
   symbols: SymbolRef[];
   highlights: HighlightRange[];
   variables: Record<string, string>;
+  runtimeStates: Map<string, RuntimeStateSnapshot>;
+  flowTraces: FlowTrace[];
   functions: string[];
   methods: string[];
   requires: string[];
@@ -50,10 +59,138 @@ interface SemanticState {
   requireChains: string[][];
   aliasToService: Map<string, string>;
   typeAliases: string[];
+  functionReturnStates: Map<string, RuntimeState>;
 }
 
 function pushUnique(list: string[], value: string) {
   if (!list.includes(value)) list.push(value);
+}
+
+function inferRoleFromName(name: string): string {
+  const lowered = name.toLowerCase();
+  if (/(^|_|\b)(player|localplayer|plr)(_|\b|$)/.test(lowered)) return "Player";
+  if (/(^|_|\b)(character|char)(_|\b|$)/.test(lowered)) return "Character";
+  if (/(^|_|\b)(profile)(_|\b|$)/.test(lowered)) return "Profile";
+  if (/(^|_|\b)(inventory|inv|bag)(_|\b|$)/.test(lowered)) return "Inventory";
+  if (/(^|_|\b)(module|mod)(_|\b|$)/.test(lowered)) return "Module";
+  if (/(^|_|\b)(instance|inst|obj|part|gui|frame|model|tool)(_|\b|$)/.test(lowered)) return "Instance";
+  if (/(^|_|\b)(remote|event|rf|re)(_|\b|$)/.test(lowered)) return "Remote";
+  if (/(^|_|\b)(humanoid|animator)(_|\b|$)/.test(lowered)) return "Humanoid";
+  return "Unknown";
+}
+
+function inferRuntimeStateFromExpression(
+  expression: Expression | undefined,
+  state: SemanticState,
+  currentFunction: string | null,
+): { state: RuntimeState; evidence: string; confidence: number } {
+  if (!expression) {
+    return { state: "Uninitialized", evidence: "No initializer was provided", confidence: 40 };
+  }
+
+  switch (expression.kind) {
+    case "NilLiteral":
+      return { state: "Uninitialized", evidence: "Assigned nil", confidence: 95 };
+    case "StringLiteral":
+    case "NumberLiteral":
+    case "BooleanLiteral":
+      return { state: "Loaded", evidence: "Assigned concrete literal value", confidence: 60 };
+    case "Identifier": {
+      const source = state.runtimeStates.get(expression.name);
+      if (source) {
+        return {
+          state: source.state,
+          evidence: `Propagated from ${expression.name}`,
+          confidence: Math.max(55, source.confidence - 5),
+        };
+      }
+      return { state: "Unknown", evidence: `Copied from ${expression.name}`, confidence: 45 };
+    }
+    case "CallExpression": {
+      const info = getCallInfo(expression);
+      const calleePath = info.calleePath ?? "";
+      const methodName = info.methodName ?? "";
+
+      if (calleePath === "require") {
+        return { state: "Loaded", evidence: "Module required successfully", confidence: 90 };
+      }
+
+      if (calleePath === "game.GetService" || calleePath.endsWith("GetService")) {
+        return { state: "Loaded", evidence: "Service resolved through GetService", confidence: 88 };
+      }
+
+      if (methodName === "WaitForChild") {
+        return { state: "Loaded", evidence: "WaitForChild resolves the dependency before use", confidence: 84 };
+      }
+
+      if (methodName === "FindFirstChild" || methodName === "FindFirstChildOfClass") {
+        return { state: "Missing", evidence: "FindFirstChild-style lookup can miss the target", confidence: 86 };
+      }
+
+      if (methodName === "Destroy") {
+        return { state: "Destroyed", evidence: "Instance was explicitly destroyed", confidence: 92 };
+      }
+
+      if (currentFunction && state.functionReturnStates.has(calleePath || currentFunction)) {
+        const returned = state.functionReturnStates.get(calleePath || currentFunction);
+        if (returned) {
+          return {
+            state: returned,
+            evidence: `Inherited return state from ${calleePath || currentFunction}`,
+            confidence: 70,
+          };
+        }
+      }
+
+      return { state: "Unknown", evidence: `Result of ${calleePath || "call"}`, confidence: 50 };
+    }
+    case "MemberExpression": {
+      const rootPath = flattenMemberPath(expression);
+      if (rootPath?.includes(".Character")) {
+        return { state: "Missing", evidence: "Character path is accessed directly", confidence: 72 };
+      }
+      return { state: "Unknown", evidence: `Read from ${expression.property.name}`, confidence: 40 };
+    }
+    default:
+      return { state: "Unknown", evidence: "Expression state could not be determined", confidence: 35 };
+  }
+}
+
+function recordRuntimeState(
+  state: SemanticState,
+  name: string,
+  line: number | undefined,
+  runtimeState: RuntimeState,
+  confidence: number,
+  evidence: string,
+  note?: string,
+): void {
+  const role = inferRoleFromName(name);
+  const current = state.runtimeStates.get(name);
+  const nextConfidence = current ? Math.max(current.confidence, confidence) : confidence;
+  const nextState = current && current.confidence > confidence ? current.state : runtimeState;
+  const nextEvidence = current ? [...new Set([...current.evidence, evidence])] : [evidence];
+
+  state.runtimeStates.set(name, {
+    name,
+    role,
+    state: nextState,
+    confidence: nextConfidence,
+    evidence: nextEvidence,
+    line,
+    note,
+  });
+}
+
+function recordFlowTrace(
+  state: SemanticState,
+  target: string,
+  source: string,
+  line: number | undefined,
+  reason: string,
+  confidence: number,
+): void {
+  state.flowTraces.push({ target, source, line, reason, confidence });
 }
 
 const REMOTE_APIS = new Set([
@@ -280,6 +417,15 @@ function visitExpression(
         state.hasRemoteUse = true;
       }
 
+      if (info.methodName === "Destroy") {
+        const destroyTarget = expression.callee.kind === "MemberExpression" ? flattenMemberPath(expression.callee.object) : null;
+        if (destroyTarget) {
+          const simpleName = destroyTarget.split(".").pop() ?? destroyTarget;
+          recordRuntimeState(state, simpleName, expression.range.start.line, "Destroyed", 92, "Destroy() was called on the instance", "Destroyed instance");
+          recordFlowTrace(state, simpleName, `${destroyTarget}:Destroy()`, expression.range.start.line, "Explicit destruction invalidated the reference", 92);
+        }
+      }
+
       if (info.methodName === "Create" || info.calleePath?.endsWith("TweenService")) {
         const calleePath = flattenMemberPath(expression.callee) ?? "";
         const isTweenCreate =
@@ -366,6 +512,15 @@ function visitStatement(
           }
         }
 
+        const inferred = inferRuntimeStateFromExpression(value, state, currentFunction);
+        recordRuntimeState(state, name.name, name.range.start.line, inferred.state, inferred.confidence, inferred.evidence);
+
+        if (value?.kind === "CallExpression") {
+          const callInfo = getCallInfo(value);
+          const source = callInfo.methodName ? `${callInfo.calleePath ?? "call"}:${callInfo.methodName}` : callInfo.calleePath ?? "call";
+          recordFlowTrace(state, name.name, source, name.range.start.line, inferred.evidence, inferred.confidence);
+        }
+
         if (name.typeAnnotation) {
           state.typeAliases.push(name.typeAnnotation.raw);
         }
@@ -383,6 +538,25 @@ function visitStatement(
         const value = assignment.values[i];
         if (target.kind === "Identifier") {
           state.variables[target.name] = value ? expressionToText(value) : "";
+          const inferred = inferRuntimeStateFromExpression(value, state, currentFunction);
+          recordRuntimeState(state, target.name, target.range.start.line, inferred.state, inferred.confidence, inferred.evidence);
+
+          if (value?.kind === "Identifier") {
+            recordFlowTrace(state, target.name, value.name, target.range.start.line, `Value propagated from ${value.name}`, inferred.confidence);
+          }
+
+          if (value?.kind === "CallExpression") {
+            const callInfo = getCallInfo(value);
+            const source = callInfo.methodName ? `${callInfo.calleePath ?? "call"}:${callInfo.methodName}` : callInfo.calleePath ?? "call";
+            recordFlowTrace(state, target.name, source, target.range.start.line, inferred.evidence, inferred.confidence);
+          }
+        } else if (target.kind === "MemberExpression" && target.property.name === "Parent" && value?.kind === "NilLiteral") {
+          const owner = flattenMemberPath(target.object);
+          if (owner) {
+            const instanceName = owner.split(".").pop() ?? owner;
+            recordRuntimeState(state, instanceName, target.range.start.line, "Destroyed", 90, "Parent was set to nil", "Instance was detached or destroyed");
+            recordFlowTrace(state, instanceName, owner, target.range.start.line, "Parent nil assignment destroyed the reference", 90);
+          }
         }
       }
       for (const target of assignment.targets) visitExpression(target, state, lines, currentFunction);
@@ -425,6 +599,10 @@ function visitStatement(
       const ret = statement as ReturnStatement;
       if (ret.values.length > 0 && currentFunction === null) {
         state.moduleExports.push(expressionToText(ret.values[0]));
+      }
+      if (currentFunction && ret.values.length > 0) {
+        const inferred = inferRuntimeStateFromExpression(ret.values[0], state, currentFunction);
+        state.functionReturnStates.set(currentFunction, inferred.state);
       }
       for (const value of ret.values) visitExpression(value, state, lines, currentFunction);
       return;
@@ -487,6 +665,8 @@ export function analyzeLuauSemantics(ast: Program, codeText: string, logText: st
     symbols: [],
     highlights: [],
     variables: {},
+    runtimeStates: new Map(),
+    flowTraces: [],
     functions: [],
     methods: [],
     requires: [],
@@ -513,6 +693,7 @@ export function analyzeLuauSemantics(ast: Program, codeText: string, logText: st
     requireChains: [],
     aliasToService: new Map(),
     typeAliases: [],
+    functionReturnStates: new Map(),
   };
 
   for (const stmt of ast.body) {
@@ -566,6 +747,8 @@ export function analyzeLuauSemantics(ast: Program, codeText: string, logText: st
     hasDataStoreUse: state.hasDataStoreUse,
     hasCharacterPropertyAccessWithoutSync: state.hasCharacterPropertyAccessWithoutSync,
     tweenGoals: state.tweenGoals,
+    runtimeStates: [...state.runtimeStates.values()].sort((a, b) => b.confidence - a.confidence),
+    flowTraces: state.flowTraces,
     moduleExports: state.moduleExports,
     requireChains: state.requireChains,
     ast,

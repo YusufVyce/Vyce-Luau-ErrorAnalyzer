@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Activity, AlertTriangle, ArrowRight, GitBranch, ShieldAlert } from "lucide-react";
 import { ANALYZER_EXAMPLES } from "@/lib/analyzerExamples";
 import type { AdvancedAnalyzerOutput } from "@/lib/analyzer/advancedRobloxAnalyzer";
 import {
@@ -264,6 +265,9 @@ function ErrorParserPage() {
 
   const logSnapshot = result?.kind === "match" ? result.logSnapshot : "";
   const advanced = analysis.advanced;
+  const rootCauseChain = advanced?.rootCauseChain;
+  const runtimeStates = advanced?.runtimeStates ?? [];
+  const flowTraces = advanced?.flowTraces ?? [];
   const sortedFindings = useMemo(() => {
     const findings = [...(advanced?.staticFindings ?? [])];
     findings.sort((a, b) => sortFindingSeverity(a.severity) - sortFindingSeverity(b.severity));
@@ -304,6 +308,55 @@ function ErrorParserPage() {
       default:
         return "badge-performance";
     }
+  }
+
+  function runtimeStateBadgeClass(state: "Loaded" | "Missing" | "Destroyed" | "Uninitialized" | "Unknown") {
+    switch (state) {
+      case "Loaded":
+        return "border-emerald-500/20 bg-emerald-500/10 text-emerald-300";
+      case "Missing":
+        return "border-amber-500/20 bg-amber-500/10 text-amber-300";
+      case "Destroyed":
+        return "border-red-500/20 bg-red-500/10 text-red-300";
+      case "Uninitialized":
+        return "border-orange-500/20 bg-orange-500/10 text-orange-300";
+      default:
+        return "border-zinc-700 bg-zinc-900/80 text-zinc-400";
+    }
+  }
+
+  function stageToneClass(stage: "primary" | "propagation" | "surface") {
+    switch (stage) {
+      case "primary":
+        return "border-red-500/15 bg-red-500/6 text-red-200";
+      case "propagation":
+        return "border-amber-500/15 bg-amber-500/6 text-amber-200";
+      default:
+        return "border-sky-500/15 bg-sky-500/6 text-sky-200";
+    }
+  }
+
+  function stageIcon(stage: "primary" | "propagation" | "surface") {
+    switch (stage) {
+      case "primary":
+        return <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />;
+      case "propagation":
+        return <GitBranch className="h-3.5 w-3.5" aria-hidden="true" />;
+      default:
+        return <ShieldAlert className="h-3.5 w-3.5" aria-hidden="true" />;
+    }
+  }
+
+  function confidenceMeterClass(confidence: number) {
+    if (confidence >= 75) return "from-emerald-400 to-teal-400";
+    if (confidence >= 55) return "from-amber-400 to-orange-400";
+    return "from-sky-400 to-cyan-400";
+  }
+
+  function hypothesisRankLabel(index: number, confidence: number) {
+    if (index === 0) return "Primary";
+    if (confidence >= 45 && index < 3) return "Alternative";
+    return "Low confidence";
   }
 
   const metaLabel = useMemo(() => {
@@ -523,8 +576,15 @@ function ErrorParserPage() {
   )}
 
   {analysis.confidence !== undefined && (
-    <div className="px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-xs font-medium">
-      🎯 Confidence: {analysis.confidence}%
+    <div className="flex items-center gap-3 rounded-full border border-zinc-800 bg-zinc-950/40 px-3 py-1.5 text-xs">
+      <span className="text-zinc-400 font-medium">Confidence</span>
+      <span className="text-emerald-300 font-semibold">{analysis.confidence}%</span>
+      <div className="h-1.5 w-28 sm:w-36 rounded-full bg-zinc-900 overflow-hidden">
+        <div
+          className={`h-full rounded-full bg-gradient-to-r ${confidenceMeterClass(analysis.confidence)}`}
+          style={{ width: `${analysis.confidence}%` }}
+        />
+      </div>
     </div>
   )}
 </div>
@@ -564,15 +624,67 @@ function ErrorParserPage() {
                       </p>
                     </section>
 
-                    <section className="space-y-2">
+                    <section className="space-y-3">
                       <h3 className="flex items-center gap-2 text-xs uppercase tracking-wider text-zinc-400 font-semibold">
-                        <span className="ep-step">2</span> Root Cause Analysis
+                        <span className="ep-step">2</span> Diagnostic Flow
                       </h3>
-                      <div className="space-y-2.5 mt-1">
-                        {(analysis.causes ?? []).map((c, i) => (
-                          <CauseRow key={i} percent={c.percent} text={c.text} />
-                        ))}
-                      </div>
+                      {rootCauseChain ? (
+                        <div className="relative pl-5 md:pl-8 space-y-3 before:absolute before:left-[14px] md:before:left-[18px] before:top-3 before:bottom-3 before:w-px before:bg-gradient-to-b before:from-red-500/50 before:via-amber-400/50 before:to-sky-500/50">
+                          {[
+                            {
+                              stage: "primary" as const,
+                              title: "Primary Cause",
+                              description: rootCauseChain.primaryCause.description,
+                              detail: "Origin",
+                              icon: stageIcon("primary"),
+                            },
+                            {
+                              stage: "propagation" as const,
+                              title: "Intermediate Cause(s)",
+                              description: rootCauseChain.intermediateCauses.length > 0
+                                ? rootCauseChain.intermediateCauses.map((cause) => cause.description).join(" · ")
+                                : "No propagation confirmed.",
+                              detail: "Path",
+                              icon: stageIcon("propagation"),
+                            },
+                            {
+                              stage: "surface" as const,
+                              title: "Surface Error",
+                              description: rootCauseChain.surfaceError.description,
+                              detail: "Observed failure",
+                              icon: stageIcon("surface"),
+                            },
+                          ].map((stage, index) => (
+                            <div key={stage.title} className={`relative rounded-2xl border p-4 md:p-4.5 ${stageToneClass(stage.stage)}`}>
+                              <div className="absolute -left-0.5 md:-left-1 top-4 flex h-7 w-7 items-center justify-center rounded-full border border-current bg-zinc-950 shadow-lg">
+                                {stage.icon}
+                              </div>
+                              <div className="flex flex-wrap items-center justify-between gap-2 pl-6 md:pl-7">
+                                <div>
+                                  <div className="text-[10px] uppercase tracking-[0.18em] font-semibold opacity-80">
+                                    {stage.detail}
+                                  </div>
+                                  <div className="mt-0.5 text-sm font-semibold text-zinc-50">
+                                    {stage.title}
+                                  </div>
+                                </div>
+                                <div className="text-[10px] px-2 py-1 rounded-full border border-current/20 bg-black/20 font-mono uppercase tracking-wide">
+                                  {index === 0 ? "source" : index === 1 ? "propagated" : "surface"}
+                                </div>
+                              </div>
+                              <p className="pl-6 md:pl-7 mt-2 text-sm text-zinc-200 leading-relaxed">
+                                {stage.description}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="space-y-2.5 mt-1">
+                          {(analysis.causes ?? []).map((c, i) => (
+                            <CauseRow key={i} percent={c.percent} text={c.text} />
+                          ))}
+                        </div>
+                      )}
                     </section>
 
                     <section className="space-y-2">
@@ -601,62 +713,234 @@ function ErrorParserPage() {
                         </summary>
 
                         <div className="mt-4 space-y-5">
-                          {(advanced.quickSummary || advanced.likelyRootCause) && (
-                            <section className="space-y-2">
+                          {(advanced.quickSummary || advanced.likelyRootCause || rootCauseChain) && (
+                            <section className="space-y-3">
                               <div className="text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">
-                                Executive Summary
+                                Diagnostic Flow
                               </div>
-                              {advanced.quickSummary && (
-                                <p className="text-sm text-zinc-200 leading-relaxed">{advanced.quickSummary}</p>
-                              )}
-                              {advanced.likelyRootCause && (
-                                <p className="text-xs text-zinc-400 leading-relaxed">Likely root cause: {advanced.likelyRootCause}</p>
-                              )}
-                            </section>
-                          )}
 
-                          {advanced.hypotheses && advanced.hypotheses.length > 0 && (
-                            <section className="space-y-2">
-                              <div className="text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">
-                                Ranked Hypotheses
-                              </div>
-                              <div className="space-y-2">
-                                {advanced.hypotheses.map((hypothesis, idx) => (
-                                  <div
-                                    key={`${hypothesis.title}-${idx}`}
-                                    className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3"
-                                  >
-                                    <div className="flex items-start justify-between gap-3">
-                                      <p className="text-sm text-zinc-100 leading-relaxed">{hypothesis.rootCause}</p>
-                                      <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono shrink-0">
-                                        {hypothesis.confidence}%
+                              <div className="space-y-3">
+                                <div className="rounded-lg border border-emerald-500/15 bg-emerald-500/5 p-3">
+                                  <div className="flex items-center justify-between gap-3 mb-2">
+                                    <div className="text-[10px] uppercase tracking-widest text-emerald-300 font-semibold">
+                                      Primary Cause
+                                    </div>
+                                    {rootCauseChain.primaryCause.confidence !== undefined && (
+                                      <span className="text-[10px] px-2 py-0.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-300 font-mono">
+                                        {rootCauseChain.primaryCause.confidence}% support
                                       </span>
-                                    </div>
-                                    <div className="mt-1 text-[11px] text-zinc-500">{hypothesis.title}</div>
+                                    )}
                                   </div>
-                                ))}
+                                  <p className="text-sm text-zinc-100 leading-relaxed">
+                                    {rootCauseChain.primaryCause.description || advanced.quickSummary || advanced.likelyRootCause || "Primary cause not available."}
+                                  </p>
+                                  {rootCauseChain.primaryCause.evidence?.length ? (
+                                    <div className="mt-2 flex flex-wrap gap-2">
+                                      {rootCauseChain.primaryCause.evidence.slice(0, 4).map((item) => (
+                                        <span key={item.id} className="px-2 py-1 rounded-md border border-emerald-500/15 bg-black/20 text-[11px] text-zinc-300">
+                                          {item.message}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  ) : null}
+                                </div>
+
+                                <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
+                                  <div className="flex items-center justify-between gap-3 mb-2">
+                                    <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">
+                                      Intermediate Cause(s)
+                                    </div>
+                                    <span className="text-[10px] px-2 py-0.5 rounded-full border border-zinc-700 bg-zinc-900 text-zinc-400 font-mono">
+                                      propagation path
+                                    </span>
+                                  </div>
+                                  <div className="space-y-2">
+                                    {rootCauseChain.intermediateCauses.length ? (
+                                      rootCauseChain.intermediateCauses.map((cause, idx) => (
+                                        <div key={`${cause.title}-${idx}`} className="rounded-md border border-zinc-800 bg-black/20 p-2.5">
+                                          <div className="flex items-center justify-between gap-3">
+                                            <div className="text-sm text-zinc-100 leading-relaxed">{cause.description}</div>
+                                            <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-950 border border-zinc-800 text-zinc-400 font-mono shrink-0">
+                                              {cause.confidence}%
+                                            </span>
+                                          </div>
+                                        </div>
+                                      ))
+                                    ) : (
+                                      <div className="text-sm text-zinc-300">No intermediate propagation was confirmed.</div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
+                                  <div className="flex items-center justify-between gap-3 mb-2">
+                                    <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">
+                                      Surface Error
+                                    </div>
+                                    {rootCauseChain.surfaceError.confidence !== undefined && (
+                                      <span className="text-[10px] px-2 py-0.5 rounded-full border border-red-500/20 bg-red-500/10 text-red-300 font-mono">
+                                        {rootCauseChain.surfaceError.confidence}% signal
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-sm text-zinc-100 leading-relaxed">
+                                    {rootCauseChain.surfaceError.description || advanced.likelyRootCause || "Surface error not available."}
+                                  </p>
+                                </div>
                               </div>
                             </section>
                           )}
 
-                          {advanced.evidence && advanced.evidence.length > 0 && (
-                            <section className="space-y-2">
-                              <div className="text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">
-                                Evidence
-                              </div>
-                              <div className="space-y-2">
-                                {advanced.evidence.map((item) => (
-                                  <div key={item.id} className="rounded-lg border border-zinc-800 bg-black/30 p-2.5 text-xs text-zinc-300">
-                                    <div className="flex items-center justify-between gap-3">
-                                      <span>{item.message}</span>
-                                      <span className="text-emerald-400 font-mono">+{item.score}</span>
+                          <details className="group rounded-xl border border-zinc-800/80 bg-zinc-950/30 p-4">
+                            <summary className="list-none cursor-pointer flex items-center justify-between gap-3">
+                              <h3 className="flex items-center gap-2 text-xs uppercase tracking-wider text-zinc-300 font-semibold">
+                                <span className="ep-step">5</span> Ranked Hypotheses
+                              </h3>
+                              <span className="text-[10px] text-zinc-500 group-open:rotate-180 transition-transform">▼</span>
+                            </summary>
+
+                            <div className="mt-4 space-y-3">
+                              {advanced.hypotheses && advanced.hypotheses.length > 0 ? (
+                                advanced.hypotheses.map((hypothesis, idx) => {
+                                  const confidenceFactors = hypothesis.confidenceFactors ?? [];
+                                  const positiveFactors = confidenceFactors.filter((factor) => !factor.startsWith("penalty:"));
+                                  const penaltyFactors = confidenceFactors.filter((factor) => factor.startsWith("penalty:"));
+
+                                  return (
+                                    <div key={`${hypothesis.title}-${idx}`} className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3 space-y-3">
+                                      <div className="flex items-start justify-between gap-3">
+                                        <div className="min-w-0">
+                                          <div className="flex items-center gap-2 flex-wrap">
+                                            <p className="text-sm text-zinc-100 leading-relaxed">{hypothesis.rootCause}</p>
+                                            {idx === 0 && (
+                                              <span className="text-[10px] px-2 py-0.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-300 font-mono shrink-0">
+                                                selected
+                                              </span>
+                                            )}
+                                          </div>
+                                          <div className="mt-1 text-[11px] text-zinc-500">{hypothesis.title}</div>
+                                        </div>
+                                        <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono shrink-0">
+                                          {hypothesis.confidence}%
+                                        </span>
+                                      </div>
+
+                                      <div className="w-full bg-zinc-950 h-1.5 rounded-full overflow-hidden">
+                                        <div className="h-full bg-gradient-to-r from-emerald-400 to-teal-400" style={{ width: `${hypothesis.confidence}%` }} />
+                                      </div>
+
+                                      {confidenceFactors.length > 0 && (
+                                        <div className="grid gap-2 md:grid-cols-2">
+                                          <div className="rounded-md border border-emerald-500/15 bg-emerald-500/5 p-2.5">
+                                            <div className="text-[10px] uppercase tracking-wider text-emerald-300 font-semibold mb-2">
+                                              Increased confidence
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                              {positiveFactors.length > 0 ? positiveFactors.map((factor) => (
+                                                <span key={factor} className="px-2 py-1 rounded-md border border-emerald-500/15 bg-black/20 text-[11px] text-zinc-300">
+                                                  {factor}
+                                                </span>
+                                              )) : <span className="text-xs text-zinc-400">No strong positive signals were recorded.</span>}
+                                            </div>
+                                          </div>
+
+                                          <div className="rounded-md border border-amber-500/15 bg-amber-500/5 p-2.5">
+                                            <div className="text-[10px] uppercase tracking-wider text-amber-300 font-semibold mb-2">
+                                              Reduced confidence
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                              {penaltyFactors.length > 0 ? penaltyFactors.map((factor) => (
+                                                <span key={factor} className="px-2 py-1 rounded-md border border-amber-500/15 bg-black/20 text-[11px] text-zinc-300">
+                                                  {factor.replace(/^penalty:\s*/i, "")}
+                                                </span>
+                                              )) : <span className="text-xs text-zinc-400">No confidence penalties applied.</span>}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
                                     </div>
-                                    {item.line && <div className="text-[10px] text-zinc-500 mt-1">line {item.line}</div>}
+                                  );
+                                })
+                              ) : (
+                                <div className="text-sm text-zinc-400">No ranked hypotheses available.</div>
+                              )}
+                            </div>
+                          </details>
+
+                          <details className="group rounded-xl border border-zinc-800/80 bg-zinc-950/30 p-4">
+                            <summary className="list-none cursor-pointer flex items-center justify-between gap-3">
+                              <h3 className="flex items-center gap-2 text-xs uppercase tracking-wider text-zinc-300 font-semibold">
+                                <span className="ep-step">6</span> Runtime State
+                              </h3>
+                              <span className="text-[10px] text-zinc-500 group-open:rotate-180 transition-transform">▼</span>
+                            </summary>
+
+                            <div className="mt-4 flex flex-wrap gap-2">
+                              {runtimeStates.length > 0 ? runtimeStates.map((state, idx) => (
+                                <div key={`${state.name}-${idx}`} className="rounded-full border border-zinc-800 bg-zinc-900/50 px-3 py-1.5 flex items-center gap-2 text-xs">
+                                  <span className="text-zinc-500 font-mono">{state.role}</span>
+                                  <span className="text-zinc-200">{state.name}</span>
+                                  <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold uppercase tracking-wide ${runtimeStateBadgeClass(state.state)}`}>
+                                    {state.state}
+                                  </span>
+                                </div>
+                              )) : <div className="text-sm text-zinc-400">No runtime state was inferred.</div>}
+                            </div>
+                          </details>
+
+                          <details className="group rounded-xl border border-zinc-800/80 bg-zinc-950/30 p-4">
+                            <summary className="list-none cursor-pointer flex items-center justify-between gap-3">
+                              <h3 className="flex items-center gap-2 text-xs uppercase tracking-wider text-zinc-300 font-semibold">
+                                <span className="ep-step">7</span> Flow Trace
+                              </h3>
+                              <span className="text-[10px] text-zinc-500 group-open:rotate-180 transition-transform">▼</span>
+                            </summary>
+
+                            <div className="mt-4 space-y-2">
+                              {flowTraces.length > 0 ? flowTraces.map((trace, idx) => (
+                                <div key={`${trace.target}-${trace.source}-${idx}`} className="rounded-lg border border-zinc-800 bg-black/30 p-3">
+                                  <div className="flex flex-wrap items-center gap-2 text-xs leading-relaxed">
+                                    <span className="px-2 py-1 rounded-md border border-cyan-500/20 bg-cyan-500/10 text-cyan-200 font-mono">{trace.source}</span>
+                                    <span className="text-zinc-500">→</span>
+                                    <span className="px-2 py-1 rounded-md border border-zinc-700 bg-zinc-900/70 text-zinc-200 font-mono">{trace.target}</span>
+                                    <span className="text-zinc-500">→</span>
+                                    <span className="text-zinc-300">{trace.reason}</span>
                                   </div>
-                                ))}
-                              </div>
-                            </section>
-                          )}
+                                  <div className="mt-2 flex items-center gap-2 text-[10px] text-zinc-500">
+                                    <span className="px-2 py-0.5 rounded-full border border-zinc-700 bg-zinc-950 text-zinc-400 font-mono">
+                                      {trace.confidence}%
+                                    </span>
+                                    {trace.line && <span>line {trace.line}</span>}
+                                  </div>
+                                </div>
+                              )) : <div className="text-sm text-zinc-400">No flow trace was inferred.</div>}
+                            </div>
+                          </details>
+
+                          <details className="group rounded-xl border border-zinc-800/80 bg-zinc-950/30 p-4">
+                            <summary className="list-none cursor-pointer flex items-center justify-between gap-3">
+                              <h3 className="flex items-center gap-2 text-xs uppercase tracking-wider text-zinc-300 font-semibold">
+                                <span className="ep-step">8</span> Evidence
+                              </h3>
+                              <span className="text-[10px] text-zinc-500 group-open:rotate-180 transition-transform">▼</span>
+                            </summary>
+
+                            <div className="mt-4 space-y-2">
+                              {advanced.evidence && advanced.evidence.length > 0 ? advanced.evidence.map((item) => (
+                                <div key={item.id} className="rounded-lg border border-zinc-800 bg-black/30 p-2.5 text-xs text-zinc-300">
+                                  <div className="flex items-center justify-between gap-3">
+                                    <span>{item.message}</span>
+                                    <span className="text-emerald-400 font-mono">+{item.score}</span>
+                                  </div>
+                                  <div className="mt-1 flex flex-wrap gap-2 text-[10px] text-zinc-500">
+                                    {item.line && <span>line {item.line}</span>}
+                                    {item.source && <span>{item.source}</span>}
+                                    {item.layer && <span>{item.layer}</span>}
+                                  </div>
+                                </div>
+                              )) : <div className="text-sm text-zinc-400">No evidence was captured.</div>}
+                            </div>
+                          </details>
 
                           {advanced.matchingRules && advanced.matchingRules.length > 0 && (
                             <section className="space-y-2">

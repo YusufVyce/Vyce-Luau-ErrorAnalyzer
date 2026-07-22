@@ -21,6 +21,11 @@ export type AnalyzerResult =
       correctedExample: string | undefined;
       causes?: Cause[];
       fixes?: string[];
+      causeChain?: {
+        primaryCause: string;
+        intermediateCauses: string[];
+        surfaceError: string;
+      };
 
       codeInsights?: {
         title: string;
@@ -127,7 +132,14 @@ function analyzeWithPipeline(logText: string, codeText: string): AnalyzerResult 
     matched: true,
     ruleId: LEGACY_RULE_IDS[dynamic.family] ?? "roblox-unknown",
     title: dynamic.title,
-    rootCause: analysisLike.explanation,
+    rootCause: dynamic.likelyRootCause,
+    causeChain: dynamic.rootCauseChain
+      ? {
+          primaryCause: dynamic.rootCauseChain.primaryCause.description,
+          intermediateCauses: dynamic.rootCauseChain.intermediateCauses.map((item) => item.description),
+          surfaceError: dynamic.rootCauseChain.surfaceError.description,
+        }
+      : undefined,
     fix: fixes[0],
     correctedExample: undefined,
     severity: analysisLike.severity,

@@ -39,7 +39,7 @@ export function runDynamicRobloxPipeline(logText: string, codeText: string): Dyn
   const classified = classifyErrorFamily(normalized.compactLog);
   const context = extractContext(normalized.normalizedCode, normalized.normalizedLog, tokenized.parserTokens);
   const signals = runEvidenceEngine(classified, context, tokenized, normalized.normalizedLog);
-  const hypotheses = applyConfidenceScores(runHypothesisEngine(signals));
+  const hypotheses = applyConfidenceScores(runHypothesisEngine(signals), context);
   const selectedHypothesis = hypotheses[0];
 
   if (!selectedHypothesis) {
@@ -62,6 +62,8 @@ export function runDynamicRobloxPipeline(logText: string, codeText: string): Dyn
     strategy: classified.strategy,
     severity: selectedHypothesis.severity,
     confidence: selectedHypothesis.confidence,
+    rootCauseChain: selectedHypothesis.rootCauseChain,
+    alternativeHypotheses: selectedHypothesis.alternativeChains,
     quickSummary: explanationBlock.quickSummary,
     likelyRootCause: selectedHypothesis.rootCause,
     explanation: explanationBlock.explanation,
@@ -70,6 +72,8 @@ export function runDynamicRobloxPipeline(logText: string, codeText: string): Dyn
     evidence: selectedHypothesis.evidence,
     matchingRules,
     highlightedCode: prioritizeHighlights(context.highlights, classified.lineReference),
+    runtimeStates: context.runtimeStates,
+    flowTraces: context.flowTraces,
     fixes,
     docs: selectedHypothesis.docs,
     relatedDiagnostics,

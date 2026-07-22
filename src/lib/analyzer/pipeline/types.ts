@@ -57,6 +57,49 @@ export interface HighlightRange {
   property?: string;
 }
 
+export type RuntimeState = "Loaded" | "Missing" | "Destroyed" | "Uninitialized" | "Unknown";
+
+export type EvidenceSource =
+  | "log"
+  | "stack-trace"
+  | "context"
+  | "data-flow"
+  | "initialization"
+  | "state"
+  | "repeated"
+  | "call-chain";
+
+export interface RuntimeStateSnapshot {
+  name: string;
+  role: string;
+  state: RuntimeState;
+  confidence: number;
+  evidence: string[];
+  line?: number;
+  note?: string;
+}
+
+export interface FlowTrace {
+  target: string;
+  source: string;
+  line?: number;
+  reason: string;
+  confidence: number;
+}
+
+export interface CauseLevel {
+  title: string;
+  description: string;
+  evidence: Evidence[];
+  confidence: number;
+}
+
+export interface CauseChain {
+  primaryCause: CauseLevel;
+  intermediateCauses: CauseLevel[];
+  surfaceError: CauseLevel;
+}
+
 export interface ExtractedContext {
   symbols: SymbolRef[];
   highlights: HighlightRange[];
@@ -86,6 +129,8 @@ export interface ExtractedContext {
   hasTweenUse: boolean;
   hasDataStoreUse: boolean;
   tweenGoals: Array<{ target: string; property: string; line: number }>;
+  runtimeStates: RuntimeStateSnapshot[];
+  flowTraces: FlowTrace[];
   parserDiagnostics: string[];
   ast?: unknown;
 }
@@ -95,6 +140,8 @@ export interface Evidence {
   message: string;
   score: number;
   line?: number;
+  source?: EvidenceSource;
+  layer?: "surface" | "intermediate" | "primary";
 }
 
 export interface RuleSignal {
@@ -103,6 +150,8 @@ export interface RuleSignal {
   domain: string;
   severity: Severity;
   rootCause: string;
+  rootCauseChain: CauseChain;
+  alternativeChains: CauseChain[];
   evidence: Evidence[];
   fixes: {
     minimal: string;
@@ -120,10 +169,13 @@ export interface Hypothesis {
   id: string;
   title: string;
   rootCause: string;
+  rootCauseChain: CauseChain;
+  alternativeChains: CauseChain[];
   severity: Severity;
   evidence: Evidence[];
   score: number;
   confidence: number;
+  confidenceFactors: string[];
   fixes: RuleSignal["fixes"];
   docs: string[];
   relatedApis: string[];
@@ -154,6 +206,8 @@ export interface DynamicAnalysisResult {
   strategy: MatchStrategy;
   severity: Severity;
   confidence: number;
+  rootCauseChain: CauseChain;
+  alternativeHypotheses: CauseChain[];
   quickSummary: string;
   likelyRootCause: string;
   explanation: string;
@@ -162,6 +216,8 @@ export interface DynamicAnalysisResult {
   evidence: Evidence[];
   matchingRules: string[];
   highlightedCode: HighlightRange[];
+  runtimeStates: RuntimeStateSnapshot[];
+  flowTraces: FlowTrace[];
   fixes: RuleSignal["fixes"];
   docs: string[];
   relatedDiagnostics: string[];

@@ -47,6 +47,10 @@ export interface AdvancedAnalyzerOutput {
 
   quickSummary?: string;
   likelyRootCause?: string;
+  rootCauseChain?: DynamicAnalysisResult["rootCauseChain"];
+  alternativeHypotheses?: DynamicAnalysisResult["alternativeHypotheses"];
+  runtimeStates?: DynamicAnalysisResult["runtimeStates"];
+  flowTraces?: DynamicAnalysisResult["flowTraces"];
   evidence?: Array<{ id: string; message: string; score: number; line?: number }>;
   matchingRules?: string[];
   highlightedCode?: Array<{ line: number; text: string; variable?: string; functionName?: string; property?: string }>;
@@ -59,7 +63,7 @@ export interface AdvancedAnalyzerOutput {
   commonMistakes?: string[];
   estimatedFixTime?: string;
   difficulty?: "Easy" | "Moderate" | "Hard";
-  hypotheses?: Array<{ title: string; confidence: number; rootCause: string }>;
+  hypotheses?: Array<{ title: string; confidence: number; rootCause: string; confidenceFactors?: string[] }>;
 }
 
 function toAdvancedAnalyzerOutput(
@@ -109,6 +113,10 @@ function toAdvancedAnalyzerOutput(
     patternDatabaseSize: result.knowledgeBaseSize,
     quickSummary: result.quickSummary,
     likelyRootCause: result.likelyRootCause,
+    rootCauseChain: result.rootCauseChain,
+    alternativeHypotheses: result.alternativeHypotheses,
+    runtimeStates: result.runtimeStates,
+    flowTraces: result.flowTraces,
     evidence: result.evidence,
     matchingRules: result.matchingRules,
     highlightedCode: result.highlightedCode,
@@ -125,6 +133,7 @@ function toAdvancedAnalyzerOutput(
       title: item.title,
       confidence: item.confidence,
       rootCause: item.rootCause,
+      confidenceFactors: item.confidenceFactors,
     })),
   };
 }
@@ -217,6 +226,8 @@ export function buildAdvancedAnalysis(
       prioritizedFixes: existingFixes,
       fixTemplates: [],
       patternDatabaseSize: ROBLOX_DIAGNOSTIC_KNOWLEDGE_BASE.length,
+      runtimeStates: [],
+      flowTraces: [],
     };
   }
 
