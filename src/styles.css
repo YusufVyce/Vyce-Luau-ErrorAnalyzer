@@ -396,6 +396,12 @@
   height: auto;
 }
 
+.results-panel .analysis-panel-card {
+  height: auto;
+  max-height: none;
+  overflow: visible;
+}
+
 .badge {
   display: inline-flex;
   align-items: center;

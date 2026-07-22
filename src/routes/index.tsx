@@ -483,7 +483,7 @@ function ErrorParserPage() {
               aria-live="polite"
             >
               {result.kind === "idle" && (
-                <div className="ep-card result-card text-center space-y-4 border-dashed">
+                <div className="ep-card result-card analysis-panel-card text-center space-y-4 border-dashed">
                   <div className="mx-auto w-14 h-14 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 flex items-center justify-center text-2xl text-emerald-400 font-mono">
                     {"{ }"}
                   </div>
@@ -502,7 +502,7 @@ function ErrorParserPage() {
 
               {result?.kind === "match" && (
                 <div
-                  className={`ep-card ep-card-accent result-card space-y-6 ${
+                  className={`ep-card ep-card-accent result-card analysis-panel-card h-auto overflow-visible ${
                     animateResult ? "slide-fade-enter-active" : "slide-fade-enter"
                   }`}
                 >
