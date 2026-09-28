@@ -254,7 +254,7 @@ function analyzeIndexNil(
 
   let traced: NilSource | undefined;
   if (culprit && ctx.hasCode) {
-    traced = traceNilExpression(culprit, ctx.code, located?.line, ctx.side);
+    traced = traceNilExpression(culprit, ctx.code, located?.line, ctx.side, key);
     if (traced) evidence.push(ev(traced.points, traced.reason));
   }
 

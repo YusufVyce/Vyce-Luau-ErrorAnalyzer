@@ -9,6 +9,7 @@
  *   - penalties (no code for a code-dependent error, line not found)
  * Every step is recorded in `confidenceReasons`, so the UI can show *why*.
  */
+import { analogyFor, breakdownFor, glossaryFor, patchScript } from "./beginner";
 import { parseLog, sideFromCode, type Side } from "./codeTools";
 import { docs } from "./docs";
 import { cause } from "./helpers";
@@ -67,6 +68,20 @@ function warningsToCauses(warnings: CodeWarning[]) {
 }
 
 export function diagnose(logText: string, codeText: string): PreciseDiagnosis | null {
+  const d = diagnoseCore(logText, codeText);
+  if (!d) return d;
+  const code = typeof codeText === "string" ? codeText : "";
+  const key = d.message.match(/with '([^']*)'/)?.[1];
+  return {
+    ...d,
+    analogy: analogyFor(d.category, d.title),
+    breakdown: breakdownFor(d, key),
+    glossary: glossaryFor(d),
+    patched: patchScript(code, d),
+  };
+}
+
+function diagnoseCore(logText: string, codeText: string): PreciseDiagnosis | null {
   const log = parseLog(typeof logText === "string" ? logText : "");
   const code = typeof codeText === "string" ? codeText : "";
   const hasCode = code.trim().length > 0;

@@ -33,6 +33,7 @@ export function explainNilProducer(
   displayName: string,
   side: Side,
   where?: string,
+  key?: string,
 ): NilSource | undefined {
   const at = where ? ` (${where})` : "";
 
@@ -110,10 +111,14 @@ export function explainNilProducer(
         likelihood: "likely",
         confirmedInCode: true,
       },
-      fix: {
-        after: "local character = player.Character or player.CharacterAdded:Wait()",
-        caption: "Use the character if it exists, otherwise wait for it to spawn.",
-      },
+      fix: (() => {
+        const owner = expr.replace(/\.\s*Character\s*$/, "").trim() || "player";
+        const v = /^[A-Za-z_]\w*$/.test(displayName) ? displayName : "character";
+        return {
+          after: `local ${v} = ${owner}.Character or ${owner}.CharacterAdded:Wait()`,
+          caption: "Use the character if it exists, otherwise wait for it to spawn.",
+        };
+      })(),
       points: 16,
       reason: "value comes from player.Character",
     };
@@ -128,11 +133,15 @@ export function explainNilProducer(
         likelihood: "likely",
         confirmedInCode: true,
       },
-      fix: {
-        after:
-          'local DEFAULT_DATA = { Coins = 0 }\n\nlocal ok, data = pcall(function()\n\treturn store:GetAsync(key)\nend)\nif not ok then\n\twarn("Load failed:", data)\n\tdata = nil\nend\ndata = data or table.clone(DEFAULT_DATA)',
-        caption: "Fall back to default data when nothing was saved yet.",
-      },
+      fix: (() => {
+        const v = /^[A-Za-z_]\w*$/.test(displayName) ? displayName : "data";
+        const defaults = key && /^[A-Za-z_]\w*$/.test(key) ? `{ ${key} = 0 }` : "{}";
+        return {
+          after: `local ok, ${v} = pcall(function()\n\treturn ${expr.trim()}\nend)\nif not ok then\n\twarn("Load failed:", ${v})\n\t${v} = nil\nend\n${v} = ${v} or ${defaults} -- default data for new players`,
+          caption:
+            "Wrap the request in pcall and fall back to default data when nothing was saved yet.",
+        };
+      })(),
       points: 18,
       reason: "value comes from DataStore GetAsync",
     };
@@ -291,6 +300,7 @@ export function explainNilProducer(
 }
 
 function safeVar(name: string): string {
+  if (/^[A-Za-z_]\w*$/.test(name)) return name;
   const last = name.split(/[.:]/).pop() ?? name;
   const cleaned = last.replace(/\W/g, "");
   return /^[A-Za-z_]/.test(cleaned) ? cleaned.charAt(0).toLowerCase() + cleaned.slice(1) : "value";
@@ -305,6 +315,7 @@ export function traceNilExpression(
   code: string,
   beforeLine: number | undefined,
   side: Side,
+  key?: string,
 ): NilSource | undefined {
   if (!expr) return undefined;
   const root = rootIdentifier(expr);
@@ -411,8 +422,16 @@ export function traceNilExpression(
   }
 
   if (assignment.kind === "assignment") {
-    const produced = explainNilProducer(assignment.rhs, expr, side, `line ${assignment.line}`);
-    if (produced) return produced;
+    const produced = explainNilProducer(assignment.rhs, expr, side, `line ${assignment.line}`, key);
+    if (produced) {
+      // The fix rewrites the line that created the value, so the whole script can be patched.
+      if (produced.fix && !produced.fix.before) {
+        const original = code.replace(/\r\n?/g, "\n").split("\n")[assignment.line - 1]?.trim();
+        if (original && /^local\s/.test(original))
+          produced.fix = { ...produced.fix, before: original };
+      }
+      return produced;
+    }
     const call = assignment.rhs.match(/^([A-Za-z_][\w.:]*)\s*\(/);
     if (call) {
       return {
