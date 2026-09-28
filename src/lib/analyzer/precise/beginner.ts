@@ -311,3 +311,87 @@ export function lineText(code: string, line: number): string {
 }
 
 export { sanitizeCode };
+
+// ---------------------------------------------------------------- Turkish
+
+const ANALOGIES_TR: Partial<Record<DiagnosisCategory, string>> = {
+  "index-nil":
+    "Ortada hiç kutu yokken “kutunun üstünde ne yazıyor?” diye sormak gibi. Luau hiçlikten (nil) bir etiket okuyamaz.",
+  "call-nil":
+    "Hiç yapılmamış bir düğmeye basmak gibi. İsim kodunda var ama arkasında henüz hiçbir şey yok.",
+  arithmetic:
+    "Kavanozun içindeki para sayısına değil, kavanozun kendisine 10 eklemeye çalışmak gibi.",
+  concatenate:
+    "Metin birleştirmek kelimeleri yapıştırmak gibidir — kelime ve sayı yapıştırabilirsin ama boşluğu (nil) ya da bir objeyi yapıştıramazsın.",
+  compare: "“5, hiçlikten büyük mü?” diye sormak gibi — cevabı yok, o yüzden Luau durur.",
+  "invalid-argument":
+    "Fonksiyonlar yuvaları olan makineler gibidir. Yuvalardan birine yanlış şeyi (ya da hiçbir şeyi) koydun.",
+  "invalid-member":
+    "Çantandan “Sword” isteyip eşyanın adının “sword” olması ya da hâlâ dükkânda durması gibi. İsimler birebir aynı olmalı ve eşya orada olmalı.",
+  "invalid-type":
+    "Her özellik tek bir türde değer kabul eder — sadece USB takılan bir yuva gibi. Yanlış türde bir şey takmaya çalıştın.",
+  wait: "WaitForChild, kapıda belli bir isimdeki arkadaşını beklemek gibidir. O isimde kimse gelmezse sonsuza kadar beklersin.",
+  timeout:
+    "Roblox scriptleri sırayla çalıştırır. Hiç durmayan bir döngü, hiç susmayan biri gibidir — kimse söz alamaz, Roblox da onu durdurur.",
+  "stack-overflow":
+    "Karşılıklı duran iki ayna gibi: fonksiyon kendini çağırıp durur, sonunda yer kalmaz.",
+  table:
+    "Tablo etiketli çekmecelere benzer. Olmayan bir etiket (nil) ya da olmayan bir çekmece kullandın.",
+  syntax:
+    "Sözdizimi hatası bir dil bilgisi hatasıdır. Kelimesi eksik bir cümle gibi, Luau scripti anlayamaz ve hiçbir kısmı çalışmaz.",
+  module:
+    "ModuleScript, diğer scriptlerin ödünç aldığı bir tarif kitabı gibidir. Kitap boşsa (return yoksa) ya da hatalıysa kimse kullanamaz.",
+  remote:
+    "Remote'lar sunucu ile oyuncular arasındaki tek yönlü posta kutularıdır. Her tarafın kendi kutusu var — sen diğer tarafınkini kullandın.",
+  datastore:
+    "DataStore, Roblox bulutundaki bir dolap gibidir. Bazen dolap odası kapalıdır (Studio ayarları) ya da çok kalabalıktır (çok fazla istek).",
+  http: "HttpService Roblox dışındaki sitelerle konuşur. İzin gerekir ve sitenin düzgün cevap vermesi gerekir.",
+  tween:
+    "Tween bir özelliği A'dan B'ye kaydırır. Hedef, özellikle aynı türde olmalı — bir boyutu başka bir boyuta kaydırmak gibi.",
+  animation:
+    "Animasyonlar sadece oyun dünyasında gerçekten bulunan karakterlerde ve oyunun kullanmasına izin verilen animasyonlarla oynar.",
+};
+
+const TOUCH_ANALOGY_TR =
+  "Touched herkes için çalan bir kapı zili gibidir — postacı, kedi, top. Kodun gelenin her zaman oyuncu olduğunu varsayıp Humanoid'ini istedi, ama bu sefer zili başka bir şey çaldı.";
+
+export function analogyTr(d: Pick<PreciseDiagnosis, "category" | "title">): string | undefined {
+  if (d.title.startsWith("hit.Parent isn't a character")) return TOUCH_ANALOGY_TR;
+  return ANALOGIES_TR[d.category];
+}
+
+const GLOSSARY_TR: Record<string, string> = {
+  nil: "Luau'da “hiçbir şey / değer yok” demek. Hiç atanmamış değişkenler, olmayan tablo anahtarları ve bulunamayan aramalar nil olur.",
+  index: 'Nokta ya da köşeli parantezle bir şey okumak: player.Name veya data["Coins"] gibi.',
+  property: "Bir objenin Properties penceresinde görünen ayarı: Size, Color, Anchored gibi.",
+  Instance:
+    "Explorer'daki herhangi bir obje: parçalar, klasörler, scriptler, oyuncular, arayüzler…",
+  server: "Oyunu herkes için çalıştıran Roblox bilgisayarı. Script objeleri burada çalışır.",
+  client:
+    "Tek bir oyuncunun cihazı. LocalScript'ler burada çalışır ve Players.LocalPlayer'ı kullanabilir.",
+  LocalPlayer: "Bu cihazı kullanan oyuncu. Sadece LocalScript'lerde vardır — sunucuda nil'dir.",
+  event:
+    "Oyunda olan bir şey (dokunma, oyuncunun girmesi). :Connect(function) o olduğunda kodunu çalıştırır.",
+  FindFirstChild: "İsmiyle bir alt obje arar; yoksa nil döndürür (hiç beklemez).",
+  WaitForChild:
+    "O isimde bir alt obje oluşana kadar bekler — biraz geç yüklenen şeyler için kullanışlı.",
+  Character: "Oyuncunun Workspace'teki 3D avatar modeli. Doğana kadar nil'dir.",
+  Humanoid: "Karakterin içindeki, Health ve WalkSpeed'i olan ve onu canlı bir karakter yapan obje.",
+  leaderstats: "Oyuncunun içindeki bir Folder; içindeki değerler skor tablosunda görünür.",
+  RemoteEvent: "LocalScript'lerle sunucu Script'lerinin birbirine mesaj göndermesini sağlar.",
+  pcall:
+    "Bir fonksiyonu “güvenli” çalıştırır: hata verirse scriptin devam eder ve hata mesajını geri alırsın.",
+  DataStore: "Oyuncu ilerlemesini oturumlar arasında saklamak için Roblox'un bulut deposu.",
+  loop: "Tekrar eden kod (for, while, repeat). Sonsuz döngülerin içinde task.wait() olmalı.",
+  function: "() ile çağırarak tekrar tekrar çalıştırabildiğin isimli kod bloğu.",
+  table: "Luau'nun liste ve anahtar/değer verisi için kabı, { } ile yazılır.",
+  string: 'Tırnak içindeki metin, "Merhaba" gibi.',
+  ModuleScript:
+    "Diğer scriptlerin require() ile yüklediği script. Tek bir değer (genelde tablo) döndürmeli.",
+  syntax: "Dilin dil bilgisi kuralları: anahtar kelimeler, parantezler, end'ler…",
+  tween: "Bir özelliğin bir değerden diğerine zamanla yumuşakça değişmesi.",
+};
+
+export function glossaryTr(term: string): string | undefined {
+  return GLOSSARY_TR[term];
+}

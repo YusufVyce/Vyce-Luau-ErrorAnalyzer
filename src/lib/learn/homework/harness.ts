@@ -68,7 +68,13 @@ export class Harness {
   constructor(
     public code: string,
     public exercise: Exercise,
+    public lang: "en" | "tr" = "en",
   ) {}
+
+  /** Picks the English or Turkish text for a check label or message. */
+  t(en: string, tr: string): string {
+    return this.lang === "tr" ? tr : en;
+  }
 
   newWorld(options: WorldOptions = {}): World {
     const w = new World({ timeoutSteps: 200_000, maxTotalSteps: 3_000_000, ...options });
@@ -150,22 +156,25 @@ export class Harness {
   }
 
   /** Checks that `expected` was printed (exact line), with a helpful message if not. */
-  expectPrinted(
-    expected: string,
-    label = `Output shows "${expected}"`,
-    world: World = this.main!,
-  ): boolean {
+  expectPrinted(expected: string, label?: string, world: World = this.main!): boolean {
+    label ??= this.t(`Output shows "${expected}"`, `Output'ta "${expected}" yazıyor`);
     const lines = this.prints(world);
     if (lines.includes(expected)) return this.check(label, true);
     const loose = (s: string) => s.toLowerCase().replace(/[\s!.,:]/g, "");
     const near = lines.find((l) => loose(l) === loose(expected));
     let detail: string;
     if (near)
-      detail = `Almost! You printed "${near}" — compare capital letters, spaces and punctuation with "${expected}".`;
+      detail = this.t(
+        `Almost! You printed "${near}" — compare capital letters, spaces and punctuation with "${expected}".`,
+        `Az kaldı! "${near}" yazdırdın — büyük/küçük harfleri, boşlukları ve noktalamayı "${expected}" ile karşılaştır.`,
+      );
     else if (lines.length === 0)
-      detail = "Nothing was printed. Use print(...) to write to the Output.";
+      detail = this.t(
+        "Nothing was printed. Use print(...) to write to the Output.",
+        "Hiçbir şey yazdırılmadı. Output'a yazmak için print(...) kullan.",
+      );
     else
-      detail = `The Output shows: ${lines
+      detail = `${this.t("The Output shows:", "Output'ta yazanlar:")} ${lines
         .slice(0, 6)
         .map((l) => `"${l}"`)
         .join(", ")}${lines.length > 6 ? "…" : ""}`;
@@ -219,7 +228,12 @@ export function explorerOf(world: World): ExplorerNode[] {
   );
 }
 
-export function runHomework(exercise: Exercise, code: string): HomeworkResult {
+export function runHomework(
+  exercise: Exercise,
+  code: string,
+  lang: "en" | "tr" = "en",
+): HomeworkResult {
+  const tr = lang === "tr";
   const parsed = parse(code);
   if (parsed.error) {
     const message = `${parsed.error.message}`;
@@ -228,9 +242,9 @@ export function runHomework(exercise: Exercise, code: string): HomeworkResult {
       passed: false,
       checks: [
         {
-          label: "Your code has no syntax errors",
+          label: tr ? "Kodunda sözdizimi hatası yok" : "Your code has no syntax errors",
           pass: false,
-          detail: `Line ${parsed.error.line}: ${message}`,
+          detail: `${tr ? "Satır" : "Line"} ${parsed.error.line}: ${message}`,
         },
       ],
       output: [{ kind: "error", text: log, time: 0 }],
@@ -240,14 +254,14 @@ export function runHomework(exercise: Exercise, code: string): HomeworkResult {
     };
   }
 
-  const h = new Harness(code, exercise);
+  const h = new Harness(code, exercise, lang);
   try {
     exercise.grade(h);
   } catch (e) {
     h.check(
-      "The checker could run your code",
+      h.t("The checker could run your code", "Kontrol eden kodunu çalıştırabildi"),
       false,
-      `The simulator hit a problem: ${(e as Error).message}`,
+      `${h.t("The simulator hit a problem:", "Simülatör bir sorunla karşılaştı:")} ${(e as Error).message}`,
     );
   }
   const world = h.main;
@@ -257,7 +271,7 @@ export function runHomework(exercise: Exercise, code: string): HomeworkResult {
   if (firstError) {
     diagnosis = diagnose(firstError.message, code) ?? undefined;
     h.checks.unshift({
-      label: "Your code runs without errors",
+      label: h.t("Your code runs without errors", "Kodun hatasız çalışıyor"),
       pass: false,
       detail: firstError.message,
     });

@@ -69,9 +69,14 @@ function Node({ node, depth }: { node: ExplorerNode; depth: number }) {
   );
 }
 
-export function ExplorerTree({ nodes }: { nodes: ExplorerNode[] }) {
-  if (nodes.length === 0)
-    return <p className="p-3 text-xs text-zinc-500">Run your code to see what it created.</p>;
+export function ExplorerTree({
+  nodes,
+  emptyText = "Run your code to see what it created.",
+}: {
+  nodes: ExplorerNode[];
+  emptyText?: string;
+}) {
+  if (nodes.length === 0) return <p className="p-3 text-xs text-zinc-500">{emptyText}</p>;
   return (
     <ul className="max-h-72 overflow-auto p-2 text-xs" aria-label="Explorer">
       {nodes.map((n) => (

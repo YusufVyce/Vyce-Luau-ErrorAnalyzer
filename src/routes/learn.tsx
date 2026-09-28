@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   AlertOctagon,
   Award,
+  BookOpen,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
@@ -16,13 +17,15 @@ import {
   PenLine,
   Star,
 } from "lucide-react";
-import { SiteNav } from "@/components/SiteNav";
+import { PageShell } from "@/components/PageShell";
 import { CodeBlock } from "@/components/CodeBlock";
 import { Visual } from "@/components/learn/Visuals";
 import { HomeworkPanel } from "@/components/learn/HomeworkPanel";
 import { PageHeader } from "@/components/PageHeader";
 import { analyzerLink, CHAPTERS, LESSONS, type Lesson } from "@/lib/learn/lessons";
+import { chapterName, lessonTitle, localizeLesson } from "@/lib/learn/lessons.tr";
 import { exerciseFor } from "@/lib/learn/homework/exercises";
+import { localizeExercise } from "@/lib/learn/homework/exercises.tr";
 import {
   EMPTY_PROGRESS,
   homeworkXp,
@@ -33,6 +36,7 @@ import {
   saveProgress,
   type Progress,
 } from "@/lib/learn/progress";
+import { useLang, useT, type TFunction } from "@/lib/prefs";
 
 type LearnSearch = { lesson?: string };
 
@@ -55,12 +59,12 @@ export const Route = createFileRoute("/learn")({
 
 function Paragraph({ text }: { text: string }) {
   return (
-    <p className="text-[15px] leading-relaxed text-zinc-300">
+    <p className="text-[15px] leading-[1.75] text-zinc-300">
       {text.split(/(`[^`]+`)/g).map((p, i) =>
         p.startsWith("`") && p.endsWith("`") && p.length > 2 ? (
           <code
             key={i}
-            className="rounded bg-zinc-800/80 px-1 py-0.5 font-mono text-[0.85em] text-emerald-200"
+            className="rounded-md border border-line bg-surface-2 px-1 py-px font-mono text-[0.85em] text-brand-ink"
           >
             {p.slice(1, -1)}
           </code>
@@ -72,30 +76,69 @@ function Paragraph({ text }: { text: string }) {
   );
 }
 
+function Callout({
+  tone,
+  icon,
+  title,
+  children,
+}: {
+  tone: "brand" | "amber" | "red" | "neutral";
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+}) {
+  const style = {
+    brand: "border-brand-line bg-brand-soft",
+    amber: "border-amber-500/30 bg-amber-500/[0.06]",
+    red: "border-red-500/30 bg-red-500/[0.05]",
+    neutral: "border-line bg-surface-2",
+  }[tone];
+  const iconColor = {
+    brand: "text-brand",
+    amber: "text-amber-400",
+    red: "text-red-400",
+    neutral: "text-ink-2",
+  }[tone];
+  return (
+    <section className={`space-y-3 rounded-2xl border p-5 ${style}`}>
+      <div className="flex items-center gap-2 text-[15px] font-semibold text-zinc-100">
+        <span className={iconColor}>{icon}</span>
+        {title}
+      </div>
+      {children}
+    </section>
+  );
+}
+
 function Quiz({
   quiz,
   lessonId,
   solved,
   onAnswer,
+  t,
 }: {
   quiz: NonNullable<Lesson["quiz"]>;
   lessonId: string;
   solved: boolean;
   onAnswer: (correct: boolean) => void;
+  t: TFunction;
 }) {
   const [picked, setPicked] = useState<number | null>(solved ? quiz.answer : null);
   useEffect(() => setPicked(solved ? quiz.answer : null), [lessonId, solved, quiz.answer]);
   const correct = picked === quiz.answer;
   return (
     <section
-      className="space-y-3 rounded-xl border border-violet-500/25 bg-violet-500/[0.05] p-5"
-      aria-label="Quick check"
+      className="space-y-4 rounded-2xl border border-line bg-surface-2 p-5"
+      aria-label={t("learn.quiz")}
     >
-      <div className="flex items-center justify-between text-[15px] font-bold text-violet-300">
-        Quick check
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-[15px] font-semibold text-zinc-100">
+          <span className="ep-step">?</span>
+          {t("learn.quiz")}
+        </div>
         {solved && (
-          <span className="inline-flex items-center gap-1 normal-case tracking-normal text-emerald-300">
-            <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> answered
+          <span className="inline-flex items-center gap-1 text-[13px] text-emerald-400">
+            <CheckCircle2 className="h-4 w-4" aria-hidden="true" /> {t("learn.answered")}
           </span>
         )}
       </div>
@@ -112,29 +155,32 @@ function Quiz({
                   : "idle";
           return (
             <button
-              key={option}
+              key={`${i}-${option}`}
               type="button"
               onClick={() => {
                 if (correct) return;
                 setPicked(i);
                 onAnswer(i === quiz.answer);
               }}
-              className={`rounded-lg border px-3 py-2 text-left font-mono text-sm transition-colors ${
+              className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 text-left text-sm transition-colors ${
                 state === "right"
                   ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-200"
                   : state === "wrong"
                     ? "border-red-500/50 bg-red-500/10 text-red-200"
-                    : "border-zinc-800 bg-zinc-950/40 text-zinc-300 hover:border-violet-500/40"
+                    : "border-line bg-surface text-zinc-300 hover:border-brand-line hover:bg-brand-soft"
               }`}
             >
-              {option}
+              <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-line bg-surface-2 font-mono text-[12px] text-ink-3">
+                {String.fromCharCode(65 + i)}
+              </span>
+              <span className="font-mono text-[13px]">{option}</span>
             </button>
           );
         })}
       </div>
       {picked !== null && (
-        <p className={`text-sm ${correct ? "text-emerald-300" : "text-red-300"}`}>
-          {correct ? "Correct! " : "Not quite — try another answer. "}
+        <p className={`text-sm ${correct ? "text-emerald-400" : "text-red-400"}`}>
+          {t(correct ? "learn.correct" : "learn.wrong")}{" "}
           {correct && <span className="text-zinc-300">{quiz.why}</span>}
         </p>
       )}
@@ -142,24 +188,26 @@ function Quiz({
   );
 }
 
-function LessonBody({ lesson }: { lesson: Lesson }) {
+function LessonBody({ lesson, t }: { lesson: Lesson; t: TFunction }) {
   return (
     <>
       {lesson.sections.map((section, i) => (
         <section key={i} className="space-y-4">
           {section.heading && (
-            <h2 className="text-xl font-semibold text-zinc-100">{section.heading}</h2>
+            <h2 className="text-xl font-semibold tracking-tight text-zinc-100">
+              {section.heading}
+            </h2>
           )}
-          {section.text?.map((t, j) => (
-            <Paragraph key={j} text={t} />
+          {section.text?.map((text, j) => (
+            <Paragraph key={j} text={text} />
           ))}
           {section.visual && <Visual id={section.visual.id} caption={section.visual.caption} />}
           {section.list && (
-            <ul className="space-y-2">
+            <ul className="space-y-2.5">
               {section.list.map((item, j) => (
-                <li key={j} className="flex gap-2.5 text-[15px] leading-relaxed text-zinc-300">
+                <li key={j} className="flex gap-3 text-[15px] leading-relaxed text-zinc-300">
                   <span
-                    className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400"
+                    className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand"
                     aria-hidden="true"
                   />
                   <span>{item}</span>
@@ -168,10 +216,10 @@ function LessonBody({ lesson }: { lesson: Lesson }) {
             </ul>
           )}
           {section.code && (
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               {section.code.where && (
-                <div className="inline-flex items-center gap-1.5 text-xs text-zinc-500">
-                  <MapPin className="h-3.5 w-3.5 text-emerald-400" aria-hidden="true" />
+                <div className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-surface-2 px-2 py-1 text-[12px] text-ink-2">
+                  <MapPin className="h-3.5 w-3.5 text-brand" aria-hidden="true" />
                   <span className="font-mono">{section.code.where}</span>
                 </div>
               )}
@@ -179,8 +227,8 @@ function LessonBody({ lesson }: { lesson: Lesson }) {
             </div>
           )}
           {section.tip && (
-            <div className="flex gap-3 rounded-lg border border-sky-500/25 bg-sky-500/[0.06] p-3.5 text-sm text-sky-100">
-              <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-sky-300" aria-hidden="true" />
+            <div className="flex gap-3 rounded-xl border border-sky-500/25 bg-sky-500/[0.06] p-3.5 text-sm text-zinc-200">
+              <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-sky-400" aria-hidden="true" />
               <span className="leading-relaxed">{section.tip}</span>
             </div>
           )}
@@ -188,55 +236,63 @@ function LessonBody({ lesson }: { lesson: Lesson }) {
       ))}
 
       {lesson.game && (
-        <section className="space-y-2 rounded-xl border border-amber-500/25 bg-gradient-to-br from-amber-500/[0.08] to-transparent p-5">
-          <div className="flex items-center gap-2 text-[15px] font-bold text-amber-300">
-            <Gamepad2 className="h-4 w-4" aria-hidden="true" /> In real games: {lesson.game.name}
-          </div>
+        <Callout
+          tone="amber"
+          icon={<Gamepad2 className="h-4 w-4" aria-hidden="true" />}
+          title={t("learn.inGames", { name: lesson.game.name })}
+        >
           <Paragraph text={lesson.game.text} />
-        </section>
+        </Callout>
       )}
 
       {lesson.tryIt && (
-        <section className="space-y-3 rounded-xl border border-zinc-800 bg-zinc-950/40 p-5">
-          <div className="flex items-center gap-2 text-[15px] font-bold text-emerald-300">
-            <ListChecks className="h-4 w-4" aria-hidden="true" /> Try it in Studio
-          </div>
-          <ol className="space-y-2">
+        <Callout
+          tone="neutral"
+          icon={<ListChecks className="h-4 w-4" aria-hidden="true" />}
+          title={t("learn.tryIt")}
+        >
+          <ol className="space-y-2.5">
             {lesson.tryIt.map((step, i) => (
               <li key={i} className="flex gap-3 text-sm text-zinc-300">
-                <span className="shrink-0 whitespace-nowrap pt-0.5 font-mono text-xs text-emerald-400">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                {step}
+                <span className="ep-step shrink-0">{i + 1}</span>
+                <span className="pt-0.5">{step}</span>
               </li>
             ))}
           </ol>
-        </section>
+        </Callout>
       )}
 
       {lesson.mistake && (
-        <section className="space-y-3 rounded-xl border border-red-500/25 bg-red-500/[0.04] p-5">
-          <div className="flex items-center gap-2 text-[15px] font-bold text-red-300">
-            <AlertOctagon className="h-4 w-4" aria-hidden="true" /> Common mistake
-          </div>
-          <CodeBlock code={lesson.mistake.code} title="This code…" tone="bad" copyable={false} />
-          <div className="code-dark rounded-lg border-2 border-[#1c1a16] bg-[#1e1e1e] px-3 py-2 font-mono text-[13px] text-red-400">
+        <Callout
+          tone="red"
+          icon={<AlertOctagon className="h-4 w-4" aria-hidden="true" />}
+          title={t("learn.mistake")}
+        >
+          <CodeBlock
+            code={lesson.mistake.code}
+            title={t("learn.thisCode")}
+            tone="bad"
+            copyable={false}
+          />
+          <div className="code-dark rounded-xl border border-code-line bg-code px-3 py-2 font-mono text-[13px] text-red-400">
             {lesson.mistake.error}
           </div>
           <p className="text-sm text-zinc-300">{lesson.mistake.explain}</p>
           <a
             href={analyzerLink(lesson.mistake.error, lesson.mistake.code)}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-200 hover:bg-emerald-500/20"
+            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-brand hover:underline"
           >
-            Open this error in the analyzer →
+            {t("learn.openAnalyzer")}
           </a>
-        </section>
+        </Callout>
       )}
     </>
   );
 }
 
 function LearnPage() {
+  const t = useT();
+  const lang = useLang();
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/learn" });
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
@@ -245,20 +301,23 @@ function LearnPage() {
   const [xpToast, setXpToast] = useState<string | null>(null);
 
   useEffect(() => {
-    document.body.classList.add("ep-body");
     setProgress(loadProgress());
     setLoaded(true);
-    return () => document.body.classList.remove("ep-body");
   }, []);
 
   const requested = LESSONS.findIndex((l) => l.id === search.lesson);
   const firstOpen = LESSONS.findIndex((l) => !lessonComplete(progress, l));
   const index =
     requested >= 0 ? requested : Math.max(0, firstOpen === -1 ? LESSONS.length - 1 : firstOpen);
-  const lesson = LESSONS[index];
+  const baseLesson = LESSONS[index];
+  const lesson = useMemo(() => localizeLesson(baseLesson, lang), [baseLesson, lang]);
   const unlocked = lessonUnlocked(progress, index);
-  const complete = lessonComplete(progress, lesson);
-  const exercise = exerciseFor(lesson.id);
+  const complete = lessonComplete(progress, baseLesson);
+  const baseExercise = exerciseFor(baseLesson.id);
+  const exercise = useMemo(
+    () => (baseExercise ? localizeExercise(baseExercise, lang) : undefined),
+    [baseExercise, lang],
+  );
   const prev = LESSONS[index - 1];
   const next = LESSONS[index + 1];
   const doneCount = LESSONS.filter((l) => lessonComplete(progress, l)).length;
@@ -269,7 +328,7 @@ function LearnPage() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     setMenuOpen(false);
-  }, [lesson.id]);
+  }, [baseLesson.id]);
 
   const byChapter = useMemo(
     () =>
@@ -298,103 +357,104 @@ function LearnPage() {
   }
 
   function onQuiz(correct: boolean) {
+    const id = baseLesson.id;
     if (!correct) {
-      update((p) => ({
-        ...p,
-        quizMisses: { ...p.quizMisses, [lesson.id]: (p.quizMisses[lesson.id] ?? 0) + 1 },
-      }));
+      update((p) => ({ ...p, quizMisses: { ...p.quizMisses, [id]: (p.quizMisses[id] ?? 0) + 1 } }));
       return;
     }
-    if (progress.quiz.includes(lesson.id)) return;
-    const gain = (progress.quizMisses[lesson.id] ?? 0) === 0 ? 20 : 10;
-    update((p) => ({ ...p, quiz: [...p.quiz, lesson.id], xp: p.xp + gain }));
-    toast(`+${gain} XP — quiz`);
+    if (progress.quiz.includes(id)) return;
+    const gain = (progress.quizMisses[id] ?? 0) === 0 ? 20 : 10;
+    update((p) => ({ ...p, quiz: [...p.quiz, id], xp: p.xp + gain }));
+    toast(t("learn.xpQuiz", { n: gain }));
   }
 
   function onHomework(passed: boolean) {
-    update((p) => ({
-      ...p,
-      attempts: { ...p.attempts, [lesson.id]: (p.attempts[lesson.id] ?? 0) + 1 },
-    }));
-    if (passed && !progress.homework.includes(lesson.id)) {
-      const gain = homeworkXp(progress, lesson.id);
-      update((p) => ({ ...p, homework: [...p.homework, lesson.id], xp: p.xp + gain }));
-      toast(`+${gain} XP — homework passed!`);
+    const id = baseLesson.id;
+    update((p) => ({ ...p, attempts: { ...p.attempts, [id]: (p.attempts[id] ?? 0) + 1 } }));
+    if (passed && !progress.homework.includes(id)) {
+      const gain = homeworkXp(progress, id);
+      update((p) => ({ ...p, homework: [...p.homework, id], xp: p.xp + gain }));
+      toast(t("learn.xpHomework", { n: gain }));
     }
   }
 
   const needs: string[] = [];
-  if (lesson.quiz && !progress.quiz.includes(lesson.id)) needs.push("answer the quick check");
-  if (exercise && !progress.homework.includes(lesson.id)) needs.push("pass the homework");
+  if (baseLesson.quiz && !progress.quiz.includes(baseLesson.id)) needs.push(t("learn.needQuiz"));
+  if (exercise && !progress.homework.includes(baseLesson.id)) needs.push(t("learn.needHomework"));
 
   const sidebar = (
-    <nav aria-label="Lessons" className="space-y-5">
-      <div className="space-y-3 rounded-xl border-2 border-[#1c1a16] bg-white p-3 shadow-[3px_3px_0_#1c1a16]">
+    <nav aria-label={t("learn.lessons")} className="space-y-6">
+      <div className="ep-card space-y-3 p-4">
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-[11px] font-medium text-zinc-500">Level {lvl.level}</div>
-            <div className="text-sm font-semibold text-zinc-100">{lvl.title}</div>
+            <div className="text-[12px] text-ink-3">{t("learn.level", { n: lvl.level })}</div>
+            <div className="font-semibold text-ink">{lvl.title}</div>
           </div>
           <div className="text-right">
-            <div className="font-mono text-lg font-bold text-emerald-300">{progress.xp}</div>
-            <div className="text-[11px] font-medium text-zinc-500">XP</div>
+            <div className="font-mono text-xl font-semibold text-brand">{progress.xp}</div>
+            <div className="text-[12px] text-ink-3">XP</div>
           </div>
         </div>
         <div
-          className="h-2.5 overflow-hidden rounded-full border-2 border-[#1c1a16] bg-white"
+          className="h-2 overflow-hidden rounded-full bg-surface-2"
           role="progressbar"
           aria-valuenow={Math.round(lvl.progress * 100)}
           aria-valuemin={0}
           aria-valuemax={100}
-          aria-label="Level progress"
+          aria-label={t("learn.levelProgress")}
         >
-          <div className="h-full bg-[#2fb45a]" style={{ width: `${lvl.progress * 100}%` }} />
+          <div
+            className="h-full rounded-full bg-brand transition-[width]"
+            style={{ width: `${lvl.progress * 100}%` }}
+          />
         </div>
-        <div className="flex items-center justify-between text-xs text-zinc-500">
-          <span>
-            {doneCount}/{LESSONS.length} lessons
-          </span>
-          <span className="font-semibold text-emerald-300">{percent}%</span>
+        <div className="flex items-center justify-between text-[12px] text-ink-3">
+          <span>{t("learn.lessonsDone", { n: doneCount, total: LESSONS.length })}</span>
+          <span className="font-medium text-brand">{percent}%</span>
         </div>
       </div>
       {byChapter.map(({ chapter, lessons }) => (
         <div key={chapter} className="space-y-1">
-          <div className="px-2 text-[15px] font-bold text-zinc-500">{chapter}</div>
+          <div className="px-2 pb-1 text-[12px] font-medium text-ink-3">
+            {chapterName(chapter, lang)}
+          </div>
           {lessons.map(({ l, i }) => {
-            const active = l.id === lesson.id;
+            const active = l.id === baseLesson.id;
             const done = lessonComplete(progress, l);
             const open = lessonUnlocked(progress, i);
+            const hwDone = progress.homework.includes(l.id);
             return (
               <button
                 key={l.id}
                 type="button"
                 onClick={() => go(l.id)}
                 aria-current={active ? "page" : undefined}
-                className={`flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors ${
+                className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-[14px] transition-colors ${
                   active
-                    ? "bg-[#ffd23f] font-semibold text-[#1c1a16]"
+                    ? "bg-brand-soft font-medium text-brand"
                     : open
-                      ? "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"
-                      : "text-zinc-600"
+                      ? "text-ink-2 hover:bg-surface-2 hover:text-ink"
+                      : "text-ink-3/70"
                 }`}
               >
                 {done ? (
                   <CheckCircle2
-                    className="h-4 w-4 shrink-0 text-emerald-400"
-                    aria-label="completed"
+                    className="h-4 w-4 shrink-0 text-emerald-500"
+                    aria-label={t("learn.completed")}
                   />
                 ) : open ? (
-                  <Circle className="h-4 w-4 shrink-0 text-zinc-700" aria-hidden="true" />
+                  <Circle className="h-4 w-4 shrink-0 text-line-strong" aria-hidden="true" />
                 ) : (
-                  <Lock className="h-3.5 w-3.5 shrink-0 text-zinc-700" aria-label="locked" />
+                  <Lock
+                    className="h-3.5 w-3.5 shrink-0 text-ink-3/60"
+                    aria-label={t("learn.locked")}
+                  />
                 )}
-                <span className="truncate">{l.title}</span>
+                <span className="truncate">{lessonTitle(l, lang)}</span>
                 {exerciseFor(l.id) && (
                   <PenLine
-                    className={`ml-auto h-3.5 w-3.5 shrink-0 ${progress.homework.includes(l.id) ? "text-emerald-600" : "text-zinc-600"}`}
-                    aria-label={
-                      progress.homework.includes(l.id) ? "homework passed" : "has homework"
-                    }
+                    className={`ml-auto h-3.5 w-3.5 shrink-0 ${hwDone ? "text-emerald-500" : "text-ink-3/60"}`}
+                    aria-label={t(hwDone ? "learn.hwPassed" : "learn.hasHw")}
                   />
                 )}
               </button>
@@ -414,240 +474,244 @@ function LearnPage() {
     ];
 
   return (
-    <>
-      <SiteNav />
+    <PageShell>
       {xpToast && (
         <div
           role="status"
-          className="fixed bottom-5 left-1/2 z-50 -translate-x-1/2 rounded-lg border-2 border-[#1c1a16] bg-[#ffd23f] px-4 py-2 text-sm font-bold text-[#1c1a16] shadow-[3px_3px_0_#1c1a16]"
+          className="fixed bottom-5 left-1/2 z-50 inline-flex -translate-x-1/2 items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-lg"
         >
-          <Star className="mr-1.5 inline h-4 w-4 fill-current" aria-hidden="true" />
+          <Star className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden="true" />
           {xpToast}
         </div>
       )}
-      <div className="relative mx-auto w-full max-w-6xl px-4 pb-16">
-        <PageHeader
-          sticker={<>Free course · {LESSONS.length} lessons</>}
-          title={
-            <>
-              Learn Roblox scripting <span className="ep-mark">from zero</span>
-            </>
-          }
+
+      <PageHeader
+        sticker={
+          <>
+            <BookOpen className="h-4 w-4 text-brand" aria-hidden="true" />
+            {t("learn.sticker", { n: LESSONS.length })}
+          </>
+        }
+        title={
+          <>
+            {t("learn.title1")} <span className="ep-mark">{t("learn.title2")}</span>
+          </>
+        }
+      >
+        {t("learn.lead")}
+      </PageHeader>
+      <ol className="relative z-10 mb-8 grid grid-cols-2 gap-3 text-sm lg:grid-cols-4">
+        {(
+          [
+            ["learn.s1t", "learn.s1"],
+            ["learn.s2t", "learn.s2"],
+            ["learn.s3t", "learn.s3"],
+            ["learn.s4t", "learn.s4"],
+          ] as const
+        ).map(([a, b], i) => (
+          <li key={a} className="ep-card flex items-start gap-3 px-3 py-3 sm:px-4">
+            <span className="ep-step mt-0.5 shrink-0">{i + 1}</span>
+            <span>
+              <span className="block font-semibold text-ink">{t(a)}</span>
+              <span className="text-[13px] text-ink-3">{t(b)}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+
+      <div className="relative z-10 mb-4 lg:hidden">
+        <button
+          type="button"
+          onClick={() => setMenuOpen((v) => !v)}
+          aria-expanded={menuOpen}
+          className="flex w-full items-center justify-between rounded-xl border border-line bg-surface px-4 py-3 text-left text-sm font-medium text-ink shadow-sm"
         >
-          Every lesson ends with homework: you write real Luau, it runs in a simulated Roblox server
-          right here, and you only move on when it works.
-        </PageHeader>
-        <ol className="relative z-10 mb-8 grid gap-2 text-sm sm:grid-cols-4">
-          {[
-            ["Read", "a short lesson with pictures"],
-            ["Answer", "one quick question"],
-            ["Write code", "for the homework"],
-            ["Pass", "→ the next lesson unlocks"],
-          ].map(([a, b], i) => (
-            <li
-              key={a}
-              className="flex items-center gap-3 rounded-lg border-2 border-[#1c1a16]/15 bg-white px-3 py-2"
-            >
-              <span className="ep-step shrink-0">{i + 1}</span>
-              <span>
-                <b className="font-semibold text-zinc-100">{a}</b>{" "}
-                <span className="text-zinc-400">{b}</span>
-              </span>
-            </li>
-          ))}
-        </ol>
-
-        <div className="relative z-10 mb-4 lg:hidden">
-          <button
-            type="button"
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-expanded={menuOpen}
-            className="w-full rounded-lg border-2 border-[#1c1a16] bg-white px-4 py-2.5 text-left text-sm font-medium text-zinc-100"
-          >
+          <span className="truncate">
             {menuOpen
-              ? "Hide lessons"
-              : `Lesson ${index + 1} of ${LESSONS.length} · ${lesson.title} · ${progress.xp} XP`}{" "}
-            ▾
-          </button>
-          {menuOpen && (
-            <div className="mt-2 rounded-xl border-2 border-[#1c1a16] bg-[#fffdf8] p-3">
-              {sidebar}
-            </div>
-          )}
-        </div>
-
-        <div className="relative z-10 grid gap-8 lg:grid-cols-[270px_1fr]">
-          <aside className="hidden lg:block">
-            <div className="sticky top-16 max-h-[calc(100vh-5rem)] overflow-y-auto pr-2">
-              {sidebar}
-            </div>
-          </aside>
-
-          <main className="ep-card min-w-0 p-5 md:p-8">
-            {loaded && !unlocked ? (
-              <div className="space-y-5 py-10 text-center">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-zinc-700 bg-zinc-900">
-                  <Lock className="h-6 w-6 text-zinc-400" aria-hidden="true" />
-                </div>
-                <h1 className="text-2xl font-bold text-zinc-100">{lesson.title} is locked</h1>
-                <p className="mx-auto max-w-md text-sm text-zinc-400">
-                  Each lesson builds on the one before. Finish{" "}
-                  <span className="text-zinc-200">{firstLocked.title}</span> (quiz + homework) to
-                  unlock the next one.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => go(firstLocked.id)}
-                  className="ep-cta rounded-lg px-4 py-2 text-xs font-semibold"
-                >
-                  Go to {firstLocked.title} →
-                </button>
-              </div>
-            ) : (
-              <article className="space-y-8">
-                <header className="space-y-3">
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-500">
-                    <span className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-0.5 text-emerald-300">
-                      {lesson.chapter}
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <Clock className="h-3.5 w-3.5" aria-hidden="true" /> {lesson.minutes} min
-                    </span>
-                    {complete && (
-                      <span className="inline-flex items-center gap-1 text-emerald-300">
-                        <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> completed
-                      </span>
-                    )}
-                  </div>
-                  <h1 className="text-3xl font-bold leading-tight text-zinc-50 md:text-4xl">
-                    {lesson.title}
-                  </h1>
-                  <p className="text-base text-zinc-400">{lesson.summary}</p>
-                  {exercise && (
-                    <a
-                      href="#homework"
-                      className="inline-flex items-center gap-1.5 rounded-lg border-2 border-[#1c1a16] bg-white px-3 py-1.5 text-sm font-medium text-zinc-100 shadow-[2px_2px_0_#1c1a16] hover:bg-[#ffd23f]"
-                    >
-                      <PenLine className="h-4 w-4" aria-hidden="true" />
-                      {progress.homework.includes(lesson.id)
-                        ? "Homework passed ✓"
-                        : `Homework at the end: ${exercise.title}`}
-                    </a>
-                  )}
-                </header>
-
-                <LessonBody lesson={lesson} />
-
-                {lesson.quiz && (
-                  <Quiz
-                    quiz={lesson.quiz}
-                    lessonId={lesson.id}
-                    solved={progress.quiz.includes(lesson.id)}
-                    onAnswer={onQuiz}
-                  />
-                )}
-
-                {exercise && (
-                  <HomeworkPanel
-                    exercise={exercise}
-                    code={progress.code[lesson.id] ?? exercise.starter}
-                    onCode={(code) =>
-                      update((p) => ({ ...p, code: { ...p.code, [lesson.id]: code } }))
-                    }
-                    passed={progress.homework.includes(lesson.id)}
-                    attempts={progress.attempts[lesson.id] ?? 0}
-                    hintsUsed={progress.hints[lesson.id] ?? 0}
-                    onChecked={onHomework}
-                    onHint={() =>
-                      update((p) => ({
-                        ...p,
-                        hints: {
-                          ...p.hints,
-                          [lesson.id]: Math.min(
-                            exercise.hints.length,
-                            (p.hints[lesson.id] ?? 0) + 1,
-                          ),
-                        },
-                      }))
-                    }
-                    onSolution={() =>
-                      update((p) =>
-                        p.solutions.includes(lesson.id)
-                          ? p
-                          : { ...p, solutions: [...p.solutions, lesson.id] },
-                      )
-                    }
-                  />
-                )}
-
-                {allDone && !next && (
-                  <section className="space-y-3 rounded-2xl border border-amber-400/40 bg-gradient-to-br from-amber-400/15 via-emerald-500/10 to-transparent p-6 text-center">
-                    <Award className="mx-auto h-10 w-10 text-amber-300" aria-hidden="true" />
-                    <h2 className="text-2xl font-bold text-zinc-50">Course complete!</h2>
-                    <p className="text-sm text-zinc-300">
-                      You finished all {LESSONS.length} lessons with {progress.xp} XP — rank{" "}
-                      <span className="font-semibold text-amber-200">{lvl.title}</span>. Now build
-                      your own game in Studio, and when something breaks, the analyzer is one click
-                      away.
-                    </p>
-                    <div className="flex flex-wrap justify-center gap-2">
-                      <Link
-                        to="/playground"
-                        className="ep-cta rounded-lg px-4 py-2 text-xs font-semibold"
-                      >
-                        Open the Playground
-                      </Link>
-                      <Link
-                        to="/"
-                        className="rounded-lg border border-zinc-700 px-4 py-2 text-xs text-zinc-200 hover:bg-zinc-900"
-                      >
-                        Error Analyzer
-                      </Link>
-                    </div>
-                  </section>
-                )}
-              </article>
-            )}
-
-            {unlocked && (
-              <footer className="mt-10 flex flex-col gap-3 border-t border-zinc-800 pt-6 sm:flex-row sm:items-center sm:justify-between">
-                <div className="text-xs text-zinc-500">
-                  {complete ? (
-                    <span className="inline-flex items-center gap-1.5 text-emerald-300">
-                      <CheckCircle2 className="h-4 w-4" aria-hidden="true" /> Lesson complete
-                    </span>
-                  ) : (
-                    <span>To unlock the next lesson: {needs.join(" and ")}.</span>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  {prev && (
-                    <button
-                      type="button"
-                      onClick={() => go(prev.id)}
-                      className="inline-flex items-center gap-1 rounded-lg border border-zinc-800 px-3 py-2 text-xs text-zinc-300 hover:border-zinc-600"
-                    >
-                      <ChevronLeft className="h-4 w-4" aria-hidden="true" /> {prev.title}
-                    </button>
-                  )}
-                  {next && (
-                    <button
-                      type="button"
-                      onClick={() => go(next.id)}
-                      disabled={!complete}
-                      className="ep-cta inline-flex items-center gap-1 rounded-lg px-4 py-2 text-xs font-semibold disabled:cursor-not-allowed"
-                      title={complete ? "" : "Finish this lesson first"}
-                    >
-                      {complete ? null : <Lock className="h-3.5 w-3.5" aria-hidden="true" />}
-                      Next: {next.title} <ChevronRight className="h-4 w-4" aria-hidden="true" />
-                    </button>
-                  )}
-                </div>
-              </footer>
-            )}
-          </main>
-        </div>
+              ? t("learn.hideLessons")
+              : t("learn.lessonOf", { n: index + 1, total: LESSONS.length, title: lesson.title })}
+          </span>
+          <span className="ml-3 shrink-0 font-mono text-[12px] text-brand">{progress.xp} XP</span>
+        </button>
+        {menuOpen && <div className="ep-card mt-2 p-3">{sidebar}</div>}
       </div>
-    </>
+
+      <div className="relative z-10 grid gap-8 lg:grid-cols-[280px_1fr]">
+        <aside className="hidden lg:block">
+          <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pr-2 pb-4">
+            {sidebar}
+          </div>
+        </aside>
+
+        <main className="ep-card min-w-0 p-5 md:p-10">
+          {loaded && !unlocked ? (
+            <div className="space-y-5 py-12 text-center">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-surface-2">
+                <Lock className="h-6 w-6 text-ink-3" aria-hidden="true" />
+              </div>
+              <h1 className="text-2xl font-semibold text-ink">
+                {t("learn.lockedTitle", { title: lesson.title })}
+              </h1>
+              <p className="mx-auto max-w-md text-sm text-ink-2">
+                {t("learn.lockedBody", { title: lessonTitle(firstLocked, lang) })}
+              </p>
+              <button
+                type="button"
+                onClick={() => go(firstLocked.id)}
+                className="ep-cta rounded-xl px-4 py-2 text-sm font-semibold"
+              >
+                {t("learn.goTo", { title: lessonTitle(firstLocked, lang) })}
+              </button>
+            </div>
+          ) : (
+            <article className="mx-auto max-w-3xl space-y-10">
+              <header className="space-y-4">
+                <div className="flex flex-wrap items-center gap-3 text-[13px] text-ink-3">
+                  <span className="rounded-full border border-brand-line bg-brand-soft px-2.5 py-0.5 font-medium text-brand">
+                    {lesson.chapter}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Clock className="h-3.5 w-3.5" aria-hidden="true" />{" "}
+                    {t("learn.minutes", { n: lesson.minutes })}
+                  </span>
+                  {complete && (
+                    <span className="inline-flex items-center gap-1 text-emerald-500">
+                      <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />{" "}
+                      {t("learn.completed")}
+                    </span>
+                  )}
+                </div>
+                <h1 className="text-[32px] leading-tight font-semibold tracking-tight text-ink md:text-[40px]">
+                  {lesson.title}
+                </h1>
+                <p className="text-lg text-ink-2">{lesson.summary}</p>
+                {exercise && (
+                  <a
+                    href="#homework"
+                    className="inline-flex items-center gap-2 rounded-xl border border-brand-line bg-brand-soft px-3 py-2 text-sm font-medium text-brand transition-colors hover:bg-brand hover:text-white"
+                  >
+                    <PenLine className="h-4 w-4" aria-hidden="true" />
+                    {progress.homework.includes(baseLesson.id)
+                      ? t("learn.hwDone")
+                      : t("learn.hwAtEnd", { title: exercise.title })}
+                  </a>
+                )}
+              </header>
+
+              <LessonBody lesson={lesson} t={t} />
+
+              {lesson.quiz && (
+                <Quiz
+                  quiz={lesson.quiz}
+                  lessonId={lesson.id}
+                  solved={progress.quiz.includes(baseLesson.id)}
+                  onAnswer={onQuiz}
+                  t={t}
+                />
+              )}
+
+              {exercise && (
+                <HomeworkPanel
+                  exercise={exercise}
+                  code={progress.code[baseLesson.id] ?? exercise.starter}
+                  onCode={(code) =>
+                    update((p) => ({ ...p, code: { ...p.code, [baseLesson.id]: code } }))
+                  }
+                  passed={progress.homework.includes(baseLesson.id)}
+                  attempts={progress.attempts[baseLesson.id] ?? 0}
+                  hintsUsed={progress.hints[baseLesson.id] ?? 0}
+                  onChecked={onHomework}
+                  onHint={() =>
+                    update((p) => ({
+                      ...p,
+                      hints: {
+                        ...p.hints,
+                        [baseLesson.id]: Math.min(
+                          exercise.hints.length,
+                          (p.hints[baseLesson.id] ?? 0) + 1,
+                        ),
+                      },
+                    }))
+                  }
+                  onSolution={() =>
+                    update((p) =>
+                      p.solutions.includes(baseLesson.id)
+                        ? p
+                        : { ...p, solutions: [...p.solutions, baseLesson.id] },
+                    )
+                  }
+                />
+              )}
+
+              {allDone && !next && (
+                <section className="space-y-3 rounded-2xl border border-amber-400/40 bg-amber-400/10 p-6 text-center">
+                  <Award className="mx-auto h-10 w-10 text-amber-400" aria-hidden="true" />
+                  <h2 className="text-2xl font-semibold text-ink">{t("learn.doneTitle")}</h2>
+                  <p className="text-sm text-ink-2">
+                    {t("learn.doneBody", { n: LESSONS.length, xp: progress.xp, rank: lvl.title })}
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    <Link
+                      to="/playground"
+                      className="ep-cta rounded-xl px-4 py-2 text-sm font-semibold"
+                    >
+                      {t("learn.openPlayground")}
+                    </Link>
+                    <Link
+                      to="/"
+                      className="rounded-xl border border-line px-4 py-2 text-sm text-ink-2 hover:bg-surface-2"
+                    >
+                      {t("nav.analyzer")}
+                    </Link>
+                  </div>
+                </section>
+              )}
+            </article>
+          )}
+
+          {unlocked && (
+            <footer className="mx-auto mt-12 flex max-w-3xl flex-col gap-3 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="text-[13px] text-ink-3">
+                {complete ? (
+                  <span className="inline-flex items-center gap-1.5 text-emerald-500">
+                    <CheckCircle2 className="h-4 w-4" aria-hidden="true" />{" "}
+                    {t("learn.lessonComplete")}
+                  </span>
+                ) : (
+                  <span>{t("learn.toUnlock", { what: needs.join(t("learn.and")) })}</span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                {prev && (
+                  <button
+                    type="button"
+                    onClick={() => go(prev.id)}
+                    className="inline-flex min-w-0 items-center gap-1 rounded-xl border border-line px-3 py-2 text-[13px] text-ink-2 hover:bg-surface-2"
+                  >
+                    <ChevronLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    <span className="truncate">{lessonTitle(prev, lang)}</span>
+                  </button>
+                )}
+                {next && (
+                  <button
+                    type="button"
+                    onClick={() => go(next.id)}
+                    disabled={!complete}
+                    className="ep-cta inline-flex min-w-0 items-center gap-1 rounded-xl px-4 py-2 text-[13px] font-semibold"
+                    title={complete ? "" : t("learn.finishFirst")}
+                  >
+                    {complete ? null : <Lock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
+                    <span className="truncate">
+                      {t("learn.next", { title: lessonTitle(next, lang) })}
+                    </span>
+                    <ChevronRight className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  </button>
+                )}
+              </div>
+            </footer>
+          )}
+        </main>
+      </div>
+    </PageShell>
   );
 }

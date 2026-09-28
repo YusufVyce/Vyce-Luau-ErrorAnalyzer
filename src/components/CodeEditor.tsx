@@ -94,7 +94,7 @@ export function CodeEditor({
 
   return (
     <div
-      className="code-dark relative overflow-hidden rounded-lg border-2 border-[#1c1a16] bg-[#1e1e1e]"
+      className="code-dark relative overflow-hidden rounded-lg border border-code-line bg-code"
       style={{ height }}
     >
       {errorLine !== undefined && errorLine > 0 && (

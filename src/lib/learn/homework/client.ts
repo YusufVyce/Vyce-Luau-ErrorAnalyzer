@@ -42,6 +42,7 @@ function getWorker(): Worker | undefined {
 export async function checkHomework(
   lessonId: string,
   code: string,
+  lang: "en" | "tr" = "en",
   timeoutMs = 12000,
 ): Promise<HomeworkResult> {
   const w = getWorker();
@@ -52,19 +53,25 @@ export async function checkHomework(
     ]);
     const ex = exerciseFor(lessonId);
     if (!ex) throw new Error("No homework for this lesson");
-    return runHomework(ex, code);
+    return runHomework(ex, code, lang);
   }
   const id = ++seq;
   return new Promise<HomeworkResult>((resolve, reject) => {
     pending.set(id, { resolve, reject });
-    w.postMessage({ id, lessonId, code });
+    w.postMessage({ id, lessonId, code, lang });
     setTimeout(() => {
       if (!pending.has(id)) return;
       pending.delete(id);
       // A stuck run: restart the worker so the next check starts clean.
       worker?.terminate();
       worker = undefined;
-      reject(new Error("Your code took too long to run. Is there a loop without task.wait()?"));
+      reject(
+        new Error(
+          lang === "tr"
+            ? "Kodunun çalışması çok uzun sürdü. task.wait() olmayan bir döngü mü var?"
+            : "Your code took too long to run. Is there a loop without task.wait()?",
+        ),
+      );
     }, timeoutMs);
   });
 }

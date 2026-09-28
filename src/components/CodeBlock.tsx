@@ -1,3 +1,4 @@
+import { useT } from "@/lib/prefs";
 import { useState, type ReactNode } from "react";
 
 const KEYWORDS = new Set([
@@ -150,33 +151,32 @@ export function CodeBlock({
   tone?: "default" | "good" | "bad";
   copyable?: boolean;
 }) {
-  const [label, setLabel] = useState("Copy");
-  const border =
-    tone === "good"
-      ? "border-emerald-500/30"
-      : tone === "bad"
-        ? "border-red-500/30"
-        : "border-zinc-800";
+  const t = useT();
+  const [label, setLabel] = useState<string | null>(null);
+  const dot = tone === "good" ? "bg-emerald-400" : tone === "bad" ? "bg-red-400" : "bg-sky-400";
   const titleColor =
     tone === "good" ? "text-emerald-300" : tone === "bad" ? "text-red-300" : "text-zinc-400";
 
   return (
-    <div className={`code-dark overflow-hidden rounded-lg border-2 border-[#1c1a16] bg-[#1e1e1e]`}>
+    <div className="code-dark overflow-hidden rounded-xl border border-code-line bg-code">
       {(title || copyable) && (
-        <div className="flex items-center justify-between gap-2 border-b border-zinc-800 bg-[#252526] px-3 py-1.5">
-          <span className={`text-[12px] font-semibold ${titleColor}`}>{title ?? "Luau"}</span>
+        <div className="flex items-center justify-between gap-2 border-b border-code-line bg-code-head px-3 py-1.5">
+          <span className={`inline-flex items-center gap-2 text-[12px] font-medium ${titleColor}`}>
+            <span className={`h-2 w-2 rounded-full ${dot}`} aria-hidden="true" />
+            {title ?? "Luau"}
+          </span>
           {copyable && (
             <button
               type="button"
               onClick={async () => {
                 const ok = await copyText(code);
-                setLabel(ok ? "Copied ✓" : "Copy failed");
-                setTimeout(() => setLabel("Copy"), 1600);
+                setLabel(t(ok ? "code.copied" : "code.copyFailed"));
+                setTimeout(() => setLabel(null), 1600);
               }}
               className="text-[11px] rounded px-2 py-0.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors"
-              aria-label="Copy code"
+              aria-label={t("code.copy")}
             >
-              {label}
+              {label ?? t("code.copy")}
             </button>
           )}
         </div>

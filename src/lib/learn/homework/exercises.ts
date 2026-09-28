@@ -71,12 +71,25 @@ export const EXERCISES: Exercise[] = [
       h.addStudentScript(w, w.service("ServerScriptService"));
       w.run(1);
       const t = w.workspace.findFirstChild("Baseplate")?.props.get("Transparency");
-      h.check("Baseplate Transparency is 0.5", approx(t, 0.5), `Transparency is ${fmtValue(t)}.`);
-      h.expectPrinted("Baseplate", "Output shows the Baseplate's name");
       h.check(
-        "The name comes from the part, not from typed text",
+        h.t("Baseplate Transparency is 0.5", "Baseplate'in Transparency değeri 0.5"),
+        approx(t, 0.5),
+        h.t(`Transparency is ${fmtValue(t)}.`, `Transparency şu an ${fmtValue(t)}.`),
+      );
+      h.expectPrinted(
+        "Baseplate",
+        h.t("Output shows the Baseplate's name", "Output'ta Baseplate'in adı yazıyor"),
+      );
+      h.check(
+        h.t(
+          "The name comes from the part, not from typed text",
+          "İsim elle yazılmış metinden değil, parçanın kendisinden geliyor",
+        ),
         h.codeHas(/\.Name\b/),
-        'Use workspace.Baseplate.Name instead of typing "Baseplate" in quotes.',
+        h.t(
+          'Use workspace.Baseplate.Name instead of typing "Baseplate" in quotes.',
+          'Tırnak içinde "Baseplate" yazmak yerine workspace.Baseplate.Name kullan.',
+        ),
       );
     },
   },
@@ -102,12 +115,18 @@ export const EXERCISES: Exercise[] = [
       const w = h.newWorld();
       h.addStudentScript(w, w.service("ServerScriptService"));
       w.run(1);
-      h.expectPrinted("Hello Roblox!", 'Output shows "Hello Roblox!"');
-      h.expectPrinted("42", "Output shows 42");
+      h.expectPrinted(
+        "Hello Roblox!",
+        h.t('Output shows "Hello Roblox!"', 'Output\'ta "Hello Roblox!" yazıyor'),
+      );
+      h.expectPrinted("42", h.t("Output shows 42", "Output'ta 42 yazıyor"));
       h.check(
-        "42 comes from the math 7 * 6",
+        h.t("42 comes from the math 7 * 6", "42, 7 * 6 işleminden geliyor"),
         h.codeHas(/7\s*\*\s*6/),
-        "Write the multiplication in your code, e.g. print(7 * 6).",
+        h.t(
+          "Write the multiplication in your code, e.g. print(7 * 6).",
+          "Çarpmayı kodunda yaz, örn. print(7 * 6).",
+        ),
       );
     },
   },
@@ -141,16 +160,28 @@ export const EXERCISES: Exercise[] = [
       w.addPlayer("Noob");
       w.run(1);
       h.expectPrinted("Welcome, Builderman!");
-      h.expectPrinted("Welcome, Noob!", 'Also works for a second player ("Welcome, Noob!")');
-      h.check(
-        "Uses Players.PlayerAdded",
-        h.codeHas(/PlayerAdded/),
-        "Connect a function to game.Players.PlayerAdded.",
+      h.expectPrinted(
+        "Welcome, Noob!",
+        h.t(
+          'Also works for a second player ("Welcome, Noob!")',
+          'İkinci bir oyuncu için de çalışıyor ("Welcome, Noob!")',
+        ),
       );
       h.check(
-        "No more LocalPlayer on the server",
+        h.t("Uses Players.PlayerAdded", "Players.PlayerAdded kullanılıyor"),
+        h.codeHas(/PlayerAdded/),
+        h.t(
+          "Connect a function to game.Players.PlayerAdded.",
+          "game.Players.PlayerAdded'a bir fonksiyon bağla (Connect).",
+        ),
+      );
+      h.check(
+        h.t("No more LocalPlayer on the server", "Sunucuda artık LocalPlayer yok"),
         !h.codeHas(/LocalPlayer/),
-        "Remove Players.LocalPlayer — it's nil in a server Script.",
+        h.t(
+          "Remove Players.LocalPlayer — it's nil in a server Script.",
+          "Players.LocalPlayer'ı kaldır — sunucu Script'inde nil'dir.",
+        ),
       );
     },
   },
@@ -186,16 +217,22 @@ export const EXERCISES: Exercise[] = [
       h.expectPrinted("Builderman is level 6");
       const tv = h.testValues(w)[0];
       h.check(
-        "isVip is true",
+        h.t("isVip is true", "isVip true"),
         tv?.[0] === "boolean" && tv?.[1] === "true",
         tv?.[0] === "string"
-          ? 'isVip holds the text "true" — write true without quotes.'
-          : "Create local isVip = true (no quotes).",
+          ? h.t(
+              'isVip holds the text "true" — write true without quotes.',
+              'isVip içinde "true" metni var — true\'yu tırnaksız yaz.',
+            )
+          : h.t(
+              "Create local isVip = true (no quotes).",
+              "local isVip = true oluştur (tırnaksız).",
+            ),
       );
       h.check(
-        "level goes up with math",
+        h.t("level goes up with math", "level matematikle artıyor"),
         h.codeHas(/level\s*(\+=\s*1|=\s*level\s*\+\s*1)/),
-        "Change the variable: level += 1",
+        h.t("Change the variable: level += 1", "Değişkeni değiştir: level += 1"),
       );
       const v = variant(
         variant(h.code, /(local\s+playerName\s*=\s*)"Builderman"/, '$1"Guest"') ?? "",
@@ -208,14 +245,23 @@ export const EXERCISES: Exercise[] = [
         w2.run(1);
         h.expectPrinted(
           "Guest is level 10",
-          "The message is built from the variables (not typed by hand)",
+          h.t(
+            "The message is built from the variables (not typed by hand)",
+            "Mesaj değişkenlerden oluşuyor (elle yazılmamış)",
+          ),
           w2,
         );
       } else {
         h.check(
-          "Uses the variables playerName and level",
+          h.t(
+            "Uses the variables playerName and level",
+            "playerName ve level değişkenleri kullanılıyor",
+          ),
           false,
-          'Keep the lines local playerName = "Builderman" and local level = 5 exactly, so the checker can try other values.',
+          h.t(
+            'Keep the lines local playerName = "Builderman" and local level = 5 exactly, so the checker can try other values.',
+            'local playerName = "Builderman" ve local level = 5 satırlarını aynen bırak ki kontrol eden başka değerleri deneyebilsin.',
+          ),
         );
       }
     },
@@ -249,9 +295,12 @@ export const EXERCISES: Exercise[] = [
       w.run(1);
       h.expectPrinted("Coins left: 250");
       h.check(
-        "Uses tonumber",
+        h.t("Uses tonumber", "tonumber kullanılıyor"),
         h.codeHas(/tonumber\s*\(/),
-        "Convert the text first: local amount = tonumber(amountText)",
+        h.t(
+          "Convert the text first: local amount = tonumber(amountText)",
+          "Önce metni sayıya çevir: local amount = tonumber(amountText)",
+        ),
       );
       const v = variant(
         variant(h.code, /(local\s+coins\s*=\s*)1000\b/, "$12000") ?? "",
@@ -264,14 +313,20 @@ export const EXERCISES: Exercise[] = [
         w2.run(1);
         h.expectPrinted(
           "Coins left: 1000",
-          "Works for other numbers too (2000 coins, 4 eggs → 1000)",
+          h.t(
+            "Works for other numbers too (2000 coins, 4 eggs → 1000)",
+            "Başka sayılarla da çalışıyor (2000 coin, 4 yumurta → 1000)",
+          ),
           w2,
         );
       } else {
         h.check(
-          "Keeps the starting variables",
+          h.t("Keeps the starting variables", "Başlangıç değişkenleri korunuyor"),
           false,
-          "Keep the first three lines as they are so the checker can try other values.",
+          h.t(
+            "Keep the first three lines as they are so the checker can try other values.",
+            "İlk üç satırı olduğu gibi bırak ki kontrol eden başka değerleri deneyebilsin.",
+          ),
         );
       }
     },
@@ -312,9 +367,12 @@ export const EXERCISES: Exercise[] = [
         const code = variant(h.code, /local\s+stage\s*=\s*\d+/, `local stage = ${stage}`);
         if (!code) {
           h.check(
-            "Keeps the line local stage = 7",
+            h.t("Keeps the line local stage = 7", "local stage = 7 satırı korunuyor"),
             false,
-            "Don't remove local stage = 7 — the checker changes that number to test your code.",
+            h.t(
+              "Don't remove local stage = 7 — the checker changes that number to test your code.",
+              "local stage = 7 satırını silme — kontrol eden kodunu test etmek için o sayıyı değiştiriyor.",
+            ),
           );
           return;
         }
@@ -324,19 +382,31 @@ export const EXERCISES: Exercise[] = [
         const printed = h.prints(w).filter((l) => all.includes(l));
         const ok = printed.length === 1 && printed[0] === expected;
         h.check(
-          `stage = ${stage} prints "${expected}"`,
+          h.t(
+            `stage = ${stage} prints "${expected}"`,
+            `stage = ${stage} iken "${expected}" yazdırılıyor`,
+          ),
           ok,
           printed.length === 0
-            ? `Nothing matching was printed for stage ${stage}.`
+            ? h.t(
+                `Nothing matching was printed for stage ${stage}.`,
+                `stage ${stage} için uygun bir şey yazdırılmadı.`,
+              )
             : printed.length > 1
-              ? `For stage ${stage} your code printed ${printed.map((p) => `"${p}"`).join(" and ")}. Use elseif so only one branch runs, and check stage == 10 first.`
-              : `For stage ${stage} it printed "${printed[0]}" instead.`,
+              ? h.t(
+                  `For stage ${stage} your code printed ${printed.map((p) => `"${p}"`).join(" and ")}. Use elseif so only one branch runs, and check stage == 10 first.`,
+                  `stage ${stage} için kodun ${printed.map((p) => `"${p}"`).join(" ve ")} yazdırdı. Sadece bir dal çalışsın diye elseif kullan ve önce stage == 10'u kontrol et.`,
+                )
+              : h.t(
+                  `For stage ${stage} it printed "${printed[0]}" instead.`,
+                  `stage ${stage} için bunun yerine "${printed[0]}" yazdırdı.`,
+                ),
         );
       }
       h.check(
-        "Uses if … elseif … else",
+        h.t("Uses if … elseif … else", "if … elseif … else kullanılıyor"),
         h.codeHas(/\bif\b[\s\S]*\belseif\b[\s\S]*\belse\b/),
-        "Use one if with an elseif and an else.",
+        h.t("Use one if with an elseif and an else.", "Bir if, bir elseif ve bir else kullan."),
       );
     },
   },
@@ -371,15 +441,21 @@ export const EXERCISES: Exercise[] = [
       const expected = ["5", "4", "3", "2", "1", "Go!", "Ann", "Bob", "Cid"];
       const positions = expected.map((e) => lines.indexOf(e));
       h.check(
-        "Prints 5, 4, 3, 2, 1",
+        h.t("Prints 5, 4, 3, 2, 1", "5, 4, 3, 2, 1 yazdırılıyor"),
         positions.slice(0, 5).every((p) => p >= 0),
-        `The Output shows: ${lines.slice(0, 8).join(", ") || "nothing"}`,
+        h.t(
+          `The Output shows: ${lines.slice(0, 8).join(", ") || "nothing"}`,
+          `Output'ta yazanlar: ${lines.slice(0, 8).join(", ") || "hiçbir şey"}`,
+        ),
       );
       const inOrder = positions.every((p, i) => p >= 0 && (i === 0 || p > positions[i - 1]));
       h.check(
-        "Everything prints in the right order",
+        h.t("Everything prints in the right order", "Her şey doğru sırayla yazdırılıyor"),
         inOrder,
-        "Order should be 5, 4, 3, 2, 1, Go!, Ann, Bob, Cid.",
+        h.t(
+          "Order should be 5, 4, 3, 2, 1, Go!, Ann, Bob, Cid.",
+          "Sıra şöyle olmalı: 5, 4, 3, 2, 1, Go!, Ann, Bob, Cid.",
+        ),
       );
       const entries = h.printEntries(w);
       const times = ["5", "4", "3", "2", "1"].map((n) => entries.find((e) => e.text === n)?.time);
@@ -387,14 +463,17 @@ export const EXERCISES: Exercise[] = [
         (t, i) => t !== undefined && (i === 0 || t - (times[i - 1] as number) >= 0.9),
       );
       h.check(
-        "Waits 1 second between numbers",
+        h.t("Waits 1 second between numbers", "Sayılar arasında 1 saniye bekleniyor"),
         spaced,
-        "Add task.wait(1) inside the countdown loop.",
+        h.t(
+          "Add task.wait(1) inside the countdown loop.",
+          "Geri sayım döngüsünün içine task.wait(1) ekle.",
+        ),
       );
       h.check(
-        "Counts with a numeric for loop",
+        h.t("Counts with a numeric for loop", "Sayısal for döngüsüyle sayılıyor"),
         h.codeHas(/for\s+\w+\s*=\s*5\s*,\s*1\s*,\s*-1/),
-        "Use for i = 5, 1, -1 do",
+        h.t("Use for i = 5, 1, -1 do", "for i = 5, 1, -1 do kullan"),
       );
       const v = variant(
         h.code,
@@ -407,9 +486,15 @@ export const EXERCISES: Exercise[] = [
         w2.run(8);
         const l2 = h.prints(w2);
         h.check(
-          "Names come from the list (loop, not typed)",
+          h.t(
+            "Names come from the list (loop, not typed)",
+            "İsimler listeden geliyor (döngüyle, elle değil)",
+          ),
           l2.includes("Zed") && l2.includes("Max") && !l2.includes("Ann"),
-          "Loop over the players table instead of printing names by hand.",
+          h.t(
+            "Loop over the players table instead of printing names by hand.",
+            "İsimleri elle yazdırmak yerine players tablosu üzerinde döngü kur.",
+          ),
         );
       }
     },
@@ -446,21 +531,36 @@ export const EXERCISES: Exercise[] = [
       const tv = h.testValues(w)[0];
       const exists = tv !== undefined && tv[0] !== "missing";
       h.check(
-        "A function called calculateDamage exists",
+        h.t("A function called calculateDamage exists", "calculateDamage adında bir fonksiyon var"),
         exists,
-        "Name it exactly calculateDamage (capital D) and define it at the top level of the script.",
+        h.t(
+          "Name it exactly calculateDamage (capital D) and define it at the top level of the script.",
+          "Adını tam olarak calculateDamage koy (büyük D) ve scriptin en dış seviyesinde tanımla.",
+        ),
       );
       if (exists) {
         const ok = tv[0] === "7" && tv[1] === "120" && tv[2] === "0";
         h.check(
-          "It returns baseDamage + level * 2",
+          h.t("It returns baseDamage + level * 2", "baseDamage + level * 2 döndürüyor"),
           ok,
           tv[0] === "nil"
-            ? "Your function doesn't give anything back — use return."
-            : `calculateDamage(5, 1) gave ${tv[0]} (expected 7), calculateDamage(100, 10) gave ${tv[1]} (expected 120).`,
+            ? h.t(
+                "Your function doesn't give anything back — use return.",
+                "Fonksiyonun hiçbir şey geri vermiyor — return kullan.",
+              )
+            : h.t(
+                `calculateDamage(5, 1) gave ${tv[0]} (expected 7), calculateDamage(100, 10) gave ${tv[1]} (expected 120).`,
+                `calculateDamage(5, 1) sonucu ${tv[0]} (beklenen 7), calculateDamage(100, 10) sonucu ${tv[1]} (beklenen 120).`,
+              ),
         );
       }
-      h.expectPrinted("110", "Prints 110 for calculateDamage(10, 50)");
+      h.expectPrinted(
+        "110",
+        h.t(
+          "Prints 110 for calculateDamage(10, 50)",
+          "calculateDamage(10, 50) için 110 yazdırılıyor",
+        ),
+      );
     },
   },
 
@@ -495,35 +595,54 @@ export const EXERCISES: Exercise[] = [
       w.run(1);
       const [count, third, power, rarity] = h.testValues(w)[0] ?? [];
       h.check(
-        "pets has 3 pets",
+        h.t("pets has 3 pets", "pets içinde 3 pet var"),
         count === "3",
-        count === "none" ? "Create a table called pets." : `pets has ${count} items.`,
+        count === "none"
+          ? h.t("Create a table called pets.", "pets adında bir tablo oluştur.")
+          : h.t(`pets has ${count} items.`, `pets içinde ${count} öğe var.`),
       );
-      h.check('The 3rd pet is "Dragon"', third === "Dragon", `pets[3] is ${third}.`);
       h.check(
-        "Uses table.insert",
+        h.t('The 3rd pet is "Dragon"', '3. pet "Dragon"'),
+        third === "Dragon",
+        h.t(`pets[3] is ${third}.`, `pets[3] şu an ${third}.`),
+      );
+      h.check(
+        h.t("Uses table.insert", "table.insert kullanılıyor"),
         h.codeHas(/table\.insert\s*\(/),
-        'Add the dragon with table.insert(pets, "Dragon").',
+        h.t(
+          'Add the dragon with table.insert(pets, "Dragon").',
+          'Ejderhayı table.insert(pets, "Dragon") ile ekle.',
+        ),
       );
       h.check(
-        "dragon has Power 950 and Rarity Legendary",
+        h.t(
+          "dragon has Power 950 and Rarity Legendary",
+          "dragon'ın Power değeri 950, Rarity değeri Legendary",
+        ),
         power === "950" && rarity === "Legendary",
         power === "none"
-          ? "Create a table called dragon with named keys."
+          ? h.t(
+              "Create a table called dragon with named keys.",
+              "İsimli anahtarları olan dragon adında bir tablo oluştur.",
+            )
           : `dragon.Power = ${power}, dragon.Rarity = ${rarity}`,
       );
       const lines = h.prints(w);
       h.check(
-        "Prints every pet",
+        h.t("Prints every pet", "Her pet yazdırılıyor"),
         ["Dog", "Cat", "Dragon"].every((p) => lines.some((l) => l.split(" ").includes(p))),
-        "Loop over pets and print each one.",
+        h.t("Loop over pets and print each one.", "pets üzerinde döngü kurup her birini yazdır."),
       );
       h.check(
-        "Prints the dragon's rarity",
+        h.t("Prints the dragon's rarity", "Ejderhanın nadirliği yazdırılıyor"),
         lines.some((l) => l.includes("Legendary")),
         "print(dragon.Rarity)",
       );
-      h.check("Uses a for loop", h.codeHas(/\bfor\b/), "Print the pets with a for loop.");
+      h.check(
+        h.t("Uses a for loop", "for döngüsü kullanılıyor"),
+        h.codeHas(/\bfor\b/),
+        h.t("Print the pets with a for loop.", "Petleri bir for döngüsüyle yazdır."),
+      );
     },
   },
 
@@ -561,41 +680,66 @@ export const EXERCISES: Exercise[] = [
       );
       if (
         !h.check(
-          "A part named Platform is in workspace",
+          h.t(
+            "A part named Platform is in workspace",
+            "workspace içinde Platform adında bir parça var",
+          ),
           Boolean(part),
           other
-            ? `Found a part called "${other.name}" — set part.Name = "Platform".`
-            : "Create the part and set part.Parent = workspace.",
+            ? h.t(
+                `Found a part called "${other.name}" — set part.Name = "Platform".`,
+                `"${other.name}" adında bir parça bulundu — part.Name = "Platform" yap.`,
+              )
+            : h.t(
+                "Create the part and set part.Parent = workspace.",
+                "Parçayı oluştur ve part.Parent = workspace yap.",
+              ),
         )
       )
         return;
       const p = part!;
-      h.check("It's a Part", p.className === "Part", `It's a ${p.className}.`);
       h.check(
-        "Size is 8, 1, 8",
+        h.t("It's a Part", "Bir Part"),
+        p.className === "Part",
+        h.t(`It's a ${p.className}.`, `Şu an bir ${p.className}.`),
+      );
+      h.check(
+        h.t("Size is 8, 1, 8", "Size 8, 1, 8"),
         vecIs(p.props.get("Size"), 8, 1, 8),
-        `Size is ${fmtValue(p.props.get("Size"))}.`,
+        h.t(
+          `Size is ${fmtValue(p.props.get("Size"))}.`,
+          `Size şu an ${fmtValue(p.props.get("Size"))}.`,
+        ),
       );
       h.check(
-        "Position is 0, 10, 0",
+        h.t("Position is 0, 10, 0", "Position 0, 10, 0"),
         vecIs(p.props.get("Position"), 0, 10, 0),
-        `Position is ${fmtValue(p.props.get("Position"))}.`,
+        h.t(
+          `Position is ${fmtValue(p.props.get("Position"))}.`,
+          `Position şu an ${fmtValue(p.props.get("Position"))}.`,
+        ),
       );
       h.check(
-        "Anchored is true",
+        h.t("Anchored is true", "Anchored true"),
         p.props.get("Anchored") === true,
-        "Set part.Anchored = true or it will fall.",
+        h.t("Set part.Anchored = true or it will fall.", "part.Anchored = true yap, yoksa düşer."),
       );
       const c = p.props.get("Color") as Color3;
       h.check(
-        "It's red",
+        h.t("It's red", "Kırmızı"),
         c instanceof Color3 && c.r > 0.95 && c.g < 0.05 && c.b < 0.05,
-        `Color is ${fmtValue(c)} — use Color3.fromRGB(255, 0, 0).`,
+        h.t(
+          `Color is ${fmtValue(c)} — use Color3.fromRGB(255, 0, 0).`,
+          `Color şu an ${fmtValue(c)} — Color3.fromRGB(255, 0, 0) kullan.`,
+        ),
       );
       h.check(
-        "Material is Neon",
+        h.t("Material is Neon", "Material Neon"),
         fmtValue(p.props.get("Material")) === "Enum.Material.Neon",
-        `Material is ${fmtValue(p.props.get("Material"))}.`,
+        h.t(
+          `Material is ${fmtValue(p.props.get("Material"))}.`,
+          `Material şu an ${fmtValue(p.props.get("Material"))}.`,
+        ),
       );
     },
   },
@@ -642,7 +786,7 @@ export const EXERCISES: Exercise[] = [
       w.run(0.3);
       const afterRock = h.studentErrors(w).length;
       h.check(
-        "Doesn't crash when a rock touches the lava",
+        h.t("Doesn't crash when a rock touches the lava", "Lava'ya bir kaya değince çökmüyor"),
         afterRock === 0,
         h.studentErrors(w)[0]?.message,
       );
@@ -650,7 +794,10 @@ export const EXERCISES: Exercise[] = [
       if (hat) w.touch(lava, hat);
       w.run(0.3);
       h.check(
-        "Doesn't crash when a player's hat touches the lava",
+        h.t(
+          "Doesn't crash when a player's hat touches the lava",
+          "Oyuncunun şapkası lava'ya değince çökmüyor",
+        ),
         h.studentErrors(w).length === afterRock,
         h.studentErrors(w)[afterRock]?.message,
       );
@@ -658,9 +805,12 @@ export const EXERCISES: Exercise[] = [
       w.touchWithCharacter(lava, p, "LeftFoot");
       w.run(0.3);
       h.check(
-        "A player who steps on the lava dies",
+        h.t("A player who steps on the lava dies", "Lava'ya basan oyuncu ölüyor"),
         approx(hum?.props.get("Health"), 0),
-        `Their Health is still ${fmtValue(hum?.props.get("Health"))}.`,
+        h.t(
+          `Their Health is still ${fmtValue(hum?.props.get("Health"))}.`,
+          `Health değeri hâlâ ${fmtValue(hum?.props.get("Health"))}.`,
+        ),
       );
     },
   },
@@ -698,43 +848,64 @@ export const EXERCISES: Exercise[] = [
       );
       if (
         !h.check(
-          "Players get a leaderstats folder",
+          h.t("Players get a leaderstats folder", "Oyunculara leaderstats klasörü veriliyor"),
           Boolean(folder),
           wrongName
-            ? `Found "${wrongName.name}" — it must be exactly leaderstats (all lowercase).`
-            : "Create the Folder in PlayerAdded and set its Parent to the player.",
+            ? h.t(
+                `Found "${wrongName.name}" — it must be exactly leaderstats (all lowercase).`,
+                `"${wrongName.name}" bulundu — adı tam olarak leaderstats olmalı (hepsi küçük harf).`,
+              )
+            : h.t(
+                "Create the Folder in PlayerAdded and set its Parent to the player.",
+                "Folder'ı PlayerAdded içinde oluştur ve Parent'ını oyuncu yap.",
+              ),
         )
       )
         return;
       const coins = leaderstat(ann, "Coins");
       const wins = leaderstat(ann, "Wins");
       h.check(
-        "Coins is an IntValue starting at 100",
+        h.t("Coins is an IntValue starting at 100", "Coins, 100'den başlayan bir IntValue"),
         coins?.className === "IntValue" && coins.props.get("Value") === 100,
         coins
-          ? `Coins is a ${coins.className} with Value ${fmtValue(coins.props.get("Value"))}.`
-          : "Create an IntValue named Coins inside leaderstats.",
+          ? h.t(
+              `Coins is a ${coins.className} with Value ${fmtValue(coins.props.get("Value"))}.`,
+              `Coins bir ${coins.className}, Value değeri ${fmtValue(coins.props.get("Value"))}.`,
+            )
+          : h.t(
+              "Create an IntValue named Coins inside leaderstats.",
+              "leaderstats içinde Coins adında bir IntValue oluştur.",
+            ),
       );
       h.check(
-        "Wins is an IntValue starting at 0",
+        h.t("Wins is an IntValue starting at 0", "Wins, 0'dan başlayan bir IntValue"),
         wins?.className === "IntValue" && wins.props.get("Value") === 0,
         wins
-          ? `Wins is a ${wins.className} with Value ${fmtValue(wins.props.get("Value"))}.`
-          : "Create an IntValue named Wins inside leaderstats.",
+          ? h.t(
+              `Wins is a ${wins.className} with Value ${fmtValue(wins.props.get("Value"))}.`,
+              `Wins bir ${wins.className}, Value değeri ${fmtValue(wins.props.get("Value"))}.`,
+            )
+          : h.t(
+              "Create an IntValue named Wins inside leaderstats.",
+              "leaderstats içinde Wins adında bir IntValue oluştur.",
+            ),
       );
       const bob = w.addPlayer("Bob");
       w.run(1);
       h.check(
-        "Works for every player who joins",
+        h.t("Works for every player who joins", "Giren her oyuncu için çalışıyor"),
         Boolean(leaderstat(bob, "Coins")),
-        "A second player didn't get leaderstats.",
+        h.t("A second player didn't get leaderstats.", "İkinci oyuncuya leaderstats verilmedi."),
       );
       w.run(11.2 - w.interp.time);
       const value = coins?.props.get("Value") as number;
       h.check(
-        "Every 5 seconds players get 10 coins",
+        h.t("Every 5 seconds players get 10 coins", "Her 5 saniyede oyunculara 10 coin veriliyor"),
         typeof value === "number" && value >= 110 && value <= 130,
-        `After ~11 seconds Ann has ${fmtValue(value)} coins (expected about 120).`,
+        h.t(
+          `After ~11 seconds Ann has ${fmtValue(value)} coins (expected about 120).`,
+          `~11 saniye sonra Ann'in ${fmtValue(value)} coini var (yaklaşık 120 bekleniyordu).`,
+        ),
       );
     },
   },
@@ -772,32 +943,48 @@ export const EXERCISES: Exercise[] = [
       const myBtn = myGui?.findFirstChild("ShopButton");
       const myFrame = myGui?.findFirstChild("ShopFrame");
       if (!myBtn || !myFrame) {
-        h.check("The GUI loaded", false, "The ShopGui didn't appear in PlayerGui.");
+        h.check(
+          h.t("The GUI loaded", "Arayüz yüklendi"),
+          false,
+          h.t("The ShopGui didn't appear in PlayerGui.", "ShopGui, PlayerGui içinde görünmedi."),
+        );
         return;
       }
       w.click(myBtn, p);
       w.run(0.3);
       h.check(
-        "First click opens the shop",
+        h.t("First click opens the shop", "İlk tık dükkânı açıyor"),
         myFrame.props.get("Visible") === true,
-        "After one click ShopFrame.Visible should be true.",
+        h.t(
+          "After one click ShopFrame.Visible should be true.",
+          "Bir tıktan sonra ShopFrame.Visible true olmalı.",
+        ),
       );
       h.check(
-        'Button says "Close" while open',
+        h.t('Button says "Close" while open', 'Açıkken butonda "Close" yazıyor'),
         myBtn.props.get("Text") === "Close",
-        `Button text is ${fmtValue(myBtn.props.get("Text"))}.`,
+        h.t(
+          `Button text is ${fmtValue(myBtn.props.get("Text"))}.`,
+          `Buton yazısı şu an ${fmtValue(myBtn.props.get("Text"))}.`,
+        ),
       );
       w.click(myBtn, p);
       w.run(0.3);
       h.check(
-        "Second click closes it again",
+        h.t("Second click closes it again", "İkinci tık tekrar kapatıyor"),
         myFrame.props.get("Visible") === false,
-        "After a second click ShopFrame.Visible should be false.",
+        h.t(
+          "After a second click ShopFrame.Visible should be false.",
+          "İkinci tıktan sonra ShopFrame.Visible false olmalı.",
+        ),
       );
       h.check(
-        'Button says "Shop" when closed',
+        h.t('Button says "Shop" when closed', 'Kapalıyken butonda "Shop" yazıyor'),
         myBtn.props.get("Text") === "Shop",
-        `Button text is ${fmtValue(myBtn.props.get("Text"))}.`,
+        h.t(
+          `Button text is ${fmtValue(myBtn.props.get("Text"))}.`,
+          `Buton yazısı şu an ${fmtValue(myBtn.props.get("Text"))}.`,
+        ),
       );
     },
   },
@@ -840,34 +1027,52 @@ export const EXERCISES: Exercise[] = [
       w.run(0.5);
       const mid = (door.props.get("Position") as Vector3).y;
       h.check(
-        "The door moves smoothly (a tween, not a teleport)",
+        h.t(
+          "The door moves smoothly (a tween, not a teleport)",
+          "Kapı yumuşakça hareket ediyor (ışınlanma değil, tween)",
+        ),
         mid > 5.2 && mid < 12.8,
-        `Half a second in, the door is at Y ${fmtValue(mid)}.`,
+        h.t(
+          `Half a second in, the door is at Y ${fmtValue(mid)}.`,
+          `Yarım saniye sonra kapı Y ${fmtValue(mid)} konumunda.`,
+        ),
       );
       w.run(2);
       const end = door.props.get("Position") as Vector3;
       h.check(
-        "The door ends 8 studs higher (Y = 13)",
+        h.t("The door ends 8 studs higher (Y = 13)", "Kapı 8 stud yukarıda duruyor (Y = 13)"),
         approx(end.y, 13),
-        `The door ended at Y ${fmtValue(end.y)}.`,
+        h.t(
+          `The door ended at Y ${fmtValue(end.y)}.`,
+          `Kapı Y ${fmtValue(end.y)} konumunda durdu.`,
+        ),
       );
       h.check(
-        "X and Z stay the same",
+        h.t("X and Z stay the same", "X ve Z aynı kalıyor"),
         approx(end.x, 0) && approx(end.z, -10),
-        `The door ended at ${fmtValue(end)}.`,
+        h.t(`The door ended at ${fmtValue(end)}.`, `Kapı ${fmtValue(end)} konumunda durdu.`),
       );
       const entry = h.printEntries(w).find((e) => e.text === "Door open");
       h.check(
-        'Prints "Door open" after the tween finishes',
+        h.t(
+          'Prints "Door open" after the tween finishes',
+          'Tween bitince "Door open" yazdırılıyor',
+        ),
         Boolean(entry) && entry!.time >= 0.95,
         entry
-          ? "It printed before the tween finished — wait with tween.Completed:Wait()."
-          : 'Print "Door open".',
+          ? h.t(
+              "It printed before the tween finished — wait with tween.Completed:Wait().",
+              "Tween bitmeden yazdırdı — tween.Completed:Wait() ile bekle.",
+            )
+          : h.t('Print "Door open".', '"Door open" yazdır.'),
       );
       h.check(
-        "Uses TweenService:Create",
+        h.t("Uses TweenService:Create", "TweenService:Create kullanılıyor"),
         h.codeHas(/TweenService\s*:\s*Create\s*\(/),
-        "Create the tween with TweenService:Create(door, info, goals).",
+        h.t(
+          "Create the tween with TweenService:Create(door, info, goals).",
+          "Tween'i TweenService:Create(door, info, goals) ile oluştur.",
+        ),
       );
     },
   },
@@ -911,40 +1116,52 @@ export const EXERCISES: Exercise[] = [
       const prompt = door.children.find((c) => c.className === "ProximityPrompt");
       if (
         !h.check(
-          "HouseDoor has a ProximityPrompt",
+          h.t("HouseDoor has a ProximityPrompt", "HouseDoor'da bir ProximityPrompt var"),
           Boolean(prompt),
-          'Create it with Instance.new("ProximityPrompt") and set its Parent to the door.',
+          h.t(
+            'Create it with Instance.new("ProximityPrompt") and set its Parent to the door.',
+            'Onu Instance.new("ProximityPrompt") ile oluştur ve Parent\'ını kapı yap.',
+          ),
         )
       )
         return;
       h.check(
-        'It starts as "Open"',
+        h.t('It starts as "Open"', 'Başta "Open" yazıyor'),
         prompt!.props.get("ActionText") === "Open",
-        `ActionText is ${fmtValue(prompt!.props.get("ActionText"))}.`,
+        h.t(
+          `ActionText is ${fmtValue(prompt!.props.get("ActionText"))}.`,
+          `ActionText şu an ${fmtValue(prompt!.props.get("ActionText"))}.`,
+        ),
       );
       w.trigger(prompt!, p);
       w.run(0.3);
       h.check(
-        "Pressing E opens the door",
+        h.t("Pressing E opens the door", "E'ye basınca kapı açılıyor"),
         approx(door.props.get("Transparency"), 0.8) && door.props.get("CanCollide") === false,
         `Transparency ${fmtValue(door.props.get("Transparency"))}, CanCollide ${fmtValue(door.props.get("CanCollide"))}.`,
       );
       h.check(
-        'The prompt then says "Close"',
+        h.t('The prompt then says "Close"', 'Sonra prompt\'ta "Close" yazıyor'),
         prompt!.props.get("ActionText") === "Close",
-        `ActionText is ${fmtValue(prompt!.props.get("ActionText"))}.`,
+        h.t(
+          `ActionText is ${fmtValue(prompt!.props.get("ActionText"))}.`,
+          `ActionText şu an ${fmtValue(prompt!.props.get("ActionText"))}.`,
+        ),
       );
       w.trigger(prompt!, p);
       w.run(0.3);
       h.check(
-        "Pressing E again closes it",
+        h.t("Pressing E again closes it", "Tekrar E'ye basınca kapanıyor"),
         approx(door.props.get("Transparency"), 0) && door.props.get("CanCollide") === true,
         `Transparency ${fmtValue(door.props.get("Transparency"))}, CanCollide ${fmtValue(door.props.get("CanCollide"))}.`,
       );
       h.check(
-        '…and the prompt says "Open" again',
+        h.t('…and the prompt says "Open" again', '…ve prompt\'ta yine "Open" yazıyor'),
         prompt!.props.get("ActionText") === "Open",
-        `ActionText is ${fmtValue(prompt!.props.get("ActionText"))}.`,
+        h.t(
+          `ActionText is ${fmtValue(prompt!.props.get("ActionText"))}.`,
+          `ActionText şu an ${fmtValue(prompt!.props.get("ActionText"))}.`,
+        ),
       );
     },
   },
@@ -987,33 +1204,46 @@ export const EXERCISES: Exercise[] = [
       w.fireServer(remote, p, "Sword");
       w.run(0.3);
       const bought = h.check(
-        "Buying a Sword with 150 coins works",
+        h.t("Buying a Sword with 150 coins works", "150 coinle Sword satın alınabiliyor"),
         coins.props.get("Value") === 50 && swords() === 1,
-        `After buying, Coins = ${fmtValue(coins.props.get("Value"))} and the Backpack has ${swords()} sword(s). ${h.codeHas(/OnServerEvent\s*:\s*Connect\s*\(\s*function\s*\(\s*itemName/) ? "Remember: the first parameter of OnServerEvent is the player." : ""}`,
+        h.t(
+          `After buying, Coins = ${fmtValue(coins.props.get("Value"))} and the Backpack has ${swords()} sword(s). ${h.codeHas(/OnServerEvent\s*:\s*Connect\s*\(\s*function\s*\(\s*itemName/) ? "Remember: the first parameter of OnServerEvent is the player." : ""}`,
+          `Satın aldıktan sonra Coins = ${fmtValue(coins.props.get("Value"))} ve Backpack'te ${swords()} kılıç var. ${h.codeHas(/OnServerEvent\s*:\s*Connect\s*\(\s*function\s*\(\s*itemName/) ? "Unutma: OnServerEvent'in ilk parametresi oyuncudur." : ""}`,
+        ),
       );
       if (!bought) return;
       w.fireServer(remote, p, "Sword");
       w.run(0.3);
       h.check(
-        "Can't buy without enough coins",
+        h.t("Can't buy without enough coins", "Yeterli coin olmadan satın alınamıyor"),
         coins.props.get("Value") === 50 && swords() === 1,
-        `With 50 coins the player ended with ${fmtValue(coins.props.get("Value"))} coins and ${swords()} swords.`,
+        h.t(
+          `With 50 coins the player ended with ${fmtValue(coins.props.get("Value"))} coins and ${swords()} swords.`,
+          `50 coinle oyuncunun sonunda ${fmtValue(coins.props.get("Value"))} coini ve ${swords()} kılıcı oldu.`,
+        ),
       );
       const errorsBefore = h.studentErrors(w).length;
       w.fireServer(remote, p, "Rocket");
       w.run(0.3);
       h.check(
-        "Unknown items are ignored (no crash)",
+        h.t("Unknown items are ignored (no crash)", "Bilinmeyen eşyalar yok sayılıyor (çökme yok)"),
         h.studentErrors(w).length === errorsBefore && coins.props.get("Value") === 50,
-        h.studentErrors(w)[errorsBefore]?.message ?? "Coins changed for an unknown item.",
+        h.studentErrors(w)[errorsBefore]?.message ??
+          h.t("Coins changed for an unknown item.", "Bilinmeyen bir eşya için coin değişti."),
       );
       coins.setProp("Value", 150);
       w.fireServer(remote, p, "Sword", 0);
       w.run(0.3);
       h.check(
-        "A hacker sending price 0 still pays 100",
+        h.t(
+          "A hacker sending price 0 still pays 100",
+          "Fiyatı 0 gönderen bir hileci yine de 100 ödüyor",
+        ),
         coins.props.get("Value") === 50,
-        `A client that sent an extra 0 ended with ${fmtValue(coins.props.get("Value"))} coins. Use the server's PRICES table only.`,
+        h.t(
+          `A client that sent an extra 0 ended with ${fmtValue(coins.props.get("Value"))} coins. Use the server's PRICES table only.`,
+          `Fazladan 0 gönderen istemcinin sonunda ${fmtValue(coins.props.get("Value"))} coini oldu. Sadece sunucudaki PRICES tablosunu kullan.`,
+        ),
       );
     },
   },
@@ -1051,40 +1281,61 @@ export const EXERCISES: Exercise[] = [
       const coins = leaderstat(ann, "Coins");
       if (
         !h.check(
-          "Players get leaderstats with Coins",
+          h.t(
+            "Players get leaderstats with Coins",
+            "Oyunculara Coins içeren leaderstats veriliyor",
+          ),
           Boolean(coins),
-          "Create leaderstats and an IntValue named Coins in PlayerAdded.",
+          h.t(
+            "Create leaderstats and an IntValue named Coins in PlayerAdded.",
+            "PlayerAdded içinde leaderstats ve Coins adında bir IntValue oluştur.",
+          ),
         )
       )
         return;
       h.check(
-        "Saved coins are loaded when a player joins",
+        h.t(
+          "Saved coins are loaded when a player joins",
+          "Oyuncu girince kayıtlı coinler yükleniyor",
+        ),
         coins!.props.get("Value") === 500,
-        `Ann (UserId 1001) had 500 coins saved but got ${fmtValue(coins!.props.get("Value"))}. Use the key "Player_" .. player.UserId.`,
+        h.t(
+          `Ann (UserId 1001) had 500 coins saved but got ${fmtValue(coins!.props.get("Value"))}. Use the key "Player_" .. player.UserId.`,
+          `Ann'in (UserId 1001) 500 coini kayıtlıydı ama ${fmtValue(coins!.props.get("Value"))} aldı. "Player_" .. player.UserId anahtarını kullan.`,
+        ),
       );
       coins!.setProp("Value", 777);
       w.removePlayer(ann);
       w.run(1);
       const saved = w.dataStore("PlayerCoins/global").get("Player_1001");
       h.check(
-        "Coins are saved when the player leaves",
+        h.t("Coins are saved when the player leaves", "Oyuncu çıkınca coinler kaydediliyor"),
         saved === "777",
-        `After Ann left with 777 coins, the DataStore holds ${saved ?? "nothing"}.`,
+        h.t(
+          `After Ann left with 777 coins, the DataStore holds ${saved ?? "nothing"}.`,
+          `Ann 777 coinle çıktıktan sonra DataStore'da ${saved ?? "hiçbir şey"} var.`,
+        ),
       );
       const errorsBefore = h.studentErrors(w).length;
       const newbie = w.addPlayer("Newbie");
       w.run(1);
       h.check(
-        "New players start with 0 coins",
+        h.t("New players start with 0 coins", "Yeni oyuncular 0 coinle başlıyor"),
         leaderstat(newbie, "Coins")?.props.get("Value") === 0 &&
           h.studentErrors(w).length === errorsBefore,
         h.studentErrors(w)[errorsBefore]?.message ??
-          "GetAsync returns nil for new players — use saved or 0.",
+          h.t(
+            "GetAsync returns nil for new players — use saved or 0.",
+            "GetAsync yeni oyuncular için nil döndürür — saved or 0 kullan.",
+          ),
       );
       h.check(
-        "DataStore calls are wrapped in pcall",
+        h.t("DataStore calls are wrapped in pcall", "DataStore çağrıları pcall içinde"),
         h.codeHas(/pcall\s*\(/),
-        "Wrap GetAsync and SetAsync in pcall — requests can fail.",
+        h.t(
+          "Wrap GetAsync and SetAsync in pcall — requests can fail.",
+          "GetAsync ve SetAsync'i pcall içine al — istekler başarısız olabilir.",
+        ),
       );
     },
   },
@@ -1128,35 +1379,59 @@ end`,
       const [first, second] = h.testValues(w);
       if (
         !h.check(
-          "The module loads with require()",
+          h.t("The module loads with require()", "Modül require() ile yükleniyor"),
           first !== undefined && first[0] !== "require-failed",
-          "require() failed — make sure the last line is return PetConfig and the module has no errors.",
+          h.t(
+            "require() failed — make sure the last line is return PetConfig and the module has no errors.",
+            "require() başarısız oldu — son satırın return PetConfig olduğundan ve modülde hata olmadığından emin ol.",
+          ),
         )
       )
         return;
-      h.check("The module returns a table", first[0] === "table", `It returned a ${first[0]}.`);
       h.check(
-        "It has a Pets table with Dog as Common",
+        h.t("The module returns a table", "Modül bir tablo döndürüyor"),
+        first[0] === "table",
+        h.t(`It returned a ${first[0]}.`, `Bir ${first[0]} döndürdü.`),
+      );
+      h.check(
+        h.t("It has a Pets table with Dog as Common", "Dog'un Common olduğu bir Pets tablosu var"),
         first[1] === "table" && first[2] === "Common",
-        first[1] !== "table" ? "Add PetConfig.Pets = { ... }." : `Pets.Dog.Rarity is ${first[2]}.`,
+        first[1] !== "table"
+          ? h.t("Add PetConfig.Pets = { ... }.", "PetConfig.Pets = { ... } ekle.")
+          : h.t(`Pets.Dog.Rarity is ${first[2]}.`, `Pets.Dog.Rarity şu an ${first[2]}.`),
       );
       if (
         !h.check(
-          "It has a getMultiplier function",
+          h.t("It has a getMultiplier function", "getMultiplier adında bir fonksiyon var"),
           first[3] === "function",
-          "Add function PetConfig.getMultiplier(petName) ... end",
+          h.t(
+            "Add function PetConfig.getMultiplier(petName) ... end",
+            "function PetConfig.getMultiplier(petName) ... end ekle",
+          ),
         )
       )
         return;
       h.check(
-        "getMultiplier gives 10 for Dragon and 2 for Cat",
+        h.t(
+          "getMultiplier gives 10 for Dragon and 2 for Cat",
+          "getMultiplier, Dragon için 10, Cat için 2 veriyor",
+        ),
         second?.[0] === "10" && second?.[1] === "2",
-        `It gave ${second?.[0]} for Dragon and ${second?.[1]} for Cat.`,
+        h.t(
+          `It gave ${second?.[0]} for Dragon and ${second?.[1]} for Cat.`,
+          `Dragon için ${second?.[0]}, Cat için ${second?.[1]} verdi.`,
+        ),
       );
       h.check(
-        "getMultiplier gives 1 for unknown pets",
+        h.t(
+          "getMultiplier gives 1 for unknown pets",
+          "getMultiplier bilinmeyen petler için 1 veriyor",
+        ),
         second?.[2] === "1",
-        `For "Unicorn" it gave ${second?.[2]} — return 1 when the pet isn't in the table.`,
+        h.t(
+          `For "Unicorn" it gave ${second?.[2]} — return 1 when the pet isn't in the table.`,
+          `"Unicorn" için ${second?.[2]} verdi — pet tabloda yoksa 1 döndür.`,
+        ),
       );
     },
   },
@@ -1211,41 +1486,63 @@ end`,
       w.touchWithCharacter(coinParts[0], p, "LeftHand");
       w.run(0.3);
       h.check(
-        "Touching a coin gives exactly 1 coin",
+        h.t("Touching a coin gives exactly 1 coin", "Bir coine dokunmak tam 1 coin veriyor"),
         coins.props.get("Value") === 1,
-        `Three quick touches on one coin gave ${fmtValue(coins.props.get("Value"))} coins — add a debounce (available = false).`,
+        h.t(
+          `Three quick touches on one coin gave ${fmtValue(coins.props.get("Value"))} coins — add a debounce (available = false).`,
+          `Bir coine üç hızlı dokunuş ${fmtValue(coins.props.get("Value"))} coin verdi — bir debounce ekle (available = false).`,
+        ),
       );
       h.check(
-        "The coin disappears",
+        h.t("The coin disappears", "Coin kayboluyor"),
         approx(coinParts[0].props.get("Transparency"), 1),
-        `Transparency is ${fmtValue(coinParts[0].props.get("Transparency"))}.`,
+        h.t(
+          `Transparency is ${fmtValue(coinParts[0].props.get("Transparency"))}.`,
+          `Transparency şu an ${fmtValue(coinParts[0].props.get("Transparency"))}.`,
+        ),
       );
       const errorsBefore = h.studentErrors(w).length;
       const rock = w.create("Part", { Name: "Rock" }, w.workspace);
       w.touch(coinParts[2], rock);
       w.run(0.3);
       h.check(
-        "Other parts touching a coin don't break it",
+        h.t(
+          "Other parts touching a coin don't break it",
+          "Coine başka parçaların değmesi onu bozmuyor",
+        ),
         h.studentErrors(w).length === errorsBefore && coins.props.get("Value") === 1,
-        h.studentErrors(w)[errorsBefore]?.message ?? "A rock touching a coin changed the coins.",
+        h.studentErrors(w)[errorsBefore]?.message ??
+          h.t(
+            "A rock touching a coin changed the coins.",
+            "Coine bir kayanın değmesi coinleri değiştirdi.",
+          ),
       );
       w.touchWithCharacter(coinParts[1], p);
       w.run(0.3);
       h.check(
-        "Every coin works",
+        h.t("Every coin works", "Her coin çalışıyor"),
         coins.props.get("Value") === 2,
-        `After a second coin, Coins = ${fmtValue(coins.props.get("Value"))}.`,
+        h.t(
+          `After a second coin, Coins = ${fmtValue(coins.props.get("Value"))}.`,
+          `İkinci coinden sonra Coins = ${fmtValue(coins.props.get("Value"))}.`,
+        ),
       );
       w.run(5.5);
       h.check(
-        "Coins come back after 5 seconds",
+        h.t("Coins come back after 5 seconds", "Coinler 5 saniye sonra geri geliyor"),
         approx(coinParts[0].props.get("Transparency"), 0),
-        `After 6 seconds the first coin's Transparency is ${fmtValue(coinParts[0].props.get("Transparency"))}.`,
+        h.t(
+          `After 6 seconds the first coin's Transparency is ${fmtValue(coinParts[0].props.get("Transparency"))}.`,
+          `6 saniye sonra ilk coinin Transparency değeri ${fmtValue(coinParts[0].props.get("Transparency"))}.`,
+        ),
       );
       w.touchWithCharacter(coinParts[0], p);
       w.run(0.3);
       h.check(
-        "A coin that came back can be collected again",
+        h.t(
+          "A coin that came back can be collected again",
+          "Geri gelen coin tekrar toplanabiliyor",
+        ),
         coins.props.get("Value") === 3,
         `Coins = ${fmtValue(coins.props.get("Value"))}.`,
       );
@@ -1281,13 +1578,13 @@ end`,
       const p = w.addPlayer("Builderman");
       w.run(1);
       h.check(
-        "Builderman has 50 coins",
+        h.t("Builderman has 50 coins", "Builderman'in 50 coini var"),
         leaderstat(p, "Coins")?.props.get("Value") === 50,
         `Coins = ${fmtValue(leaderstat(p, "Coins")?.props.get("Value"))}.`,
       );
       h.expectPrinted("Builderman got 50 coins");
       h.check(
-        "No errors in the Output",
+        h.t("No errors in the Output", "Output'ta hata yok"),
         h.studentErrors(w).length === 0,
         h
           .studentErrors(w)

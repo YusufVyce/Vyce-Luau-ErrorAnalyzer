@@ -60,6 +60,22 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-line: var(--brand-line);
+  --color-code: var(--code);
+  --color-code-head: var(--code-head);
+  --color-code-line: var(--code-line);
 }
 
 :root {
@@ -144,60 +160,101 @@
   }
 }
 
-@layer components {
-  /* ---------- Site theme: paper + ink, Studio-dark code panels ---------- */
+/* ---------- Site theme tokens (light / dark) ---------- */
+:root {
+  --canvas: #f7f7f8;
+  --surface: #ffffff;
+  --surface-2: #f3f4f6;
+  --line: #e4e4e7;
+  --line-strong: #d4d4d8;
+  --ink: #18181b;
+  --ink-2: #52525b;
+  --ink-3: #71717a;
+  --brand: #2563eb;
+  --brand-hover: #1d4ed8;
+  --brand-ink: #1e40af;
+  --brand-soft: rgba(37, 99, 235, 0.08);
+  --brand-line: rgba(37, 99, 235, 0.28);
+  --code: #0d1117;
+  --code-head: #161b22;
+  --code-line: #262c36;
+  --card-shadow: 0 1px 2px rgba(24, 24, 27, 0.04), 0 8px 24px -12px rgba(24, 24, 27, 0.12);
+}
+:root[data-theme="dark"] {
+  --canvas: #0b0b0e;
+  --surface: #131317;
+  --surface-2: #1b1b20;
+  --line: #26262d;
+  --line-strong: #33333b;
+  --ink: #f4f4f5;
+  --ink-2: #a1a1aa;
+  --ink-3: #7a7a85;
+  --brand: #5b8cff;
+  --brand-hover: #7aa2ff;
+  --brand-ink: #a9c1ff;
+  --brand-soft: rgba(91, 140, 255, 0.12);
+  --brand-line: rgba(91, 140, 255, 0.35);
+  --code: #0d1117;
+  --code-head: #161b22;
+  --code-line: #262c36;
+  --card-shadow: 0 1px 0 rgba(255, 255, 255, 0.02) inset;
+}
 
+@layer components {
   .ep-body {
-    --paper: #f6f2e9;
-    --paper-2: #fffdf8;
-    --ink: #1c1a16;
-    --ink-soft: #57524a;
-    --brick: #e8483f;
-    --go: #2fb45a;
-    --sun: #ffd23f;
-    font-family: "Rubik", system-ui, sans-serif;
+    font-family:
+      "Geist",
+      system-ui,
+      -apple-system,
+      "Segoe UI",
+      sans-serif;
     min-height: 100vh;
     overflow-y: auto;
-    background-color: var(--paper);
-    background-image: radial-gradient(rgba(28, 26, 22, 0.07) 1px, transparent 1px);
-    background-size: 22px 22px;
-    color: var(--ink-soft);
+    background-color: var(--canvas);
+    background-image: radial-gradient(
+      ellipse 70% 40% at 50% -8%,
+      var(--brand-soft),
+      transparent 70%
+    );
+    background-repeat: no-repeat;
+    color: var(--ink-2);
     color-scheme: light;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+  :root[data-theme="dark"] .ep-body {
+    color-scheme: dark;
   }
   .ep-body ::selection {
-    background: var(--sun);
-    color: var(--ink);
+    background: var(--brand);
+    color: #fff;
   }
   .ep-body code,
   .ep-body pre,
   .ep-body textarea,
   .ep-body .font-mono {
-    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-family: "Geist Mono", "JetBrains Mono", ui-monospace, monospace;
   }
   .ep-body h1,
   .ep-body h2,
   .ep-body h3,
-  .serif-title {
-    font-family: "Bricolage Grotesque", "Rubik", sans-serif;
-    letter-spacing: -0.02em;
-  }
+  .serif-title,
   .font-display {
-    font-family: "Bricolage Grotesque", "Rubik", system-ui, sans-serif;
+    font-family: "Geist", system-ui, sans-serif;
+    letter-spacing: -0.025em;
   }
   .serif-title {
-    font-weight: 800;
+    font-weight: 650;
     color: var(--ink);
   }
-  /* Highlighter-pen accent for one word in a heading. */
+  /* One highlighted word in a heading. */
   .ep-mark {
-    background: linear-gradient(transparent 58%, var(--sun) 58%, var(--sun) 92%, transparent 92%);
-    padding: 0 0.12em;
-    color: var(--ink);
+    color: var(--brand);
   }
   .ep-body :focus-visible {
-    outline: 2px solid var(--ink);
+    outline: 2px solid var(--brand);
     outline-offset: 2px;
-    border-radius: 4px;
+    border-radius: 6px;
   }
   .ep-body textarea::-webkit-scrollbar,
   .ep-body pre::-webkit-scrollbar {
@@ -206,77 +263,67 @@
   }
   .ep-body textarea::-webkit-scrollbar-thumb,
   .ep-body pre::-webkit-scrollbar-thumb {
-    background: rgba(120, 113, 108, 0.35);
+    background: rgba(127, 127, 140, 0.35);
     border-radius: 6px;
   }
-
-  /* Decorative blobs from the old theme are gone. */
   .ep-aurora {
     display: none;
   }
 
-  /* Cards: white paper with an ink outline and a hard block shadow. */
   .ep-card {
     position: relative;
-    background: var(--paper-2);
-    border: 2px solid var(--ink);
-    border-radius: 14px;
-    box-shadow: 5px 5px 0 var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
   }
   .ep-card-accent {
-    background: var(--paper-2);
+    background: var(--surface);
   }
 
-  /* Primary button: a chunky green brick that presses down. */
   .ep-cta {
-    background: var(--go);
+    background: var(--brand);
     color: #fff;
-    border: 2px solid var(--ink);
-    box-shadow: 3px 3px 0 var(--ink);
-    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+    border: 1px solid transparent;
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.16);
     transition:
-      transform 120ms ease,
-      box-shadow 120ms ease;
+      background-color 150ms ease,
+      transform 150ms ease;
   }
   .ep-cta:not(:disabled):hover {
-    transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0 var(--ink);
+    background: var(--brand-hover);
   }
   .ep-cta:not(:disabled):active {
-    transform: translate(3px, 3px);
-    box-shadow: 0 0 0 var(--ink);
+    transform: translateY(1px);
   }
   .ep-cta:disabled {
-    background: #d6d0c4;
-    color: #6b655b;
-    text-shadow: none;
+    opacity: 0.45;
+    cursor: not-allowed;
     box-shadow: none;
-    border-color: #a8a195;
   }
 
-  /* Section number chips */
   .ep-step {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 22px;
     height: 22px;
-    border-radius: 6px;
+    border-radius: 7px;
     font-size: 11px;
-    font-weight: 700;
-    background: var(--sun);
-    border: 2px solid var(--ink);
-    color: var(--ink);
+    font-weight: 600;
+    background: var(--brand-soft);
+    border: 1px solid var(--brand-line);
+    color: var(--brand);
   }
-
   .ep-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 2px;
-    background: var(--brick);
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--brand);
   }
 
-  /* Dark "Studio" surfaces: code, Output, Explorer. */
   .ep-body .code-dark {
     color: #d4d4d8;
   }

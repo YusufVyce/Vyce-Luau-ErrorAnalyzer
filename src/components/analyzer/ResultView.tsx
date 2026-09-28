@@ -15,6 +15,8 @@ import {
 import type { AdvancedAnalyzerOutput } from "@/lib/analyzer/advancedRobloxAnalyzer";
 import type { CodeWarning, DiagnosisCause, PreciseDiagnosis } from "@/lib/analyzer/precise/types";
 import { CodeBlock, copyText, highlightLuau } from "@/components/CodeBlock";
+import { analogyTr, glossaryTr } from "@/lib/analyzer/precise/beginner";
+import { useLang, useT, type TFunction } from "@/lib/prefs";
 
 const SEVERITY_STYLE: Record<PreciseDiagnosis["severity"], string> = {
   Critical: "border-red-500/40 bg-red-500/10 text-red-300",
@@ -25,10 +27,10 @@ const SEVERITY_STYLE: Record<PreciseDiagnosis["severity"], string> = {
 
 function confidenceTone(value: number) {
   if (value >= 80)
-    return { bar: "from-emerald-400 to-teal-400", text: "text-emerald-300", label: "High" };
+    return { bar: "bg-emerald-400", text: "text-emerald-300", label: "res.high" } as const;
   if (value >= 55)
-    return { bar: "from-amber-400 to-orange-400", text: "text-amber-300", label: "Medium" };
-  return { bar: "from-zinc-500 to-zinc-400", text: "text-zinc-300", label: "Low" };
+    return { bar: "bg-amber-400", text: "text-amber-300", label: "res.medium" } as const;
+  return { bar: "bg-zinc-500", text: "text-zinc-300", label: "res.low" } as const;
 }
 
 /** Renders `code` spans in plain text (the analyzer writes names in backticks). */
@@ -40,7 +42,7 @@ function Rich({ text }: { text: string }) {
         part.startsWith("`") && part.endsWith("`") && part.length > 2 ? (
           <code
             key={i}
-            className="rounded bg-zinc-800/80 px-1 py-0.5 font-mono text-[0.85em] text-emerald-200"
+            className="rounded-md border border-line bg-surface-2 px-1 py-px font-mono text-[0.85em] text-brand-ink"
           >
             {part.slice(1, -1)}
           </code>
@@ -52,7 +54,7 @@ function Rich({ text }: { text: string }) {
   );
 }
 
-function LikelihoodTag({ cause }: { cause: DiagnosisCause }) {
+function LikelihoodTag({ cause, t }: { cause: DiagnosisCause; t: TFunction }) {
   const style =
     cause.likelihood === "likely"
       ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
@@ -61,11 +63,13 @@ function LikelihoodTag({ cause }: { cause: DiagnosisCause }) {
         : "bg-zinc-800 text-zinc-400 border-zinc-700";
   return (
     <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${style}`}>
-      {cause.likelihood === "likely"
-        ? "Most likely"
-        : cause.likelihood === "possible"
-          ? "Possible"
-          : "Unlikely"}
+      {t(
+        cause.likelihood === "likely"
+          ? "res.likely"
+          : cause.likelihood === "possible"
+            ? "res.possible"
+            : "res.unlikely",
+      )}
     </span>
   );
 }
@@ -81,14 +85,13 @@ function CodeLine({
   culprit?: string;
   exact: boolean;
 }) {
+  const t = useT();
   const idx = culprit ? code.indexOf(culprit) : -1;
   return (
     <div className="rounded-lg border border-red-500/25 bg-red-500/[0.04] overflow-hidden">
       <div className="flex items-center justify-between border-b border-red-500/15 px-3 py-1.5 text-[11px]">
-        <span className="font-semibold text-red-300">Line {line}</span>
-        <span className="text-zinc-500">
-          {exact ? "matches the line number in the error" : "found by searching your code"}
-        </span>
+        <span className="font-semibold text-red-300">{t("res.line", { n: line })}</span>
+        <span className="text-zinc-500">{t(exact ? "res.lineExact" : "res.lineSearched")}</span>
       </div>
       <pre className="overflow-x-auto px-3 py-2 font-mono text-[13px] text-zinc-100">
         <span className="mr-3 select-none text-zinc-600">{line}</span>
@@ -109,26 +112,29 @@ function CodeLine({
 }
 
 function WarningList({ warnings }: { warnings: CodeWarning[] }) {
+  const t = useT();
   if (warnings.length === 0) return null;
   const icon = { error: "🔴", warning: "🟠", info: "🔵" } as const;
   return (
     <ul className="space-y-2">
       {warnings.map((w, i) => (
-        <li key={`${w.id}-${i}`} className="rounded-lg border border-zinc-800 bg-zinc-950/40 p-3">
+        <li key={`${w.id}-${i}`} className="rounded-xl border border-line p-3">
           <div className="flex items-start gap-2 text-sm">
             <span aria-hidden="true">{icon[w.severity]}</span>
             <div className="min-w-0 space-y-1">
               <div className="font-medium text-zinc-100">
                 <Rich text={w.title} />
                 {w.line ? (
-                  <span className="ml-2 text-xs font-normal text-zinc-500">line {w.line}</span>
+                  <span className="ml-2 text-xs font-normal text-zinc-500">
+                    {t("res.line", { n: w.line })}
+                  </span>
                 ) : null}
               </div>
               <p className="text-xs leading-relaxed text-zinc-400">
                 <Rich text={w.message} />
               </p>
               {w.fix && (
-                <pre className="code-dark mt-1 overflow-x-auto rounded bg-[#1e1e1e] px-2 py-1.5 font-mono text-[12px] text-emerald-200">
+                <pre className="code-dark mt-1 overflow-x-auto rounded bg-code px-2 py-1.5 font-mono text-[12px] text-emerald-200">
                   {highlightLuau(w.fix)}
                 </pre>
               )}
@@ -151,8 +157,10 @@ function Section({
 }) {
   return (
     <section className="space-y-3">
-      <h3 className="flex items-center gap-2 text-[17px] font-bold text-zinc-100">
-        <span className="text-emerald-400">{icon}</span>
+      <h3 className="flex items-center gap-2 text-[16px] font-semibold text-zinc-100">
+        <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-brand-soft text-brand">
+          {icon}
+        </span>
         {title}
       </h3>
       {children}
@@ -168,7 +176,7 @@ function Breakdown({ steps }: { steps: NonNullable<PreciseDiagnosis["breakdown"]
   } as const;
   const icon = { ok: "✓", nil: "∅", error: "✗" } as const;
   return (
-    <ol className="space-y-1.5" aria-label="Step by step">
+    <ol className="space-y-1.5">
       {steps.map((s, i) => (
         <li key={i} className="flex items-center gap-3">
           <span className="w-5 shrink-0 text-right font-mono text-[11px] text-zinc-600">
@@ -190,22 +198,23 @@ function Breakdown({ steps }: { steps: NonNullable<PreciseDiagnosis["breakdown"]
 }
 
 function PatchedScript({ patched }: { patched: NonNullable<PreciseDiagnosis["patched"]> }) {
-  const [label, setLabel] = useState("Copy whole script");
+  const t = useT();
+  const [label, setLabel] = useState<string | null>(null);
   const lines = patched.code.split("\n");
   const changed = new Set(patched.changed);
   return (
-    <div className="code-dark overflow-hidden rounded-lg border-2 border-[#1c1a16] bg-[#1e1e1e]">
-      <div className="flex items-center justify-between border-b border-zinc-800 bg-[#252526] px-3 py-1.5 text-[12px]">
-        <span className="font-semibold text-emerald-300">Your script, fixed</span>
+    <div className="code-dark overflow-hidden rounded-lg border border-code-line bg-code">
+      <div className="flex items-center justify-between border-b border-zinc-800 bg-code-head px-3 py-1.5 text-[12px]">
+        <span className="font-semibold text-emerald-300">{t("res.patched")}</span>
         <button
           type="button"
           onClick={async () => {
-            setLabel((await copyText(patched.code)) ? "Copied ✓" : "Copy failed");
-            setTimeout(() => setLabel("Copy whole script"), 1600);
+            setLabel(t((await copyText(patched.code)) ? "code.copied" : "code.copyFailed"));
+            setTimeout(() => setLabel(null), 1600);
           }}
           className="rounded px-2 py-0.5 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
         >
-          {label}
+          {label ?? t("res.copyScript")}
         </button>
       </div>
       <pre
@@ -234,6 +243,8 @@ export function ResultView({
   diagnosis: PreciseDiagnosis;
   advanced?: AdvancedAnalyzerOutput;
 }) {
+  const t = useT();
+  const lang = useLang();
   const [showReasons, setShowReasons] = useState(false);
   const [showTech, setShowTech] = useState(false);
   const tone = confidenceTone(diagnosis.confidence);
@@ -248,18 +259,18 @@ export function ResultView({
   );
 
   return (
-    <div className="ep-card ep-card-accent result-card space-y-7">
+    <div className="ep-card space-y-8 p-5 md:p-8">
       {/* Header */}
-      <header className="space-y-3 border-b border-emerald-500/10 pb-5">
+      <header className="space-y-3 border-b border-line pb-6">
         <div className="flex flex-wrap items-center gap-2 text-[11px]">
           <span
             className={`rounded-full border px-2.5 py-0.5 font-semibold ${SEVERITY_STYLE[diagnosis.severity]}`}
           >
-            {diagnosis.severity}
+            {t(`sev.${diagnosis.severity}` as "sev.High")}
           </span>
           {diagnosis.side !== "unknown" && (
             <span className="rounded-full border border-zinc-700 bg-zinc-900 px-2.5 py-0.5 text-zinc-300">
-              {diagnosis.side === "server" ? "Server script" : "LocalScript (client)"}
+              {t(diagnosis.side === "server" ? "res.server" : "res.client")}
             </span>
           )}
           {diagnosis.scriptPath && (
@@ -272,11 +283,16 @@ export function ResultView({
           )}
           {!diagnosis.recognized && (
             <span className="rounded-full border border-zinc-700 bg-zinc-900 px-2.5 py-0.5 text-zinc-400">
-              No exact match
+              {t("res.noMatch")}
             </span>
           )}
         </div>
-        <h2 className="text-2xl font-bold leading-tight text-zinc-50 md:text-3xl">
+        {lang === "tr" && (
+          <p className="rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-[12px] text-ink-3">
+            {t("res.enNote")}
+          </p>
+        )}
+        <h2 className="text-2xl font-semibold leading-tight tracking-tight text-zinc-50 md:text-[32px]">
           <Rich text={diagnosis.title} />
         </h2>
         <p className="text-base leading-relaxed text-zinc-200">
@@ -284,32 +300,32 @@ export function ResultView({
         </p>
 
         {diagnosis.recognized && (
-          <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-3">
+          <div className="rounded-xl border border-line bg-surface-2 p-3">
             <div className="flex flex-wrap items-center gap-3 text-xs">
-              <span className="font-medium text-zinc-400">Confidence</span>
+              <span className="font-medium text-zinc-400">{t("res.confidence")}</span>
               <span className={`font-semibold ${tone.text}`}>
-                {diagnosis.confidence}% · {tone.label}
+                {diagnosis.confidence}% · {t(tone.label)}
               </span>
               <div
-                className="h-1.5 min-w-24 flex-1 overflow-hidden rounded-full bg-zinc-900"
+                className="h-1.5 min-w-24 flex-1 overflow-hidden rounded-full bg-zinc-800"
                 role="progressbar"
                 aria-valuenow={diagnosis.confidence}
                 aria-valuemin={0}
                 aria-valuemax={100}
-                aria-label="Confidence"
+                aria-label={t("res.confidence")}
               >
                 <div
-                  className={`h-full rounded-full bg-gradient-to-r ${tone.bar}`}
+                  className={`h-full rounded-full ${tone.bar}`}
                   style={{ width: `${diagnosis.confidence}%` }}
                 />
               </div>
               <button
                 type="button"
                 onClick={() => setShowReasons((v) => !v)}
-                className="text-emerald-300 hover:underline"
+                className="font-medium text-brand hover:underline"
                 aria-expanded={showReasons}
               >
-                {showReasons ? "Hide why" : "Why?"}
+                {t(showReasons ? "res.hideWhy" : "res.why")}
               </button>
             </div>
             {showReasons && (
@@ -317,39 +333,35 @@ export function ResultView({
                 {diagnosis.confidenceReasons.map((r, i) => (
                   <li key={i}>• {r}</li>
                 ))}
-                <li className="pt-1 font-sans text-zinc-500">
-                  The score only goes up for things the analyzer actually verified in your error and
-                  code.
-                </li>
+                <li className="pt-1 font-sans text-zinc-500">{t("res.whyNote")}</li>
               </ul>
             )}
           </div>
         )}
       </header>
 
-      <Section icon={<Lightbulb className="h-4 w-4" />} title="What happened">
+      <Section icon={<Lightbulb className="h-4 w-4" />} title={t("res.what")}>
         <p className="text-sm leading-relaxed text-zinc-300">
           <Rich text={diagnosis.explanation} />
         </p>
         {diagnosis.analogy && (
-          <div className="flex gap-3 rounded-lg border border-violet-500/25 bg-violet-500/[0.06] p-3 text-sm text-violet-100">
-            <Smile className="mt-0.5 h-4 w-4 shrink-0 text-violet-300" aria-hidden="true" />
+          <div className="flex gap-3 rounded-xl border border-brand-line bg-brand-soft p-3.5 text-sm text-zinc-200">
+            <Smile className="mt-0.5 h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
             <span>
-              <span className="font-semibold">In plain words: </span>
-              {diagnosis.analogy}
+              <span className="font-semibold text-zinc-100">{t("res.plain")} </span>
+              {(lang === "tr" && analogyTr(diagnosis)) || diagnosis.analogy}
             </span>
           </div>
         )}
       </Section>
 
       {diagnosis.location && (
-        <Section icon={<MapPin className="h-4 w-4" />} title="Where">
+        <Section icon={<MapPin className="h-4 w-4" />} title={t("res.where")}>
           <CodeLine {...diagnosis.location} />
           {diagnosis.breakdown && diagnosis.breakdown.length > 0 && (
-            <div className="space-y-2 rounded-lg border border-zinc-800 bg-zinc-950/40 p-3">
-              <div className="flex items-center gap-1.5 text-[15px] font-bold text-zinc-400">
-                <ListOrdered className="h-3.5 w-3.5" aria-hidden="true" /> What Luau did, step by
-                step
+            <div className="space-y-2 rounded-xl border border-line bg-surface-2 p-3.5">
+              <div className="flex items-center gap-1.5 text-[13px] font-semibold text-zinc-300">
+                <ListOrdered className="h-3.5 w-3.5" aria-hidden="true" /> {t("res.steps")}
               </div>
               <Breakdown steps={diagnosis.breakdown} />
             </div>
@@ -360,9 +372,9 @@ export function ResultView({
       {top && (
         <Section
           icon={<AlertTriangle className="h-4 w-4" />}
-          title={diagnosis.recognized ? "Why it happened" : "Things to check"}
+          title={t(diagnosis.recognized ? "res.why2" : "res.check")}
         >
-          <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/[0.05] p-4">
+          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/[0.06] p-4">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <p className="text-sm font-semibold text-zinc-50">
                 <Rich text={top.text} />
@@ -370,10 +382,10 @@ export function ResultView({
               <div className="flex items-center gap-1.5">
                 {top.confirmedInCode && (
                   <span className="inline-flex items-center gap-1 rounded-full border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[10px] font-semibold text-sky-300">
-                    <CheckCircle2 className="h-3 w-3" aria-hidden="true" /> Seen in your code
+                    <CheckCircle2 className="h-3 w-3" aria-hidden="true" /> {t("res.seen")}
                   </span>
                 )}
-                <LikelihoodTag cause={top} />
+                <LikelihoodTag cause={top} t={t} />
               </div>
             </div>
             {top.detail && (
@@ -387,7 +399,7 @@ export function ResultView({
               {others.map((c, i) => (
                 <li
                   key={i}
-                  className="flex items-start justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-950/30 px-3 py-2"
+                  className="flex items-start justify-between gap-3 rounded-xl border border-line px-3 py-2.5"
                 >
                   <div className="min-w-0 text-sm text-zinc-300">
                     <Rich text={c.text} />
@@ -397,7 +409,7 @@ export function ResultView({
                       </p>
                     )}
                   </div>
-                  <LikelihoodTag cause={c} />
+                  <LikelihoodTag cause={c} t={t} />
                 </li>
               ))}
             </ul>
@@ -405,13 +417,11 @@ export function ResultView({
         </Section>
       )}
 
-      <Section icon={<Wrench className="h-4 w-4" />} title="How to fix it">
+      <Section icon={<Wrench className="h-4 w-4" />} title={t("res.fix")}>
         <ol className="space-y-2 text-sm leading-relaxed text-zinc-300">
           {diagnosis.steps.map((step, i) => (
             <li key={i} className="flex gap-3">
-              <span className="shrink-0 whitespace-nowrap pt-0.5 font-mono text-xs text-emerald-400">
-                {String(i + 1).padStart(2, "0")}
-              </span>
+              <span className="ep-step shrink-0">{i + 1}</span>
               <span>
                 <Rich text={step} />
               </span>
@@ -425,14 +435,14 @@ export function ResultView({
             {diagnosis.fixCode.before && (
               <CodeBlock
                 code={diagnosis.fixCode.before}
-                title="Before"
+                title={t("res.before")}
                 tone="bad"
                 copyable={false}
               />
             )}
             <CodeBlock
               code={diagnosis.fixCode.after}
-              title={diagnosis.fixCode.before ? "After" : "Fixed code"}
+              title={t(diagnosis.fixCode.before ? "res.after" : "res.fixed")}
               tone="good"
             />
           </div>
@@ -446,21 +456,21 @@ export function ResultView({
       {warnings.length > 0 && (
         <Section
           icon={<AlertTriangle className="h-4 w-4" />}
-          title={
-            diagnosis.category === "code-check" ? "Problems found" : "Other problems in your code"
-          }
+          title={t(diagnosis.category === "code-check" ? "res.problems" : "res.otherProblems")}
         >
           <WarningList warnings={warnings} />
         </Section>
       )}
 
       {diagnosis.glossary && diagnosis.glossary.length > 0 && (
-        <Section icon={<GraduationCap className="h-4 w-4" />} title="Words used here">
+        <Section icon={<GraduationCap className="h-4 w-4" />} title={t("res.words")}>
           <dl className="grid gap-2 sm:grid-cols-2">
             {diagnosis.glossary.map((g) => (
-              <div key={g.term} className="rounded-lg border border-zinc-800 bg-zinc-950/40 p-3">
-                <dt className="font-mono text-xs font-semibold text-emerald-300">{g.term}</dt>
-                <dd className="mt-1 text-xs leading-relaxed text-zinc-400">{g.meaning}</dd>
+              <div key={g.term} className="rounded-xl border border-line p-3">
+                <dt className="font-mono text-xs font-semibold text-brand">{g.term}</dt>
+                <dd className="mt-1 text-xs leading-relaxed text-zinc-400">
+                  {(lang === "tr" && glossaryTr(g.term)) || g.meaning}
+                </dd>
               </div>
             ))}
           </dl>
@@ -468,7 +478,7 @@ export function ResultView({
       )}
 
       {diagnosis.docs.length > 0 && (
-        <Section icon={<BookOpen className="h-4 w-4" />} title="Official Roblox docs">
+        <Section icon={<BookOpen className="h-4 w-4" />} title={t("res.docs")}>
           <div className="flex flex-wrap gap-2">
             {diagnosis.docs.map((d) => (
               <a
@@ -476,28 +486,26 @@ export function ResultView({
                 href={d.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-950/40 px-3 py-1.5 text-xs text-zinc-300 transition-colors hover:border-emerald-500/40 hover:text-emerald-200"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-xs text-zinc-300 transition-colors hover:border-brand-line hover:bg-brand-soft hover:text-brand"
               >
                 {d.label}
                 <ExternalLink className="h-3 w-3" aria-hidden="true" />
               </a>
             ))}
           </div>
-          <p className="text-[11px] text-zinc-600">
-            Links go only to create.roblox.com — never to guessed forum posts.
-          </p>
+          <p className="text-[11px] text-zinc-600">{t("res.docsNote")}</p>
         </Section>
       )}
 
       {advanced && (advanced.hypotheses?.length || advanced.runtimeStates?.length) ? (
-        <div className="border-t border-zinc-800/80 pt-4">
+        <div className="border-t border-line pt-4">
           <button
             type="button"
             onClick={() => setShowTech((v) => !v)}
             aria-expanded={showTech}
-            className="flex w-full items-center justify-between text-[15px] font-bold text-zinc-500 hover:text-zinc-300"
+            className="flex w-full items-center justify-between text-[14px] font-medium text-zinc-500 hover:text-zinc-300"
           >
-            Technical details (AST analysis)
+            {t("res.tech")}
             <ChevronDown
               className={`h-4 w-4 transition-transform ${showTech ? "rotate-180" : ""}`}
               aria-hidden="true"
@@ -507,7 +515,7 @@ export function ResultView({
             <div className="mt-4 space-y-4 text-xs text-zinc-400">
               {advanced.runtimeStates && advanced.runtimeStates.length > 0 && (
                 <div>
-                  <div className="mb-1.5 font-semibold text-zinc-300">Inferred object states</div>
+                  <div className="mb-1.5 font-semibold text-zinc-300">{t("res.states")}</div>
                   <ul className="space-y-1 font-mono">
                     {advanced.runtimeStates.slice(0, 8).map((s, i) => (
                       <li key={i}>
@@ -520,7 +528,7 @@ export function ResultView({
               )}
               {advanced.flowTraces && advanced.flowTraces.length > 0 && (
                 <div>
-                  <div className="mb-1.5 font-semibold text-zinc-300">Value flow</div>
+                  <div className="mb-1.5 font-semibold text-zinc-300">{t("res.flow")}</div>
                   <ul className="space-y-1 font-mono">
                     {advanced.flowTraces.slice(0, 8).map((t, i) => (
                       <li key={i}>
@@ -533,9 +541,7 @@ export function ResultView({
               )}
               {advanced.hypotheses && advanced.hypotheses.length > 0 && (
                 <div>
-                  <div className="mb-1.5 font-semibold text-zinc-300">
-                    Generic pipeline hypotheses
-                  </div>
+                  <div className="mb-1.5 font-semibold text-zinc-300">{t("res.hyp")}</div>
                   <ul className="space-y-1">
                     {advanced.hypotheses.slice(0, 4).map((h, i) => (
                       <li key={i}>
