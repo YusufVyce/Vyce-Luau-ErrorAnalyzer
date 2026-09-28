@@ -250,6 +250,32 @@
   .vy-node[data-state="locked"]:active {
     box-shadow: 0 2px 0 var(--line-strong);
   }
+  /* Glossy highlight on round buttons */
+  .vy-node::before {
+    content: "";
+    position: absolute;
+    top: 7px;
+    left: 14px;
+    width: 26px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.35);
+    transform: rotate(-18deg);
+    pointer-events: none;
+  }
+  .vy-node[data-state="locked"]::before {
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .vy-node-icon {
+    display: inline-flex;
+    filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.18));
+  }
+  .vy-node:hover .vy-node-icon {
+    animation: vy-wiggle 500ms ease;
+  }
+  .vy-chest-glow {
+    animation: vy-glow 1.4s ease-in-out infinite;
+  }
   .vy-node-ring {
     position: absolute;
     inset: -11px -11px -3px;
@@ -347,35 +373,36 @@
   }
 
   /* ---------- Mascot ---------- */
+  .vy-mascot g,
+  .vy-mascot path,
+  .vy-mascot rect,
+  .vy-mascot circle,
+  .vy-mascot ellipse,
+  .vy-mascot text {
+    transform-box: view-box;
+  }
   .vy-mascot .vy-m-body {
-    transform-origin: 60px 110px;
-    transform-box: view-box;
+    transform-origin: 60px 118px;
   }
-  .vy-mascot[data-mood="idle"] .vy-m-body,
-  .vy-mascot[data-mood="think"] .vy-m-body {
-    animation: vy-float 3.2s ease-in-out infinite;
+  .vy-mascot .vy-m-head {
+    transform-origin: 60px 88px;
   }
-  .vy-mascot[data-mood="happy"] .vy-m-body {
-    animation: vy-hop 520ms ease 2;
+  .vy-mascot .vy-m-antenna {
+    transform-origin: 60px 21px;
+    animation: vy-antenna 2.6s ease-in-out infinite;
   }
-  .vy-mascot[data-mood="cheer"] .vy-m-body {
-    animation: vy-jump 900ms ease-in-out infinite;
-  }
-  .vy-mascot[data-mood="sad"] .vy-m-body {
-    transform: translateY(5px) rotate(-5deg);
-    transition: transform 300ms ease;
-  }
-  .vy-mascot .vy-m-eyes {
-    transform-origin: 60px 56px;
-    transform-box: view-box;
-    animation: vy-blink 4.5s infinite;
+  .vy-mascot .vy-m-shadow {
+    transform-origin: 60px 125px;
   }
   .vy-mascot .vy-m-bulb {
     animation: vy-glow 1.6s ease-in-out infinite;
   }
+  .vy-mascot .vy-m-eyes {
+    transform-origin: 60px 56px;
+    animation: vy-blink 4.5s infinite;
+  }
   .vy-mascot .vy-m-arm-l,
   .vy-mascot .vy-m-arm-r {
-    transform-box: view-box;
     transition: transform 250ms ease;
   }
   .vy-mascot .vy-m-arm-l {
@@ -384,14 +411,121 @@
   .vy-mascot .vy-m-arm-r {
     transform-origin: 96px 92px;
   }
-  .vy-mascot[data-mood="cheer"] .vy-m-arm-l {
-    transform: rotate(125deg);
+
+  /* idle: float, look around */
+  .vy-mascot[data-mood="idle"] .vy-m-body {
+    animation: vy-float 3.2s ease-in-out infinite;
   }
-  .vy-mascot[data-mood="cheer"] .vy-m-arm-r {
-    transform: rotate(-125deg);
+  .vy-mascot[data-mood="idle"] .vy-m-shadow,
+  .vy-mascot[data-mood="think"] .vy-m-shadow {
+    animation: vy-shadow 3.2s ease-in-out infinite;
+  }
+  .vy-mascot[data-mood="idle"] .vy-m-face {
+    animation: vy-glance 6s ease-in-out infinite;
+  }
+  /* happy: hop, then keep waving */
+  .vy-mascot[data-mood="happy"] .vy-m-body {
+    animation:
+      vy-hop 520ms ease 2,
+      vy-float 3s ease-in-out 1.1s infinite;
   }
   .vy-mascot[data-mood="happy"] .vy-m-arm-r {
-    animation: vy-wave 500ms ease-in-out 3;
+    animation: vy-wave 1.2s ease-in-out infinite;
+  }
+  /* cheer: jump with both arms up */
+  .vy-mascot[data-mood="cheer"] .vy-m-body {
+    animation: vy-jump 900ms ease-in-out infinite;
+  }
+  .vy-mascot[data-mood="cheer"] .vy-m-shadow {
+    animation: vy-shadow 450ms ease-in-out infinite;
+  }
+  .vy-mascot[data-mood="cheer"] .vy-m-arm-l {
+    animation: vy-cheer-l 450ms ease-in-out infinite alternate;
+  }
+  .vy-mascot[data-mood="cheer"] .vy-m-arm-r {
+    animation: vy-cheer-r 450ms ease-in-out infinite alternate;
+  }
+  /* sad: droop, antenna down, tears */
+  .vy-mascot[data-mood="sad"] .vy-m-body {
+    animation: vy-sigh 3.4s ease-in-out infinite;
+  }
+  .vy-mascot[data-mood="sad"] .vy-m-antenna {
+    animation: none;
+    transform: rotate(-35deg);
+  }
+  .vy-mascot[data-mood="sad"] .vy-m-tear {
+    animation: vy-tear 1.6s ease-in infinite;
+  }
+  /* think: head tilt, thought dots */
+  .vy-mascot[data-mood="think"] .vy-m-body {
+    animation: vy-float 3.2s ease-in-out infinite;
+  }
+  .vy-mascot[data-mood="think"] .vy-m-head {
+    animation: vy-tilt 2.4s ease-in-out infinite;
+  }
+  .vy-mascot[data-mood="think"] .vy-m-arm-r {
+    transform: rotate(-150deg) translateY(4px);
+  }
+  .vy-mascot .vy-m-dot {
+    animation: vy-dot 1.4s ease-in-out infinite;
+  }
+  /* wow: jump back, big eyes, "!" */
+  .vy-mascot[data-mood="wow"] .vy-m-body {
+    animation: vy-shock 1.8s ease-out infinite;
+  }
+  .vy-mascot[data-mood="wow"] .vy-m-arm-l {
+    transform: rotate(60deg);
+  }
+  .vy-mascot[data-mood="wow"] .vy-m-arm-r {
+    transform: rotate(-60deg);
+  }
+  .vy-mascot .vy-m-exclaim {
+    transform-origin: 106px 30px;
+    animation: vy-exclaim 1.8s ease-out infinite;
+  }
+  .vy-mascot .vy-m-mouth-o {
+    transform-origin: 60px 69px;
+    animation: vy-o 1.8s ease-out infinite;
+  }
+  /* love: sway, pulsing heart eyes, floating hearts */
+  .vy-mascot[data-mood="love"] .vy-m-body {
+    animation: vy-sway 2.4s ease-in-out infinite;
+  }
+  .vy-mascot .vy-m-hearteyes {
+    transform-origin: 60px 55px;
+    animation: vy-heartbeat 1s ease-in-out infinite;
+  }
+  .vy-mascot[data-mood="love"] .vy-m-arm-l {
+    transform: rotate(40deg);
+  }
+  .vy-mascot[data-mood="love"] .vy-m-arm-r {
+    transform: rotate(-40deg);
+  }
+  /* sleepy: slow breathing, Zzz */
+  .vy-mascot[data-mood="sleepy"] .vy-m-body {
+    animation: vy-breathe 3.6s ease-in-out infinite;
+  }
+  .vy-mascot[data-mood="sleepy"] .vy-m-head {
+    transform: rotate(-6deg);
+  }
+  .vy-mascot[data-mood="sleepy"] .vy-m-antenna {
+    animation: none;
+    transform: rotate(25deg);
+  }
+  .vy-mascot[data-mood="sleepy"] .vy-m-bulb {
+    animation-duration: 3.6s;
+  }
+  .vy-mascot .vy-m-snore {
+    transform-origin: 60px 68.5px;
+    animation: vy-snore 3.6s ease-in-out infinite;
+  }
+  .vy-mascot .vy-m-float-up {
+    animation: vy-float-up 2.4s ease-out infinite;
+  }
+  .vy-mascot .vy-m-twinkle {
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: vy-twinkle 1.2s ease-in-out infinite;
   }
 
   /* ---------- Misc animations ---------- */
@@ -422,6 +556,201 @@
   }
 }
 
+@keyframes vy-glance {
+  0%,
+  40%,
+  100% {
+    transform: translateX(0);
+  }
+  45%,
+  60% {
+    transform: translateX(-4px);
+  }
+  65%,
+  80% {
+    transform: translateX(4px);
+  }
+}
+@keyframes vy-antenna {
+  0%,
+  100% {
+    transform: rotate(-6deg);
+  }
+  50% {
+    transform: rotate(6deg);
+  }
+}
+@keyframes vy-shadow {
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scaleX(0.8);
+    opacity: 0.6;
+  }
+}
+@keyframes vy-cheer-l {
+  from {
+    transform: rotate(110deg);
+  }
+  to {
+    transform: rotate(145deg);
+  }
+}
+@keyframes vy-cheer-r {
+  from {
+    transform: rotate(-110deg);
+  }
+  to {
+    transform: rotate(-145deg);
+  }
+}
+@keyframes vy-sigh {
+  0%,
+  100% {
+    transform: translateY(5px) rotate(-5deg);
+  }
+  50% {
+    transform: translateY(8px) rotate(-3deg) scale(1, 0.97);
+  }
+}
+@keyframes vy-tear {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(26px);
+    opacity: 0;
+  }
+}
+@keyframes vy-tilt {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  50% {
+    transform: rotate(-7deg);
+  }
+}
+@keyframes vy-dot {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+@keyframes vy-shock {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  12% {
+    transform: translateY(-12px) scale(1.06, 0.94);
+  }
+  25%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes vy-exclaim {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  15% {
+    transform: scale(1.3);
+    opacity: 1;
+  }
+  30%,
+  80% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes vy-o {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.4);
+  }
+}
+@keyframes vy-sway {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(4deg) translateY(-3px);
+  }
+}
+@keyframes vy-breathe {
+  0%,
+  100% {
+    transform: translateY(2px) scale(1, 1);
+  }
+  50% {
+    transform: translateY(0) scale(1.02, 1.04);
+  }
+}
+@keyframes vy-snore {
+  0%,
+  100% {
+    transform: scale(0.6);
+  }
+  50% {
+    transform: scale(1.4);
+  }
+}
+@keyframes vy-float-up {
+  0% {
+    transform: translateY(8px) scale(0.6);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-18px) scale(1.1);
+    opacity: 0;
+  }
+}
+@keyframes vy-twinkle {
+  0%,
+  100% {
+    transform: scale(0.4) rotate(0);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.15) rotate(45deg);
+    opacity: 1;
+  }
+}
+@keyframes vy-wiggle {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  30% {
+    transform: rotate(-12deg) scale(1.08);
+  }
+  60% {
+    transform: rotate(9deg) scale(1.08);
+  }
+}
 @keyframes vy-float {
   0%,
   100% {
@@ -461,10 +790,10 @@
 @keyframes vy-wave {
   0%,
   100% {
-    transform: rotate(0);
+    transform: rotate(-125deg);
   }
   50% {
-    transform: rotate(-60deg);
+    transform: rotate(-165deg);
   }
 }
 @keyframes vy-blink {
