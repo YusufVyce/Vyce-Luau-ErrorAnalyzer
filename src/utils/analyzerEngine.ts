@@ -3,6 +3,8 @@ import {
   type AdvancedAnalyzerOutput,
 } from "@/lib/analyzer/advancedRobloxAnalyzer";
 import { runDynamicRobloxPipeline } from "@/lib/analyzer/pipeline";
+import { diagnose } from "@/lib/analyzer/precise/diagnose";
+import type { DiagnosisCategory, PreciseDiagnosis } from "@/lib/analyzer/precise/types";
 
 import type { Analysis, Cause, DeprecatedApi } from "@/lib/types";
 
@@ -34,6 +36,8 @@ export type AnalyzerResult =
 
       deprecatedApis?: DeprecatedApi[];
       advanced?: AdvancedAnalyzerOutput;
+      /** Message-specific diagnosis. The UI's primary view is built from this. */
+      precise?: PreciseDiagnosis;
     }
   | { matched: false; error?: string };
 
@@ -45,10 +49,7 @@ export type AnalyzerResult =
  * surfaced to the caller as `{ matched: false, error }` so the UI can show a
  * graceful "couldn't analyze this" state instead of crashing.
  */
-export function analyzeErrorAndCode(
-  logText: string,
-  codeText: string,
-): AnalyzerResult {
+export function analyzeErrorAndCode(logText: string, codeText: string): AnalyzerResult {
   try {
     const safeLogText = typeof logText === "string" ? logText : "";
     const safeCodeText = typeof codeText === "string" ? codeText : "";
@@ -87,17 +88,91 @@ const LEGACY_RULE_IDS: Record<string, string> = {
   UNKNOWN: "roblox-unknown",
 };
 
+const CATEGORY_RULE_IDS: Record<DiagnosisCategory, string> = {
+  "index-nil": "roblox-index-nil",
+  "call-nil": "roblox-call-nil",
+  arithmetic: "roblox-arithmetic-nil",
+  concatenate: "roblox-concat-nil",
+  compare: "roblox-compare-nil",
+  "invalid-argument": "roblox-invalid-argument",
+  "invalid-member": "roblox-invalid-member",
+  "invalid-type": "roblox-invalid-type",
+  wait: "roblox-wait",
+  timeout: "roblox-timeout",
+  "stack-overflow": "roblox-stack-overflow",
+  table: "roblox-table",
+  syntax: "roblox-syntax",
+  module: "roblox-module",
+  remote: "roblox-remote",
+  datastore: "roblox-datastore",
+  http: "roblox-http",
+  tween: "roblox-tween",
+  animation: "roblox-animation",
+  asset: "roblox-asset",
+  instance: "roblox-instance",
+  coroutine: "roblox-coroutine",
+  "code-check": "roblox-code-check",
+  unknown: "roblox-unknown",
+};
+
+const LIKELIHOOD_PERCENT = { likely: 70, possible: 25, unlikely: 10 } as const;
+
 function analyzeWithPipeline(logText: string, codeText: string): AnalyzerResult {
   if (logText.trim().length === 0 && codeText.trim().length === 0) {
     return { matched: false };
   }
 
+  const precise = diagnose(logText, codeText);
   const dynamic = runDynamicRobloxPipeline(logText, codeText);
-  if (!dynamic) {
+
+  if (!precise && !dynamic) {
     return { matched: false };
   }
 
-  const fixes = [dynamic.fixes.minimal, dynamic.fixes.better, dynamic.fixes.production];
+  // The dynamic pipeline still powers the "technical details" view.
+  const pipelineFixes = dynamic
+    ? [dynamic.fixes.minimal, dynamic.fixes.better, dynamic.fixes.production]
+    : [];
+  const advanced = dynamic
+    ? buildAdvancedAnalysisFromDynamicResult(dynamic, logText, codeText, pipelineFixes)
+    : undefined;
+  if (advanced && precise) {
+    advanced.docs = precise.docs.map((link) => link.url);
+  }
+
+  if (precise) {
+    const fixes = precise.steps.length ? precise.steps : pipelineFixes;
+    return {
+      matched: true,
+      ruleId: CATEGORY_RULE_IDS[precise.category] ?? "roblox-unknown",
+      title: precise.title,
+      rootCause: precise.causes[0]
+        ? `${precise.summary} Most likely: ${precise.causes[0].text}.`
+        : precise.summary,
+      fix: fixes[0] ?? "",
+      correctedExample: precise.fixCode?.after,
+      severity: precise.severity,
+      confidence: precise.confidence,
+      causes: precise.causes.map((item) => ({
+        percent: LIKELIHOOD_PERCENT[item.likelihood],
+        text: item.text,
+      })),
+      fixes,
+      codeInsights: precise.warnings.map((w) => ({ title: w.title, description: w.message })),
+      deprecatedApis: [],
+      advanced,
+      precise,
+    };
+  }
+
+  return analyzeDynamicOnly(dynamic!, advanced!, pipelineFixes);
+}
+
+function analyzeDynamicOnly(
+  dynamic: NonNullable<ReturnType<typeof runDynamicRobloxPipeline>>,
+  advanced: AdvancedAnalyzerOutput,
+  fixes: string[],
+): AnalyzerResult {
   const causes: Cause[] = dynamic.hypotheses.map((item) => ({
     percent: item.confidence,
     text: `${item.title}: ${item.rootCause}`,
@@ -114,19 +189,7 @@ function analyzeWithPipeline(logText: string, codeText: string): AnalyzerResult 
       description: item.description,
     })),
     deprecatedApis: [],
-    performanceIssues: dynamic.performanceNotes.map((item) => ({
-      title: item.title,
-      impact: "Medium" as const,
-      description: item.description,
-    })),
-    securityIssues: dynamic.securityNotes.map((item) => ({
-      title: item.title,
-      severity: "High" as const,
-      description: item.description,
-    })),
   };
-
-  const advanced = buildAdvancedAnalysisFromDynamicResult(dynamic, logText, codeText, fixes);
 
   return {
     matched: true,
@@ -136,7 +199,9 @@ function analyzeWithPipeline(logText: string, codeText: string): AnalyzerResult 
     causeChain: dynamic.rootCauseChain
       ? {
           primaryCause: dynamic.rootCauseChain.primaryCause.description,
-          intermediateCauses: dynamic.rootCauseChain.intermediateCauses.map((item) => item.description),
+          intermediateCauses: dynamic.rootCauseChain.intermediateCauses.map(
+            (item) => item.description,
+          ),
           surfaceError: dynamic.rootCauseChain.surfaceError.description,
         }
       : undefined,

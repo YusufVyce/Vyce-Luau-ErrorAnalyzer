@@ -43,6 +43,18 @@ Its purpose is not only to tell you **where** an error occurred—but to explain
 
 ---
 
+# Precise Diagnosis & Learn Page
+
+- **Exact message recognition** — 50+ real Roblox/Luau error messages (index/call/math on nil, "is not a valid member", infinite yield, script timeout, syntax errors, RemoteEvents, DataStores, HttpService, tweens, animations…) are parsed with their captured names.
+- **Code tracing** — finds the failing line, the exact nil expression, and where it came from (`FindFirstChild` miss, `LocalPlayer` on the server, `player.Character` before spawn, `GetAsync` for new players, typos, functions used before their definition…).
+- **Explainable confidence** — the score only increases for evidence the analyzer verified; the "Why?" button lists every step. Unrecognized messages are reported honestly instead of guessed.
+- **Only real documentation links** — links come from an allowlist of official create.roblox.com pages (`src/lib/analyzer/precise/docs.ts`); nothing is generated from API names and no forum links are shown.
+- **Learn page (`/learn`)** — a free course that teaches Roblox Studio scripting from zero, with illustrations, copy-paste code, examples inspired by popular games, common mistakes (openable in the analyzer) and quizzes.
+
+Engine: `src/lib/analyzer/precise/` · Ground-truth tests: `src/lib/analyzer/precise/diagnose.test.ts`
+
+---
+
 # Features
 
 - 🌳 Lightweight Luau AST parser

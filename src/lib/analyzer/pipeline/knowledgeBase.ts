@@ -1,7 +1,53 @@
+import { doc } from "../precise/docs";
 import type { DiagnosticKnowledge, ErrorFamily } from "./types";
 
+/**
+ * Doc pages per domain. Only keys from the verified allowlist in
+ * `precise/docs.ts` are used — URLs are never built from API names, which is
+ * how this file used to emit dead links like `/engine/Humanoid:LoadAnimation`.
+ */
+const DOMAIN_DOCS: Record<string, string[]> = {
+  Networking: ["RemoteEvent", "RemoteFunction", "guideRemote"],
+  Replication: ["Instance", "ReplicatedStorage"],
+  Physics: ["BasePart", "Workspace"],
+  Constraints: ["BasePart"],
+  Animation: ["Animator", "Humanoid"],
+  Pathfinding: ["Humanoid"],
+  DataStore: ["DataStoreService", "GlobalDataStore", "guideDataStores"],
+  Memory: ["Instance", "RBXScriptSignal"],
+  Events: ["RBXScriptSignal", "BindableEvent"],
+  Signals: ["BindableEvent"],
+  UI: ["TextLabel", "TextButton", "ScreenGui"],
+  TweenService: ["TweenService", "TweenInfo"],
+  Humanoid: ["Humanoid"],
+  Character: ["Player", "Humanoid"],
+  Camera: ["Workspace"],
+  Input: ["UserInputService"],
+  Marketplace: ["MarketplaceService"],
+  Teleport: ["Players"],
+  MessagingService: ["Players"],
+  MemoryStore: ["DataStoreService"],
+  Attributes: ["Instance"],
+  CollectionService: ["CollectionService"],
+  Instances: ["Instance"],
+  Plugin: ["Instance"],
+  Terrain: ["Workspace"],
+  CSG: ["BasePart"],
+  Raycast: ["Workspace"],
+  CollisionGroups: ["BasePart"],
+  HttpService: ["HttpService"],
+  Serialization: ["HttpService", "table"],
+};
+
 const DOMAIN_APIS: Record<string, string[]> = {
-  Networking: ["RemoteEvent", "RemoteFunction", "FireServer", "FireClient", "InvokeServer", "InvokeClient"],
+  Networking: [
+    "RemoteEvent",
+    "RemoteFunction",
+    "FireServer",
+    "FireClient",
+    "InvokeServer",
+    "InvokeClient",
+  ],
   Replication: ["WaitForChild", "FindFirstChild", "StreamingEnabled", "ReplicatedStorage"],
   Physics: ["BasePart", "AssemblyLinearVelocity", "CollisionGroup", "Raycast"],
   Constraints: ["HingeConstraint", "SpringConstraint", "BallSocketConstraint"],
@@ -37,7 +83,11 @@ const FAMILIES: Array<{ family: ErrorFamily; triggers: string[]; title: string }
   { family: "CALL_NIL", triggers: ["attempt to call a nil value"], title: "Call on Nil" },
   { family: "INDEX_NIL", triggers: ["attempt to index nil"], title: "Index on Nil" },
   { family: "CONCAT_NIL", triggers: ["attempt to concatenate nil"], title: "Concatenate Nil" },
-  { family: "ARITHMETIC_NIL", triggers: ["attempt to perform arithmetic on nil"], title: "Arithmetic on Nil" },
+  {
+    family: "ARITHMETIC_NIL",
+    triggers: ["attempt to perform arithmetic on nil"],
+    title: "Arithmetic on Nil",
+  },
   { family: "COMPARE_NIL", triggers: ["attempt to compare nil"], title: "Compare Nil" },
   { family: "INVALID_ARGUMENT", triggers: ["invalid argument"], title: "Invalid Argument" },
   { family: "INVALID_MEMBER", triggers: ["not a valid member"], title: "Invalid Member" },
@@ -49,7 +99,10 @@ const FAMILIES: Array<{ family: ErrorFamily; triggers: string[]; title: string }
 ];
 
 function slug(value: string): string {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 }
 
 const generated: DiagnosticKnowledge[] = [];
@@ -63,7 +116,9 @@ for (const domain of Object.keys(DOMAIN_APIS)) {
       domain,
       title: `${domain} • ${familySpec.title}`,
       triggers: familySpec.triggers,
-      docs: apis.slice(0, 3).map((api) => `https://create.roblox.com/docs/reference/engine/${api}`),
+      docs: (DOMAIN_DOCS[domain] ?? [])
+        .map((key) => doc(key)?.url)
+        .filter((url): url is string => Boolean(url)),
       relatedApis: apis,
       relatedErrors: [
         "attempt to index nil",
