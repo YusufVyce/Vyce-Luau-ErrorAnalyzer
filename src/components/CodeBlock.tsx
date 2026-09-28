@@ -161,12 +161,10 @@ export function CodeBlock({
     tone === "good" ? "text-emerald-300" : tone === "bad" ? "text-red-300" : "text-zinc-400";
 
   return (
-    <div className={`rounded-lg border ${border} bg-[#0b0e12] overflow-hidden`}>
+    <div className={`code-dark overflow-hidden rounded-lg border-2 border-[#1c1a16] bg-[#1e1e1e]`}>
       {(title || copyable) && (
-        <div className="flex items-center justify-between gap-2 border-b border-zinc-800/80 px-3 py-1.5">
-          <span className={`text-[11px] font-semibold uppercase tracking-wider ${titleColor}`}>
-            {title ?? "Luau"}
-          </span>
+        <div className="flex items-center justify-between gap-2 border-b border-zinc-800 bg-[#252526] px-3 py-1.5">
+          <span className={`text-[12px] font-semibold ${titleColor}`}>{title ?? "Luau"}</span>
           {copyable && (
             <button
               type="button"

@@ -60,9 +60,7 @@ function LikelihoodTag({ cause }: { cause: DiagnosisCause }) {
         ? "bg-amber-500/10 text-amber-200 border-amber-500/25"
         : "bg-zinc-800 text-zinc-400 border-zinc-700";
   return (
-    <span
-      className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${style}`}
-    >
+    <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${style}`}>
       {cause.likelihood === "likely"
         ? "Most likely"
         : cause.likelihood === "possible"
@@ -130,7 +128,7 @@ function WarningList({ warnings }: { warnings: CodeWarning[] }) {
                 <Rich text={w.message} />
               </p>
               {w.fix && (
-                <pre className="mt-1 overflow-x-auto rounded bg-black/40 px-2 py-1.5 font-mono text-[12px] text-emerald-200">
+                <pre className="code-dark mt-1 overflow-x-auto rounded bg-[#1e1e1e] px-2 py-1.5 font-mono text-[12px] text-emerald-200">
                   {highlightLuau(w.fix)}
                 </pre>
               )}
@@ -153,7 +151,7 @@ function Section({
 }) {
   return (
     <section className="space-y-3">
-      <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+      <h3 className="flex items-center gap-2 text-[17px] font-bold text-zinc-100">
         <span className="text-emerald-400">{icon}</span>
         {title}
       </h3>
@@ -196,11 +194,9 @@ function PatchedScript({ patched }: { patched: NonNullable<PreciseDiagnosis["pat
   const lines = patched.code.split("\n");
   const changed = new Set(patched.changed);
   return (
-    <div className="overflow-hidden rounded-lg border border-emerald-500/30 bg-[#0b0e12]">
-      <div className="flex items-center justify-between border-b border-zinc-800 px-3 py-1.5 text-[11px]">
-        <span className="font-semibold uppercase tracking-wider text-emerald-300">
-          Your script, fixed
-        </span>
+    <div className="code-dark overflow-hidden rounded-lg border-2 border-[#1c1a16] bg-[#1e1e1e]">
+      <div className="flex items-center justify-between border-b border-zinc-800 bg-[#252526] px-3 py-1.5 text-[12px]">
+        <span className="font-semibold text-emerald-300">Your script, fixed</span>
         <button
           type="button"
           onClick={async () => {
@@ -351,7 +347,7 @@ export function ResultView({
           <CodeLine {...diagnosis.location} />
           {diagnosis.breakdown && diagnosis.breakdown.length > 0 && (
             <div className="space-y-2 rounded-lg border border-zinc-800 bg-zinc-950/40 p-3">
-              <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+              <div className="flex items-center gap-1.5 text-[15px] font-bold text-zinc-400">
                 <ListOrdered className="h-3.5 w-3.5" aria-hidden="true" /> What Luau did, step by
                 step
               </div>
@@ -499,7 +495,7 @@ export function ResultView({
             type="button"
             onClick={() => setShowTech((v) => !v)}
             aria-expanded={showTech}
-            className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300"
+            className="flex w-full items-center justify-between text-[15px] font-bold text-zinc-500 hover:text-zinc-300"
           >
             Technical details (AST analysis)
             <ChevronDown

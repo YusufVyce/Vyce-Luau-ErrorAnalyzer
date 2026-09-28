@@ -11,6 +11,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
+import { PageHeader } from "@/components/PageHeader";
 import { CodeEditor } from "@/components/CodeEditor";
 import { ExplorerTree, OutputConsole } from "@/components/learn/SimPanels";
 import { explorerOf, type ExplorerNode, type OutputLine } from "@/lib/learn/homework/harness";
@@ -198,20 +199,21 @@ function PlaygroundPage() {
     <>
       <SiteNav />
       <div className="relative mx-auto w-full max-w-6xl px-4 pb-16">
-        <div className="ep-aurora" aria-hidden="true" />
-        <header className="relative z-10 space-y-3 py-10 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-emerald-300">
-            <FlaskConical className="h-3.5 w-3.5" aria-hidden="true" /> Playground
-          </div>
-          <h1 className="serif-title text-4xl text-zinc-50 md:text-5xl">
-            A tiny Roblox server in your browser
-          </h1>
-          <p className="mx-auto max-w-2xl text-sm text-zinc-400">
-            Write a Script and a LocalScript, press Run, then make players join, touch parts and
-            press keys. Everything is simulated locally — the Output and Explorer update like in
-            Studio.
-          </p>
-        </header>
+        <PageHeader
+          sticker={
+            <>
+              <FlaskConical className="h-4 w-4" aria-hidden="true" /> Playground
+            </>
+          }
+          title={
+            <>
+              A tiny Roblox server <span className="ep-mark">in your browser</span>
+            </>
+          }
+        >
+          Write a Script and a LocalScript, press Run, then make players join, touch parts and press
+          keys. Output and Explorer update just like in Studio.
+        </PageHeader>
 
         <div className="relative z-10 grid gap-5 lg:grid-cols-[1.2fr_1fr]">
           <section className="ep-card space-y-3 p-4">
@@ -330,13 +332,13 @@ function PlaygroundPage() {
           </section>
 
           <section className="space-y-4">
-            <div className="ep-card overflow-hidden">
-              <div className="flex items-center justify-between border-b border-zinc-800 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-pink-300">
+            <div className="ep-card code-dark overflow-hidden bg-[#1e1e1e]">
+              <div className="flex items-center justify-between border-b border-zinc-800 bg-[#252526] px-3 py-2 text-xs font-semibold text-zinc-200">
                 Output
                 {lastError && (
                   <a
                     href={analyzerLink(lastError.text, tab === "server" ? server : client)}
-                    className="normal-case tracking-normal text-emerald-300 hover:underline"
+                    className="text-emerald-300 hover:underline"
                   >
                     Explain this error →
                   </a>
@@ -344,8 +346,8 @@ function PlaygroundPage() {
               </div>
               <OutputConsole lines={output} emptyText="Press Run to start the server." />
             </div>
-            <div className="ep-card overflow-hidden">
-              <div className="border-b border-zinc-800 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-emerald-300">
+            <div className="ep-card code-dark overflow-hidden bg-[#1e1e1e]">
+              <div className="border-b border-zinc-800 bg-[#252526] px-3 py-2 text-xs font-semibold text-zinc-200">
                 Explorer
               </div>
               <ExplorerTree nodes={explorer} />

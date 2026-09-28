@@ -17,10 +17,10 @@ describe("homework", () => {
       expect(r.checks.some((c) => !c.pass && c.detail)).toBe(true);
     });
   }
-  it("every lesson except the Studio tour has homework", () => {
-    const missing = LESSONS.filter(
-      (l) => l.id !== "studio-tour" && !EXERCISES.some((e) => e.lessonId === l.id),
-    ).map((l) => l.id);
+  it("every lesson has homework", () => {
+    const missing = LESSONS.filter((l) => !EXERCISES.some((e) => e.lessonId === l.id)).map(
+      (l) => l.id,
+    );
     expect(missing).toEqual([]);
   });
 });

@@ -48,6 +48,38 @@ function character(p: Instance): Instance | undefined {
 }
 
 export const EXERCISES: Exercise[] = [
+  // ---------------------------------------------------------------- studio-tour
+  {
+    lessonId: "studio-tour",
+    title: "Change a property with code",
+    kind: "write",
+    goal: "Everything in the Properties window can also be changed by a script. Try it on the Baseplate.",
+    steps: [
+      "Make the Baseplate half see-through: set its Transparency to 0.5.",
+      "Print the Baseplate's Name to the Output.",
+    ],
+    scriptKind: "Script",
+    location: "ServerScriptService › Script",
+    starter: "-- The Baseplate is at workspace.Baseplate\n\n",
+    hints: [
+      "workspace.Baseplate.Transparency = 0.5 changes the property. It's the same name as in the Properties window.",
+      "print(workspace.Baseplate.Name) prints its name. No quotes: you want the part's real name, not text you typed.",
+    ],
+    solution: "workspace.Baseplate.Transparency = 0.5\nprint(workspace.Baseplate.Name)\n",
+    grade(h) {
+      const w = h.newWorld();
+      h.addStudentScript(w, w.service("ServerScriptService"));
+      w.run(1);
+      const t = w.workspace.findFirstChild("Baseplate")?.props.get("Transparency");
+      h.check("Baseplate Transparency is 0.5", approx(t, 0.5), `Transparency is ${fmtValue(t)}.`);
+      h.expectPrinted("Baseplate", "Output shows the Baseplate's name");
+      h.check(
+        "The name comes from the part, not from typed text",
+        h.codeHas(/\.Name\b/),
+        'Use workspace.Baseplate.Name instead of typing "Baseplate" in quotes.',
+      );
+    },
+  },
   // ---------------------------------------------------------------- first-script
   {
     lessonId: "first-script",

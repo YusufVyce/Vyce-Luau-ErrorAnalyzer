@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Library, Search } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
+import { PageHeader } from "@/components/PageHeader";
 import { diagnose } from "@/lib/analyzer/precise/diagnose";
 import { ERROR_LIBRARY } from "@/lib/analyzer/precise/library";
 import { analyzerLink } from "@/lib/learn/lessons";
@@ -74,19 +75,21 @@ function ErrorsPage() {
     <>
       <SiteNav />
       <div className="relative mx-auto w-full max-w-5xl px-4 pb-16">
-        <div className="ep-aurora" aria-hidden="true" />
-        <header className="relative z-10 space-y-3 py-10 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-emerald-300">
-            <Library className="h-3.5 w-3.5" aria-hidden="true" /> Error library
-          </div>
-          <h1 className="serif-title text-4xl text-zinc-50 md:text-5xl">
-            Every common Roblox error, explained
-          </h1>
-          <p className="mx-auto max-w-2xl text-sm text-zinc-400">
-            Search for the message you see in Output. Open any example in the analyzer to see the
-            full explanation and fix.
-          </p>
-        </header>
+        <PageHeader
+          sticker={
+            <>
+              <Library className="h-4 w-4" aria-hidden="true" /> Error library
+            </>
+          }
+          title={
+            <>
+              Every common Roblox error, <span className="ep-mark">explained</span>
+            </>
+          }
+        >
+          Search for the message you see in Output. Open any of them in the analyzer to see the full
+          explanation and the fix.
+        </PageHeader>
 
         <div className="relative z-10 space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -120,8 +123,8 @@ function ErrorsPage() {
           <ul className="grid gap-3 md:grid-cols-2">
             {shown.map((e) => (
               <li key={e.log} className="ep-card flex flex-col gap-2 p-4">
-                <div className="text-[10px] uppercase tracking-wider text-zinc-500">{e.group}</div>
-                <code className="break-words rounded-md border border-red-500/20 bg-black/40 px-2 py-1.5 font-mono text-[12px] text-red-300">
+                <div className="text-[11px] font-medium text-zinc-500">{e.group}</div>
+                <code className="code-dark break-words rounded-md bg-[#1e1e1e] px-2 py-1.5 font-mono text-[12px] text-red-400">
                   {e.message}
                 </code>
                 <div className="font-semibold text-zinc-100">

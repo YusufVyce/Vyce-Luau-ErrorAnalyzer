@@ -13,12 +13,14 @@ import {
   ListChecks,
   Lock,
   MapPin,
-  Sparkles,
+  PenLine,
+  Star,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { CodeBlock } from "@/components/CodeBlock";
 import { Visual } from "@/components/learn/Visuals";
 import { HomeworkPanel } from "@/components/learn/HomeworkPanel";
+import { PageHeader } from "@/components/PageHeader";
 import { analyzerLink, CHAPTERS, LESSONS, type Lesson } from "@/lib/learn/lessons";
 import { exerciseFor } from "@/lib/learn/homework/exercises";
 import {
@@ -89,7 +91,7 @@ function Quiz({
       className="space-y-3 rounded-xl border border-violet-500/25 bg-violet-500/[0.05] p-5"
       aria-label="Quick check"
     >
-      <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-violet-300">
+      <div className="flex items-center justify-between text-[15px] font-bold text-violet-300">
         Quick check
         {solved && (
           <span className="inline-flex items-center gap-1 normal-case tracking-normal text-emerald-300">
@@ -187,7 +189,7 @@ function LessonBody({ lesson }: { lesson: Lesson }) {
 
       {lesson.game && (
         <section className="space-y-2 rounded-xl border border-amber-500/25 bg-gradient-to-br from-amber-500/[0.08] to-transparent p-5">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-300">
+          <div className="flex items-center gap-2 text-[15px] font-bold text-amber-300">
             <Gamepad2 className="h-4 w-4" aria-hidden="true" /> In real games: {lesson.game.name}
           </div>
           <Paragraph text={lesson.game.text} />
@@ -196,7 +198,7 @@ function LessonBody({ lesson }: { lesson: Lesson }) {
 
       {lesson.tryIt && (
         <section className="space-y-3 rounded-xl border border-zinc-800 bg-zinc-950/40 p-5">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-emerald-300">
+          <div className="flex items-center gap-2 text-[15px] font-bold text-emerald-300">
             <ListChecks className="h-4 w-4" aria-hidden="true" /> Try it in Studio
           </div>
           <ol className="space-y-2">
@@ -214,11 +216,11 @@ function LessonBody({ lesson }: { lesson: Lesson }) {
 
       {lesson.mistake && (
         <section className="space-y-3 rounded-xl border border-red-500/25 bg-red-500/[0.04] p-5">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-red-300">
+          <div className="flex items-center gap-2 text-[15px] font-bold text-red-300">
             <AlertOctagon className="h-4 w-4" aria-hidden="true" /> Common mistake
           </div>
           <CodeBlock code={lesson.mistake.code} title="This code…" tone="bad" copyable={false} />
-          <div className="rounded-lg border border-red-500/20 bg-black/40 px-3 py-2 font-mono text-[13px] text-red-300">
+          <div className="code-dark rounded-lg border-2 border-[#1c1a16] bg-[#1e1e1e] px-3 py-2 font-mono text-[13px] text-red-400">
             {lesson.mistake.error}
           </div>
           <p className="text-sm text-zinc-300">{lesson.mistake.explain}</p>
@@ -327,31 +329,26 @@ function LearnPage() {
 
   const sidebar = (
     <nav aria-label="Lessons" className="space-y-5">
-      <div className="space-y-3 rounded-xl border border-zinc-800 bg-zinc-950/50 p-3">
+      <div className="space-y-3 rounded-xl border-2 border-[#1c1a16] bg-white p-3 shadow-[3px_3px_0_#1c1a16]">
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-zinc-500">
-              Level {lvl.level}
-            </div>
+            <div className="text-[11px] font-medium text-zinc-500">Level {lvl.level}</div>
             <div className="text-sm font-semibold text-zinc-100">{lvl.title}</div>
           </div>
           <div className="text-right">
             <div className="font-mono text-lg font-bold text-emerald-300">{progress.xp}</div>
-            <div className="text-[10px] uppercase tracking-wider text-zinc-500">XP</div>
+            <div className="text-[11px] font-medium text-zinc-500">XP</div>
           </div>
         </div>
         <div
-          className="h-1.5 overflow-hidden rounded-full bg-zinc-900"
+          className="h-2.5 overflow-hidden rounded-full border-2 border-[#1c1a16] bg-white"
           role="progressbar"
           aria-valuenow={Math.round(lvl.progress * 100)}
           aria-valuemin={0}
           aria-valuemax={100}
           aria-label="Level progress"
         >
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-violet-400 to-emerald-400"
-            style={{ width: `${lvl.progress * 100}%` }}
-          />
+          <div className="h-full bg-[#2fb45a]" style={{ width: `${lvl.progress * 100}%` }} />
         </div>
         <div className="flex items-center justify-between text-xs text-zinc-500">
           <span>
@@ -362,9 +359,7 @@ function LearnPage() {
       </div>
       {byChapter.map(({ chapter, lessons }) => (
         <div key={chapter} className="space-y-1">
-          <div className="px-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
-            {chapter}
-          </div>
+          <div className="px-2 text-[15px] font-bold text-zinc-500">{chapter}</div>
           {lessons.map(({ l, i }) => {
             const active = l.id === lesson.id;
             const done = lessonComplete(progress, l);
@@ -377,7 +372,7 @@ function LearnPage() {
                 aria-current={active ? "page" : undefined}
                 className={`flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors ${
                   active
-                    ? "bg-emerald-500/10 text-emerald-200"
+                    ? "bg-[#ffd23f] font-semibold text-[#1c1a16]"
                     : open
                       ? "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"
                       : "text-zinc-600"
@@ -394,6 +389,14 @@ function LearnPage() {
                   <Lock className="h-3.5 w-3.5 shrink-0 text-zinc-700" aria-label="locked" />
                 )}
                 <span className="truncate">{l.title}</span>
+                {exerciseFor(l.id) && (
+                  <PenLine
+                    className={`ml-auto h-3.5 w-3.5 shrink-0 ${progress.homework.includes(l.id) ? "text-emerald-600" : "text-zinc-600"}`}
+                    aria-label={
+                      progress.homework.includes(l.id) ? "homework passed" : "has homework"
+                    }
+                  />
+                )}
               </button>
             );
           })}
@@ -416,37 +419,50 @@ function LearnPage() {
       {xpToast && (
         <div
           role="status"
-          className="fixed bottom-5 left-1/2 z-50 -translate-x-1/2 rounded-full border border-emerald-500/40 bg-emerald-950/90 px-4 py-2 text-sm font-semibold text-emerald-200 shadow-xl backdrop-blur"
+          className="fixed bottom-5 left-1/2 z-50 -translate-x-1/2 rounded-lg border-2 border-[#1c1a16] bg-[#ffd23f] px-4 py-2 text-sm font-bold text-[#1c1a16] shadow-[3px_3px_0_#1c1a16]"
         >
-          <Sparkles className="mr-1.5 inline h-4 w-4" aria-hidden="true" />
+          <Star className="mr-1.5 inline h-4 w-4 fill-current" aria-hidden="true" />
           {xpToast}
         </div>
       )}
       <div className="relative mx-auto w-full max-w-6xl px-4 pb-16">
-        <div className="ep-aurora" aria-hidden="true" />
-
-        <header className="relative z-10 space-y-3 py-10 text-center md:py-12">
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-emerald-300">
-            <span className="ep-dot" /> Free course · {LESSONS.length} lessons · real homework
-          </div>
-          <h1 className="serif-title text-4xl leading-tight text-zinc-50 md:text-5xl">
-            Learn Roblox scripting{" "}
-            <span className="bg-gradient-to-r from-emerald-300 to-teal-400 bg-clip-text italic text-transparent">
-              from zero
-            </span>
-          </h1>
-          <p className="mx-auto max-w-2xl text-sm text-zinc-400 md:text-base">
-            Read a short lesson, then write real Luau. Your homework runs in a simulated Roblox
-            server right in your browser — pass it to unlock the next lesson.
-          </p>
-        </header>
+        <PageHeader
+          sticker={<>Free course · {LESSONS.length} lessons</>}
+          title={
+            <>
+              Learn Roblox scripting <span className="ep-mark">from zero</span>
+            </>
+          }
+        >
+          Every lesson ends with homework: you write real Luau, it runs in a simulated Roblox server
+          right here, and you only move on when it works.
+        </PageHeader>
+        <ol className="relative z-10 mb-8 grid gap-2 text-sm sm:grid-cols-4">
+          {[
+            ["Read", "a short lesson with pictures"],
+            ["Answer", "one quick question"],
+            ["Write code", "for the homework"],
+            ["Pass", "→ the next lesson unlocks"],
+          ].map(([a, b], i) => (
+            <li
+              key={a}
+              className="flex items-center gap-3 rounded-lg border-2 border-[#1c1a16]/15 bg-white px-3 py-2"
+            >
+              <span className="ep-step shrink-0">{i + 1}</span>
+              <span>
+                <b className="font-semibold text-zinc-100">{a}</b>{" "}
+                <span className="text-zinc-400">{b}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
 
         <div className="relative z-10 mb-4 lg:hidden">
           <button
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
             aria-expanded={menuOpen}
-            className="w-full rounded-lg border border-zinc-800 bg-zinc-950/60 px-4 py-2.5 text-left text-sm text-zinc-300"
+            className="w-full rounded-lg border-2 border-[#1c1a16] bg-white px-4 py-2.5 text-left text-sm font-medium text-zinc-100"
           >
             {menuOpen
               ? "Hide lessons"
@@ -454,7 +470,9 @@ function LearnPage() {
             ▾
           </button>
           {menuOpen && (
-            <div className="mt-2 rounded-xl border border-zinc-800 bg-[#0b0f13] p-3">{sidebar}</div>
+            <div className="mt-2 rounded-xl border-2 border-[#1c1a16] bg-[#fffdf8] p-3">
+              {sidebar}
+            </div>
           )}
         </div>
 
@@ -505,6 +523,17 @@ function LearnPage() {
                     {lesson.title}
                   </h1>
                   <p className="text-base text-zinc-400">{lesson.summary}</p>
+                  {exercise && (
+                    <a
+                      href="#homework"
+                      className="inline-flex items-center gap-1.5 rounded-lg border-2 border-[#1c1a16] bg-white px-3 py-1.5 text-sm font-medium text-zinc-100 shadow-[2px_2px_0_#1c1a16] hover:bg-[#ffd23f]"
+                    >
+                      <PenLine className="h-4 w-4" aria-hidden="true" />
+                      {progress.homework.includes(lesson.id)
+                        ? "Homework passed ✓"
+                        : `Homework at the end: ${exercise.title}`}
+                    </a>
+                  )}
                 </header>
 
                 <LessonBody lesson={lesson} />
