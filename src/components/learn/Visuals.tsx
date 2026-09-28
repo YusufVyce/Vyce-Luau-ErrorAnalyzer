@@ -1083,7 +1083,7 @@ const VISUALS: Record<VisualId, () => ReactNode> = {
 export function Visual({ id, caption }: { id: VisualId; caption?: string }) {
   const Component = VISUALS[id];
   return (
-    <figure className="code-dark overflow-hidden rounded-xl border-2 border-[#1c1a16] bg-[#1e1e1e]">
+    <figure className="code-dark overflow-hidden rounded-xl border border-code-line bg-code">
       <Component />
       {caption && (
         <figcaption className="border-t border-zinc-800 px-4 py-2 text-xs text-zinc-500">

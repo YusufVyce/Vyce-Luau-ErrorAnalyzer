@@ -60,6 +60,22 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-line: var(--brand-line);
+  --color-code: var(--code);
+  --color-code-head: var(--code-head);
+  --color-code-line: var(--code-line);
 }
 
 :root {
@@ -144,60 +160,139 @@
   }
 }
 
-@layer components {
-  /* ---------- Site theme: paper + ink, Studio-dark code panels ---------- */
+/* ---------- Site theme tokens (dark is the default) ---------- */
+:root,
+:root[data-theme="dark"] {
+  --canvas: #07080c;
+  --surface: #0e1017;
+  --surface-2: #151822;
+  --line: #1d2230;
+  --line-strong: #2a3142;
+  --ink: #eef1f8;
+  --ink-2: #a6afc2;
+  --ink-3: #6f788c;
+  --brand: #82aaff;
+  --brand-hover: #9dbcff;
+  --brand-ink: #b4ccff;
+  --brand-soft: rgba(130, 170, 255, 0.1);
+  --brand-line: rgba(130, 170, 255, 0.32);
+  --syn-purple: #c792ea;
+  --syn-cyan: #89ddff;
+  --syn-green: #c3e88d;
+  --syn-orange: #f78c6c;
+  --code: #0a0c12;
+  --code-head: #10131b;
+  --code-line: #1d2230;
+  --glass-top: rgba(255, 255, 255, 0.1);
+  --glass-bottom: rgba(255, 255, 255, 0.02);
+  --card-shadow: 0 30px 80px -40px rgba(0, 0, 0, 0.8);
+  --dot: rgba(255, 255, 255, 0.06);
+  --glow-a: rgba(130, 170, 255, 0.16);
+  --glow-b: rgba(199, 146, 234, 0.12);
+}
+:root[data-theme="light"] {
+  --canvas: #f5f6fa;
+  --surface: #ffffff;
+  --surface-2: #f0f2f7;
+  --line: #e2e5ee;
+  --line-strong: #cfd4e0;
+  --ink: #0b1020;
+  --ink-2: #4a5368;
+  --ink-3: #6b7488;
+  --brand: #3656d8;
+  --brand-hover: #2a47bf;
+  --brand-ink: #2a47bf;
+  --brand-soft: rgba(54, 86, 216, 0.08);
+  --brand-line: rgba(54, 86, 216, 0.28);
+  --syn-purple: #8e44c9;
+  --syn-cyan: #0b8fb5;
+  --syn-green: #4d8a1f;
+  --syn-orange: #d4531f;
+  --code: #0d1017;
+  --code-head: #141822;
+  --code-line: #232939;
+  --glass-top: rgba(11, 16, 32, 0.12);
+  --glass-bottom: rgba(11, 16, 32, 0.06);
+  --card-shadow: 0 1px 2px rgba(11, 16, 32, 0.04), 0 24px 48px -28px rgba(11, 16, 32, 0.22);
+  --dot: rgba(11, 16, 32, 0.07);
+  --glow-a: rgba(54, 86, 216, 0.1);
+  --glow-b: rgba(142, 68, 201, 0.07);
+}
 
+@layer components {
   .ep-body {
-    --paper: #f6f2e9;
-    --paper-2: #fffdf8;
-    --ink: #1c1a16;
-    --ink-soft: #57524a;
-    --brick: #e8483f;
-    --go: #2fb45a;
-    --sun: #ffd23f;
-    font-family: "Rubik", system-ui, sans-serif;
+    font-family:
+      "Geist",
+      system-ui,
+      -apple-system,
+      "Segoe UI",
+      sans-serif;
     min-height: 100vh;
     overflow-y: auto;
-    background-color: var(--paper);
-    background-image: radial-gradient(rgba(28, 26, 22, 0.07) 1px, transparent 1px);
-    background-size: 22px 22px;
-    color: var(--ink-soft);
+    background-color: var(--canvas);
+    color: var(--ink-2);
+    color-scheme: dark;
+    -webkit-font-smoothing: antialiased;
+  }
+  :root[data-theme="light"] .ep-body {
     color-scheme: light;
   }
+  /* Dot grid + two soft glows behind the top of every page. */
+  .ep-body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+      radial-gradient(ellipse 60% 45% at 18% -5%, var(--glow-a), transparent 70%),
+      radial-gradient(ellipse 50% 40% at 85% 0%, var(--glow-b), transparent 70%),
+      radial-gradient(var(--dot) 1px, transparent 1px);
+    background-size:
+      100% 100%,
+      100% 100%,
+      24px 24px;
+    mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+  }
   .ep-body ::selection {
-    background: var(--sun);
-    color: var(--ink);
+    background: var(--brand);
+    color: #fff;
   }
   .ep-body code,
   .ep-body pre,
   .ep-body textarea,
+  .ep-body kbd,
   .ep-body .font-mono {
-    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-family: "Geist Mono", "JetBrains Mono", ui-monospace, monospace;
   }
   .ep-body h1,
   .ep-body h2,
   .ep-body h3,
-  .serif-title {
-    font-family: "Bricolage Grotesque", "Rubik", sans-serif;
-    letter-spacing: -0.02em;
-  }
+  .serif-title,
   .font-display {
-    font-family: "Bricolage Grotesque", "Rubik", system-ui, sans-serif;
+    font-family: "Geist", system-ui, sans-serif;
+    letter-spacing: -0.035em;
   }
   .serif-title {
-    font-weight: 800;
+    font-weight: 650;
     color: var(--ink);
   }
-  /* Highlighter-pen accent for one word in a heading. */
+  /* Gradient in syntax-highlight colors for one phrase in a heading. */
   .ep-mark {
-    background: linear-gradient(transparent 58%, var(--sun) 58%, var(--sun) 92%, transparent 92%);
-    padding: 0 0.12em;
-    color: var(--ink);
+    background: linear-gradient(
+      95deg,
+      var(--brand) 0%,
+      var(--syn-purple) 55%,
+      var(--syn-cyan) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
   .ep-body :focus-visible {
-    outline: 2px solid var(--ink);
+    outline: 2px solid var(--brand);
     outline-offset: 2px;
-    border-radius: 4px;
+    border-radius: 6px;
   }
   .ep-body textarea::-webkit-scrollbar,
   .ep-body pre::-webkit-scrollbar {
@@ -206,79 +301,157 @@
   }
   .ep-body textarea::-webkit-scrollbar-thumb,
   .ep-body pre::-webkit-scrollbar-thumb {
-    background: rgba(120, 113, 108, 0.35);
+    background: rgba(127, 136, 160, 0.3);
     border-radius: 6px;
   }
-
-  /* Decorative blobs from the old theme are gone. */
   .ep-aurora {
     display: none;
   }
 
-  /* Cards: white paper with an ink outline and a hard block shadow. */
+  /* Glass card with a gradient hairline border. */
   .ep-card {
     position: relative;
-    background: var(--paper-2);
-    border: 2px solid var(--ink);
-    border-radius: 14px;
-    box-shadow: 5px 5px 0 var(--ink);
+    border: 1px solid transparent;
+    border-radius: 18px;
+    background:
+      linear-gradient(var(--surface), var(--surface)) padding-box,
+      linear-gradient(180deg, var(--glass-top), var(--glass-bottom)) border-box;
+    box-shadow: var(--card-shadow);
   }
   .ep-card-accent {
-    background: var(--paper-2);
+    background:
+      linear-gradient(var(--surface), var(--surface)) padding-box,
+      linear-gradient(135deg, var(--brand-line), var(--glass-bottom) 45%) border-box;
+  }
+  /* Glowing gradient border used for the hero demo and homework panel. */
+  .ep-glow {
+    position: relative;
+    border: 1px solid transparent;
+    border-radius: 18px;
+    background:
+      linear-gradient(var(--surface), var(--surface)) padding-box,
+      linear-gradient(135deg, var(--brand), var(--syn-purple) 50%, var(--syn-cyan)) border-box;
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.02),
+      0 30px 90px -30px var(--glow-a),
+      0 20px 60px -40px var(--glow-b);
   }
 
-  /* Primary button: a chunky green brick that presses down. */
+  .ep-glow-code {
+    background:
+      linear-gradient(var(--code), var(--code)) padding-box,
+      linear-gradient(135deg, var(--brand), var(--syn-purple) 50%, var(--syn-cyan)) border-box;
+  }
+
   .ep-cta {
-    background: var(--go);
+    position: relative;
+    background: linear-gradient(180deg, var(--brand-hover), var(--brand));
     color: #fff;
-    border: 2px solid var(--ink);
-    box-shadow: 3px 3px 0 var(--ink);
-    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+      0 8px 24px -8px var(--brand-line),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
     transition:
-      transform 120ms ease,
-      box-shadow 120ms ease;
+      transform 150ms ease,
+      box-shadow 150ms ease,
+      filter 150ms ease;
+  }
+  :root:not([data-theme="light"]) .ep-cta {
+    color: #07080c;
+    text-shadow: none;
   }
   .ep-cta:not(:disabled):hover {
-    transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0 var(--ink);
+    transform: translateY(-1px);
+    filter: brightness(1.06);
+    box-shadow:
+      0 14px 34px -10px var(--brand),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
   }
   .ep-cta:not(:disabled):active {
-    transform: translate(3px, 3px);
-    box-shadow: 0 0 0 var(--ink);
+    transform: translateY(0);
   }
   .ep-cta:disabled {
-    background: #d6d0c4;
-    color: #6b655b;
-    text-shadow: none;
+    opacity: 0.45;
+    cursor: not-allowed;
     box-shadow: none;
-    border-color: #a8a195;
   }
 
-  /* Section number chips */
   .ep-step {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 22px;
+    min-width: 22px;
     height: 22px;
-    border-radius: 6px;
+    padding: 0 5px;
+    border-radius: 7px;
+    font-family: "Geist Mono", ui-monospace, monospace;
     font-size: 11px;
-    font-weight: 700;
-    background: var(--sun);
-    border: 2px solid var(--ink);
-    color: var(--ink);
+    font-weight: 600;
+    background: var(--brand-soft);
+    border: 1px solid var(--brand-line);
+    color: var(--brand);
   }
-
   .ep-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 2px;
-    background: var(--brick);
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: var(--syn-green);
+    box-shadow: 0 0 10px var(--syn-green);
   }
-
-  /* Dark "Studio" surfaces: code, Output, Explorer. */
+  /* "// 01 — label" section captions */
+  .ep-label {
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    color: var(--ink-3);
+  }
+  .ep-label b {
+    color: var(--syn-purple);
+    font-weight: 500;
+  }
+  .ep-caret {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.05em;
+    margin-left: 2px;
+    vertical-align: -0.15em;
+    background: var(--brand);
+    animation: ep-blink 1.1s steps(1) infinite;
+  }
+  @keyframes ep-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+  .ep-rise {
+    animation: ep-rise 520ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  }
+  @keyframes ep-rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .ep-scan {
+    background: linear-gradient(90deg, transparent, var(--brand-soft), transparent);
+    background-size: 200% 100%;
+    animation: ep-scan 1.2s linear infinite;
+  }
+  @keyframes ep-scan {
+    from {
+      background-position: 100% 0;
+    }
+    to {
+      background-position: -100% 0;
+    }
+  }
   .ep-body .code-dark {
-    color: #d4d4d8;
+    color: #d4d8e3;
   }
 }
 

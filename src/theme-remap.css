@@ -1,11 +1,11 @@
 /*
- * Light theme remap. Components were written with dark-theme utility classes
- * (text-zinc-100, bg-zinc-950, text-emerald-300...). Inside .ep-body each color
- * scale is mirrored (50<->950, 100<->900, ...) and zinc becomes the warm stone
- * scale, so the same classes render a light page. Code panels opt back into
- * the original dark scales with .code-dark, like Studio's script editor.
+ * Light theme. Components use dark-theme utility classes (text-zinc-100,
+ * bg-zinc-950, text-emerald-300...). In the light theme every color scale is
+ * mirrored (50<->950, 100<->900, ...), so the same classes render a light page.
+ * Code panels opt back into the original dark scales with .code-dark, like
+ * Studio's script editor. The dark theme uses Tailwind's scales unchanged.
  */
-.ep-body {
+html[data-theme="light"] .ep-body {
   --color-red-50: oklch(25.8% 0.092 26.042);
   --color-red-100: oklch(39.6% 0.141 25.723);
   --color-red-200: oklch(44.4% 0.177 26.899);
@@ -193,19 +193,19 @@
   --color-rose-800: oklch(89.2% 0.058 10.001);
   --color-rose-900: oklch(94.1% 0.03 12.58);
   --color-rose-950: oklch(96.9% 0.015 12.422);
-  --color-zinc-50: oklch(14.7% 0.004 49.25);
-  --color-zinc-100: oklch(21.6% 0.006 56.043);
-  --color-zinc-200: oklch(26.8% 0.007 34.298);
-  --color-zinc-300: oklch(37.4% 0.01 67.558);
-  --color-zinc-400: oklch(44.4% 0.011 73.639);
-  --color-zinc-500: oklch(55.3% 0.013 58.071);
-  --color-zinc-600: oklch(70.9% 0.01 56.259);
-  --color-zinc-700: oklch(86.9% 0.005 56.366);
-  --color-zinc-800: oklch(92.3% 0.003 48.717);
-  --color-zinc-900: oklch(97% 0.001 106.424);
-  --color-zinc-950: oklch(98.5% 0.001 106.423);
+  --color-zinc-50: oklch(14.1% 0.005 285.823);
+  --color-zinc-100: oklch(21% 0.006 285.885);
+  --color-zinc-200: oklch(27.4% 0.006 286.033);
+  --color-zinc-300: oklch(37% 0.013 285.805);
+  --color-zinc-400: oklch(44.2% 0.017 285.786);
+  --color-zinc-500: oklch(55.2% 0.016 285.938);
+  --color-zinc-600: oklch(70.5% 0.015 286.067);
+  --color-zinc-700: oklch(87.1% 0.006 286.286);
+  --color-zinc-800: oklch(92% 0.004 286.32);
+  --color-zinc-900: oklch(96.7% 0.001 286.375);
+  --color-zinc-950: oklch(98.5% 0 0);
 }
-.ep-body .code-dark {
+html[data-theme="light"] .ep-body .code-dark {
   --color-red-50: oklch(97.1% 0.013 17.38);
   --color-red-100: oklch(93.6% 0.032 17.717);
   --color-red-200: oklch(88.5% 0.062 18.334);

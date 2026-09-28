@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   Clock,
   FlaskConical,
@@ -10,7 +10,9 @@ import {
   UserMinus,
   UserPlus,
 } from "lucide-react";
-import { SiteNav } from "@/components/SiteNav";
+import { PageShell } from "@/components/PageShell";
+import { useLang, useT } from "@/lib/prefs";
+import type { UiKey } from "@/lib/i18n/ui";
 import { PageHeader } from "@/components/PageHeader";
 import { CodeEditor } from "@/components/CodeEditor";
 import { ExplorerTree, OutputConsole } from "@/components/learn/SimPanels";
@@ -34,31 +36,42 @@ export const Route = createFileRoute("/playground")({
   component: PlaygroundPage,
 });
 
-const TEMPLATES: Record<string, { server: string; client: string; note: string }> = {
+const TEMPLATES: Record<
+  string,
+  { server: string; client: string; note: string; nameTr: string; noteTr: string }
+> = {
   "Hello world": {
     server:
       'print("Hello from the server!")\n\ngame.Players.PlayerAdded:Connect(function(player)\n\tprint(player.Name .. " joined the game")\nend)\n',
     client:
       'local player = game.Players.LocalPlayer\nprint("Hello from " .. player.Name .. "\'s computer!")\n',
     note: "Run it, then press “Player joins”.",
+    nameTr: "Merhaba dünya",
+    noteTr: "Çalıştır, sonra “Oyuncu girsin”e bas.",
   },
   "Kill brick": {
     server:
       'local lava = workspace.Lava\n\nlava.Touched:Connect(function(hit)\n\tlocal humanoid = hit.Parent:FindFirstChildOfClass("Humanoid")\n\tif humanoid then\n\t\thumanoid.Health = 0\n\t\tprint(hit.Parent.Name .. " touched the lava!")\n\tend\nend)\n',
     client: "",
     note: "Run, then press “Touch Lava”. Try removing the if-check and touch it with the rock!",
+    nameTr: "Öldüren blok",
+    noteTr: "Çalıştır, sonra “Lava’ya dokun”a bas. if kontrolünü silip kayayla dokunmayı dene!",
   },
   Leaderstats: {
     server:
       'local Players = game:GetService("Players")\n\nPlayers.PlayerAdded:Connect(function(player)\n\tlocal leaderstats = Instance.new("Folder")\n\tleaderstats.Name = "leaderstats"\n\tleaderstats.Parent = player\n\n\tlocal coins = Instance.new("IntValue")\n\tcoins.Name = "Coins"\n\tcoins.Parent = leaderstats\nend)\n\nwhile true do\n\ttask.wait(2)\n\tfor _, player in Players:GetPlayers() do\n\t\tplayer.leaderstats.Coins.Value += 5\n\t\tprint(player.Name, "has", player.leaderstats.Coins.Value, "coins")\n\tend\nend\n',
     client: "",
     note: "Watch the Explorer: Players › Player1 › leaderstats › Coins goes up.",
+    nameTr: "Leaderstats",
+    noteTr: "Explorer’ı izle: Players › Player1 › leaderstats › Coins artıyor.",
   },
   "Tween door": {
     server:
       'local TweenService = game:GetService("TweenService")\nlocal door = workspace.Part\n\nlocal tween = TweenService:Create(door, TweenInfo.new(2, Enum.EasingStyle.Quad), {\n\tPosition = door.Position + Vector3.new(0, 8, 0),\n\tTransparency = 0.5,\n})\ntween:Play()\nprint("Door starts at", door.Position)\ntween.Completed:Wait()\nprint("Door ends at", door.Position)\n',
     client: "",
     note: "The tween takes 2 simulated seconds.",
+    nameTr: "Tween kapı",
+    noteTr: "Tween, simülasyonda 2 saniye sürer.",
   },
   RemoteEvent: {
     server:
@@ -66,11 +79,15 @@ const TEMPLATES: Record<string, { server: string; client: string; note: string }
     client:
       'local UserInputService = game:GetService("UserInputService")\nlocal remote = game.ReplicatedStorage:WaitForChild("RemoteEvent")\n\nremote.OnClientEvent:Connect(function(reply)\n\tprint("Client got:", reply)\nend)\n\nUserInputService.InputBegan:Connect(function(input)\n\tif input.KeyCode == Enum.KeyCode.E then\n\t\tremote:FireServer("I pressed E")\n\tend\nend)\n',
     note: "Run, then “Press E”.",
+    nameTr: "RemoteEvent",
+    noteTr: "Çalıştır, sonra “E’ye bas”.",
   },
   Countdown: {
     server: 'for i = 5, 1, -1 do\n\tprint(i)\n\ttask.wait(1)\nend\nprint("Go!")\n',
     client: "",
     note: "Loops with task.wait run on a simulated clock.",
+    nameTr: "Geri sayım",
+    noteTr: "task.wait içeren döngüler sanal bir saatle çalışır.",
   },
 };
 
@@ -125,6 +142,8 @@ function buildWorld(server: string, client: string): World {
 }
 
 function PlaygroundPage() {
+  const t = useT();
+  const lang = useLang();
   const [template, setTemplate] = useState("Hello world");
   const [server, setServer] = useState(TEMPLATES["Hello world"].server);
   const [client, setClient] = useState(TEMPLATES["Hello world"].client);
@@ -135,11 +154,6 @@ function PlaygroundPage() {
   const [running, setRunning] = useState(false);
   const world = useRef<World | null>(null);
   const playerCount = useRef(0);
-
-  useEffect(() => {
-    document.body.classList.add("ep-body");
-    return () => document.body.classList.remove("ep-body");
-  }, []);
 
   function refresh() {
     const w = world.current;
@@ -195,119 +209,125 @@ function PlaygroundPage() {
   const lastError = output.find((o) => o.kind === "error");
   const disabled = !world.current;
 
-  return (
-    <>
-      <SiteNav />
-      <div className="relative mx-auto w-full max-w-6xl px-4 pb-16">
-        <PageHeader
-          sticker={
-            <>
-              <FlaskConical className="h-4 w-4" aria-hidden="true" /> Playground
-            </>
-          }
-          title={
-            <>
-              A tiny Roblox server <span className="ep-mark">in your browser</span>
-            </>
-          }
-        >
-          Write a Script and a LocalScript, press Run, then make players join, touch parts and press
-          keys. Output and Explorer update just like in Studio.
-        </PageHeader>
+  const actions: Array<{ key: UiKey; icon: typeof Play; fn: () => void }> = [
+    {
+      key: "pg.join",
+      icon: UserPlus,
+      fn: () => act((w) => w.addPlayer(`Player${++playerCount.current}`), 1),
+    },
+    {
+      key: "pg.leave",
+      icon: UserMinus,
+      fn: () => act((w) => firstPlayer() && w.removePlayer(firstPlayer()!), 1),
+    },
+    { key: "pg.lava", icon: Hand, fn: () => touch("Lava") },
+    { key: "pg.part", icon: Hand, fn: () => touch("Part") },
+    { key: "pg.key", icon: Keyboard, fn: () => act((w) => w.pressKey(firstPlayer(), "E"), 1) },
+    { key: "pg.wait", icon: Clock, fn: () => act(() => undefined, 5) },
+  ];
 
-        <div className="relative z-10 grid gap-5 lg:grid-cols-[1.2fr_1fr]">
-          <section className="ep-card space-y-3 p-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <label className="text-xs text-zinc-500" htmlFor="template">
-                Example
-              </label>
-              <select
-                id="template"
-                value={template}
-                onChange={(e) => loadTemplate(e.target.value)}
-                className="rounded-lg border border-zinc-800 bg-zinc-950 px-2 py-1.5 text-xs text-zinc-200"
-              >
-                {Object.keys(TEMPLATES).map((t) => (
-                  <option key={t}>{t}</option>
-                ))}
-              </select>
-              <span className="text-xs text-zinc-500">{TEMPLATES[template].note}</span>
-            </div>
-            <div role="tablist" className="flex gap-1 border-b border-zinc-800 text-xs">
-              {(["server", "client"] as const).map((t) => (
-                <button
-                  key={t}
-                  role="tab"
-                  type="button"
-                  aria-selected={tab === t}
-                  onClick={() => setTab(t)}
-                  className={`-mb-px border-b-2 px-3 py-2 ${tab === t ? "border-emerald-400 text-emerald-200" : "border-transparent text-zinc-500 hover:text-zinc-300"}`}
-                >
-                  {t === "server" ? "Script" : "LocalScript"}
-                  <span className="hidden sm:inline">
-                    {t === "server" ? " · ServerScriptService" : " · StarterPlayerScripts"}
-                  </span>
-                </button>
+  return (
+    <PageShell>
+      <PageHeader
+        sticker={
+          <>
+            <FlaskConical className="h-4 w-4 text-brand" aria-hidden="true" /> {t("pg.sticker")}
+          </>
+        }
+        title={
+          <>
+            {t("pg.title1")} <span className="ep-mark">{t("pg.title2")}</span>
+          </>
+        }
+      >
+        {t("pg.lead")}
+      </PageHeader>
+
+      <div className="relative z-10 grid gap-5 lg:grid-cols-[1.2fr_1fr]">
+        <section className="ep-card min-w-0 space-y-4 p-4 md:p-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="text-[13px] text-ink-3" htmlFor="template">
+              {t("pg.example")}
+            </label>
+            <select
+              id="template"
+              value={template}
+              onChange={(e) => loadTemplate(e.target.value)}
+              className="rounded-lg border border-line bg-surface px-2 py-1.5 text-[13px] text-ink"
+            >
+              {Object.keys(TEMPLATES).map((name) => (
+                <option key={name} value={name}>
+                  {lang === "tr" ? TEMPLATES[name].nameTr : name}
+                </option>
               ))}
-            </div>
-            {tab === "server" ? (
-              <CodeEditor
-                value={server}
-                onChange={setServer}
-                onRun={run}
-                minLines={16}
-                label="Server script"
-              />
-            ) : (
-              <CodeEditor
-                value={client}
-                onChange={setClient}
-                onRun={run}
-                minLines={16}
-                label="Local script"
-              />
-            )}
-            <div className="flex flex-wrap items-center gap-2">
+            </select>
+            <span className="text-[13px] text-ink-3">
+              {lang === "tr" ? TEMPLATES[template].noteTr : TEMPLATES[template].note}
+            </span>
+          </div>
+          <div
+            role="tablist"
+            className="inline-flex gap-1 rounded-xl border border-line bg-surface-2 p-1 text-[13px]"
+          >
+            {(["server", "client"] as const).map((side) => (
               <button
+                key={side}
+                role="tab"
                 type="button"
-                onClick={run}
-                disabled={running}
-                className="ep-cta inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold"
+                aria-selected={tab === side}
+                onClick={() => setTab(side)}
+                className={`rounded-lg px-3 py-1.5 font-medium transition-colors ${tab === side ? "bg-surface text-ink shadow-sm" : "text-ink-3 hover:text-ink"}`}
               >
-                <Play className="h-4 w-4" aria-hidden="true" />{" "}
-                {running ? "Starting…" : world.current ? "Restart" : "Run"}
+                {side === "server" ? "Script" : "LocalScript"}
+                <span className="hidden font-normal text-ink-3 sm:inline">
+                  {side === "server" ? " · ServerScriptService" : " · StarterPlayerScripts"}
+                </span>
               </button>
-              <span className="font-mono text-xs text-zinc-500">time {time.toFixed(1)}s</span>
-            </div>
+            ))}
+          </div>
+          {tab === "server" ? (
+            <CodeEditor
+              value={server}
+              onChange={setServer}
+              onRun={run}
+              minLines={16}
+              label="Server script"
+            />
+          ) : (
+            <CodeEditor
+              value={client}
+              onChange={setClient}
+              onRun={run}
+              minLines={16}
+              label="Local script"
+            />
+          )}
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={run}
+              disabled={running}
+              className="ep-cta inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold"
+            >
+              <Play className="h-4 w-4" aria-hidden="true" />
+              {t(running ? "pg.starting" : world.current ? "pg.restart" : "pg.run")}
+            </button>
+            <span className="rounded-md border border-line bg-surface-2 px-2 py-0.5 font-mono text-[12px] text-ink-3">
+              {t("pg.time", { s: time.toFixed(1) })}
+            </span>
+          </div>
+          <div>
+            <div className="mb-2 text-[13px] font-medium text-ink-3">{t("pg.actions")}</div>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {[
-                {
-                  label: "Player joins",
-                  icon: UserPlus,
-                  fn: () => act((w) => w.addPlayer(`Player${++playerCount.current}`), 1),
-                },
-                {
-                  label: "Player leaves",
-                  icon: UserMinus,
-                  fn: () => act((w) => firstPlayer() && w.removePlayer(firstPlayer()!), 1),
-                },
-                { label: "Touch Lava", icon: Hand, fn: () => touch("Lava") },
-                { label: "Touch Part", icon: Hand, fn: () => touch("Part") },
-                {
-                  label: "Press E",
-                  icon: Keyboard,
-                  fn: () => act((w) => w.pressKey(firstPlayer(), "E"), 1),
-                },
-                { label: "Wait 5 seconds", icon: Clock, fn: () => act(() => undefined, 5) },
-              ].map(({ label, icon: Icon, fn }) => (
+              {actions.map(({ key, icon: Icon, fn }) => (
                 <button
-                  key={label}
+                  key={key}
                   type="button"
                   disabled={disabled}
                   onClick={fn}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-950/50 px-2 py-2 text-xs text-zinc-300 hover:border-emerald-500/40 hover:text-emerald-200 disabled:opacity-40"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-line bg-surface px-2 py-2 text-[13px] text-ink-2 transition-colors hover:border-brand-line hover:bg-brand-soft hover:text-brand disabled:pointer-events-none disabled:opacity-40"
                 >
-                  <Icon className="h-3.5 w-3.5" aria-hidden="true" /> {label}
+                  <Icon className="h-4 w-4" aria-hidden="true" /> {t(key)}
                 </button>
               ))}
               <button
@@ -323,43 +343,38 @@ function PlaygroundPage() {
                     if (btn) w.click(btn, p);
                   })
                 }
-                className="col-span-2 inline-flex items-center justify-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-950/50 px-2 py-2 text-xs text-zinc-300 hover:border-emerald-500/40 hover:text-emerald-200 disabled:opacity-40 sm:col-span-3"
+                className="col-span-2 inline-flex items-center justify-center gap-1.5 rounded-xl border border-line bg-surface px-2 py-2 text-[13px] text-ink-2 transition-colors hover:border-brand-line hover:bg-brand-soft hover:text-brand disabled:pointer-events-none disabled:opacity-40 sm:col-span-3"
               >
-                <MousePointerClick className="h-3.5 w-3.5" aria-hidden="true" /> Click the first
-                button in the player's GUI
+                <MousePointerClick className="h-4 w-4" aria-hidden="true" /> {t("pg.click")}
               </button>
             </div>
-          </section>
+          </div>
+        </section>
 
-          <section className="space-y-4">
-            <div className="ep-card code-dark overflow-hidden bg-[#1e1e1e]">
-              <div className="flex items-center justify-between border-b border-zinc-800 bg-[#252526] px-3 py-2 text-xs font-semibold text-zinc-200">
-                Output
-                {lastError && (
-                  <a
-                    href={analyzerLink(lastError.text, tab === "server" ? server : client)}
-                    className="text-emerald-300 hover:underline"
-                  >
-                    Explain this error →
-                  </a>
-                )}
-              </div>
-              <OutputConsole lines={output} emptyText="Press Run to start the server." />
+        <section className="min-w-0 space-y-4">
+          <div className="code-dark overflow-hidden rounded-2xl border border-code-line bg-code">
+            <div className="flex items-center justify-between border-b border-code-line bg-code-head px-3 py-2 text-[13px] font-medium text-zinc-200">
+              Output
+              {lastError && (
+                <a
+                  href={analyzerLink(lastError.text, tab === "server" ? server : client)}
+                  className="text-sky-300 hover:underline"
+                >
+                  {t("pg.explain")}
+                </a>
+              )}
             </div>
-            <div className="ep-card code-dark overflow-hidden bg-[#1e1e1e]">
-              <div className="border-b border-zinc-800 bg-[#252526] px-3 py-2 text-xs font-semibold text-zinc-200">
-                Explorer
-              </div>
-              <ExplorerTree nodes={explorer} />
+            <OutputConsole lines={output} emptyText={t("pg.empty")} />
+          </div>
+          <div className="code-dark overflow-hidden rounded-2xl border border-code-line bg-code">
+            <div className="border-b border-code-line bg-code-head px-3 py-2 text-[13px] font-medium text-zinc-200">
+              Explorer
             </div>
-            <p className="text-[11px] leading-relaxed text-zinc-600">
-              The simulator runs real Luau and the common Roblox APIs (instances, events, players,
-              tweens, remotes, DataStores, UI). Physics, rendering and networking lag aren't
-              simulated.
-            </p>
-          </section>
-        </div>
+            <ExplorerTree nodes={explorer} emptyText={t("pg.emptyExplorer")} />
+          </div>
+          <p className="text-[12px] leading-relaxed text-ink-3">{t("pg.note")}</p>
+        </section>
       </div>
-    </>
+    </PageShell>
   );
 }
