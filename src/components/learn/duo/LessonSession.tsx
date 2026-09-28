@@ -103,7 +103,8 @@ function StatTile({
 export interface LessonSessionProps {
   mode: "lesson" | "review";
   title: string;
-  emoji?: string;
+  /** Lesson icon shown on the completion screen. */
+  icon?: ReactNode;
   build: (seed: number) => SessionItem[];
   takeaway?: string;
   /** Current total XP, today's XP and the goal (the session shows what changed). */
@@ -728,8 +729,13 @@ function Complete(
             <h1 className="ep-mark text-[34px] leading-tight font-extrabold tracking-tight md:text-[40px]">
               {headline}
             </h1>
-            <p className="text-ink-2">
-              {props.emoji} {props.title}
+            <p className="inline-flex items-center gap-2 font-medium text-ink-2">
+              {props.icon && (
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-brand-soft text-brand">
+                  {props.icon}
+                </span>
+              )}
+              {props.title}
             </p>
           </div>
           {stars > 0 && (

@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, BookOpen, Clock, PenLine, Play } from "lucide-react";
+import { ArrowLeft, BookOpen, Brain, Clock, PenLine, Play } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
 import { PageHeader } from "@/components/PageHeader";
 import { HomeworkPanel } from "@/components/learn/HomeworkPanel";
 import { LessonBody } from "@/components/learn/LessonNotes";
+import { LessonIcon } from "@/components/learn/duo/LessonIcon";
 import { LessonSession } from "@/components/learn/duo/LessonSession";
 import { Bubble, Mascot } from "@/components/learn/duo/Mascot";
 import { PathMap } from "@/components/learn/duo/PathMap";
@@ -106,7 +107,7 @@ function LearnPage() {
       <LessonSession
         mode="review"
         title={t("duo.review")}
-        emoji="🧠"
+        icon={<Brain className="h-5 w-5" aria-hidden="true" />}
         build={(seed) => reviewItems(ids, seed)}
         xp={progress.xp}
         todayXp={todayXp(progress)}
@@ -247,7 +248,7 @@ function LessonRunner({
     <LessonSession
       mode="lesson"
       title={lesson.title}
-      emoji={path?.emoji}
+      icon={<LessonIcon id={id} className="h-5 w-5" />}
       build={build}
       takeaway={path?.takeaway[lang]}
       xp={progress.xp}
@@ -337,7 +338,10 @@ function NotesPage({
             )}
           </div>
           <h1 className="text-[32px] leading-tight font-semibold tracking-tight text-ink md:text-[40px]">
-            {path?.emoji} {lesson.title}
+            <span className="mr-3 inline-flex h-12 w-12 translate-y-[-4px] items-center justify-center rounded-2xl bg-brand-soft align-middle text-brand">
+              <LessonIcon id={base.id} className="h-7 w-7" />
+            </span>
+            {lesson.title}
           </h1>
           <p className="text-lg text-ink-2">{lesson.summary}</p>
           {path && (

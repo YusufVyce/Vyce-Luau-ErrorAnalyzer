@@ -250,6 +250,32 @@
   .vy-node[data-state="locked"]:active {
     box-shadow: 0 2px 0 var(--line-strong);
   }
+  /* Glossy highlight on round buttons */
+  .vy-node::before {
+    content: "";
+    position: absolute;
+    top: 7px;
+    left: 14px;
+    width: 26px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.35);
+    transform: rotate(-18deg);
+    pointer-events: none;
+  }
+  .vy-node[data-state="locked"]::before {
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .vy-node-icon {
+    display: inline-flex;
+    filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.18));
+  }
+  .vy-node:hover .vy-node-icon {
+    animation: vy-wiggle 500ms ease;
+  }
+  .vy-chest-glow {
+    animation: vy-glow 1.4s ease-in-out infinite;
+  }
   .vy-node-ring {
     position: absolute;
     inset: -11px -11px -3px;
@@ -422,6 +448,18 @@
   }
 }
 
+@keyframes vy-wiggle {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  30% {
+    transform: rotate(-12deg) scale(1.08);
+  }
+  60% {
+    transform: rotate(9deg) scale(1.08);
+  }
+}
 @keyframes vy-float {
   0%,
   100% {

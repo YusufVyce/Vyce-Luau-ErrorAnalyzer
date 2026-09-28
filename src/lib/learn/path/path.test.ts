@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parse } from "@/lib/luau/parser";
-import { LESSONS } from "../lessons";
+import { CHAPTERS, LESSONS } from "../lessons";
+import { LESSON_ICONS, UNIT_ICONS } from "@/components/learn/duo/icons";
 import { runSample } from "../runSample";
 import { MOTIVATION_POOLS, motivate } from "../motivation";
 import { PATH, choice, reviewExercises, rng, shuffled, t, type L, type Opt, type Step } from ".";
@@ -39,6 +40,11 @@ function printed(code: string) {
 }
 
 describe("Duolingo-style path content", () => {
+  it("has an icon for every lesson and unit", () => {
+    expect(Object.keys(LESSON_ICONS).sort()).toEqual(LESSONS.map((l) => l.id).sort());
+    expect(UNIT_ICONS.length).toBe(CHAPTERS.length);
+  });
+
   it("has bite-sized steps for every lesson and nothing else", () => {
     expect(Object.keys(PATH).sort()).toEqual(LESSONS.map((l) => l.id).sort());
   });

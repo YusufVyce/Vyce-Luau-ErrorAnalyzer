@@ -1,23 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  BookOpen,
-  Brain,
-  Check,
-  Crown,
-  Flame,
-  Lock,
-  PenLine,
-  Star,
-  Trophy,
-  User,
-  Zap,
-} from "lucide-react";
+import { BookOpen, Brain, Check, Flame, Lock, PenLine, Star, User, Zap } from "lucide-react";
 import { CHAPTERS, LESSONS } from "@/lib/learn/lessons";
 import { chapterName, lessonTitle } from "@/lib/learn/lessons.tr";
 import { exerciseFor } from "@/lib/learn/homework/exercises";
 import { greeting } from "@/lib/learn/motivation";
-import { PATH } from "@/lib/learn/path";
 import {
   DAILY_GOALS,
   doneLessonIds,
@@ -31,6 +18,8 @@ import {
 } from "@/lib/learn/progress";
 import type { Lang } from "@/lib/learn/path/types";
 import type { TFunction } from "@/lib/prefs";
+import { UNIT_ICONS } from "./icons";
+import { Chest, LessonIcon } from "./LessonIcon";
 import { Bubble, Mascot } from "./Mascot";
 
 const OFFSETS = [0, 1, 2, 1, 0, -1, -2, -1];
@@ -349,10 +338,14 @@ export function PathMap({
           const unitLocked = lessons.every(({ i }) => states[i] === "locked");
           const name = chapterName(chapter, lang).replace(/^\d+\s*·\s*/, "");
           const chestId = `chest-${u}`;
+          const UnitIcon = UNIT_ICONS[u] ?? UNIT_ICONS[0];
           return (
             <section key={chapter} className={`vy-unit-${u} space-y-2`} aria-label={name}>
               <div className="vy-banner flex items-center justify-between gap-4 rounded-2xl px-5 py-4">
-                <div className="min-w-0">
+                <span className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-black/10 sm:inline-flex">
+                  <UnitIcon className="h-6 w-6" strokeWidth={2.4} aria-hidden="true" />
+                </span>
+                <div className="min-w-0 flex-1">
                   <div className="text-[12px] font-extrabold tracking-[0.14em] uppercase opacity-75">
                     {t("duo.unit", { n: u + 1 })}
                   </div>
@@ -367,7 +360,6 @@ export function PathMap({
                 {lessons.map(({ l, i }, k) => {
                   const state = states[i];
                   const x = OFFSETS[k % OFFSETS.length] * STEP_PX;
-                  const p = PATH[l.id];
                   const stars = progress.stars[l.id] ?? 0;
                   const hwPending =
                     state !== "done" &&
@@ -421,14 +413,12 @@ export function PathMap({
                         {state === "current" && (
                           <span className="vy-node-ring" aria-hidden="true" />
                         )}
-                        {state === "done" ? (
-                          <Check className="h-8 w-8" strokeWidth={4} aria-hidden="true" />
-                        ) : (
-                          <span
-                            className={`text-[30px] leading-none ${state === "locked" ? "opacity-40 grayscale" : ""}`}
-                            aria-hidden="true"
-                          >
-                            {p?.emoji ?? "⭐"}
+                        <span className={state === "locked" ? "opacity-45" : "vy-node-icon"}>
+                          <LessonIcon id={l.id} className="h-8 w-8" strokeWidth={2.4} />
+                        </span>
+                        {state === "done" && (
+                          <span className="absolute -right-1 -bottom-1 inline-flex h-6 w-6 items-center justify-center rounded-full border-2 border-canvas bg-[var(--ok)] text-[var(--ok-ink)]">
+                            <Check className="h-3.5 w-3.5" strokeWidth={4} aria-hidden="true" />
                           </span>
                         )}
                         {state === "locked" && (
@@ -462,8 +452,9 @@ export function PathMap({
                             <div className="text-[12px] font-bold tracking-wide uppercase opacity-75">
                               {t("duo.lessonN", { n: i + 1, total: LESSONS.length })}
                             </div>
-                            <div className="text-[17px] leading-snug font-extrabold">
-                              {p?.emoji} {lessonTitle(l, lang)}
+                            <div className="flex items-center gap-2 text-[17px] leading-snug font-extrabold">
+                              <LessonIcon id={l.id} className="h-5 w-5 shrink-0" />
+                              {lessonTitle(l, lang)}
                             </div>
                             {state === "done" && stars > 0 && <Stars n={stars} />}
                           </div>
@@ -515,11 +506,7 @@ export function PathMap({
                     aria-expanded={open === chestId}
                     aria-label={unitDone ? t("duo.unitDone") : t("duo.unitTodo")}
                   >
-                    {unitDone ? (
-                      <Crown className="h-8 w-8 fill-current" aria-hidden="true" />
-                    ) : (
-                      <Trophy className="h-7 w-7" aria-hidden="true" />
-                    )}
+                    <Chest open={unitDone} />
                   </button>
                   {open === chestId && (
                     <div
@@ -529,7 +516,7 @@ export function PathMap({
                       className="vy-pop absolute top-full left-1/2 z-20 mt-4 w-64 -translate-x-1/2 rounded-2xl border-2 border-line bg-surface p-4 text-center text-[14px] text-ink-2 shadow-2xl"
                     >
                       {unitDone ? (
-                        <span className="font-bold text-ink">🏆 {t("duo.unitDone")}</span>
+                        <span className="font-bold text-ink">{t("duo.unitDone")}</span>
                       ) : (
                         t("duo.unitTodo")
                       )}
