@@ -93,15 +93,16 @@ export function HomeworkPanel({
 
   return (
     <section
-      className="space-y-5 rounded-2xl border border-emerald-500/25 bg-gradient-to-b from-emerald-500/[0.06] to-transparent p-5 md:p-6"
+      id="homework"
+      className="scroll-mt-20 space-y-5 rounded-2xl border-2 border-[#1c1a16] bg-[#fff8dc] p-5 shadow-[5px_5px_0_#1c1a16] md:p-6"
       aria-label="Homework"
     >
       <header className="space-y-2">
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          <span className="inline-flex items-center gap-1.5 font-semibold uppercase tracking-wider text-emerald-300">
+          <span className="inline-flex items-center gap-1.5 rounded-md border-2 border-[#1c1a16] bg-[#e8483f] px-2 py-0.5 text-[13px] font-bold text-white">
             <Trophy className="h-4 w-4" aria-hidden="true" /> Homework
           </span>
-          <span className="rounded-full border border-zinc-700 bg-zinc-900 px-2 py-0.5 text-zinc-300">
+          <span className="rounded-md border-2 border-[#1c1a16]/20 bg-white px-2 py-0.5 text-[13px] text-zinc-200">
             {exercise.kind === "fix" ? "Fix the bug" : "Write the code"}
           </span>
           {passed && (
@@ -243,7 +244,7 @@ export function HomeworkPanel({
               <div className="font-semibold">
                 {result.passed
                   ? "Homework passed! The next lesson is unlocked."
-                  : `${passedCount} of ${result.checks.length} checks passed${passedCount === 0 ? " — not yet" : result.checks.length - passedCount === 1 ? " — almost there!" : " — keep going"}.`}
+                  : `${passedCount} of ${result.checks.length} checks passed${passedCount === 0 ? " — not yet" : result.checks.length - passedCount === 1 ? " — almost there" : " — keep going"}.`}
               </div>
               <div className="text-sm opacity-80">
                 {result.passed
@@ -307,21 +308,19 @@ export function HomeworkPanel({
             </ul>
           )}
           {tab === "output" && (
-            <div className="rounded-lg border border-zinc-800 bg-black/40">
+            <div className="code-dark rounded-lg border-2 border-[#1c1a16] bg-[#1e1e1e]">
               <OutputConsole lines={result.output} />
             </div>
           )}
           {tab === "explorer" && (
-            <div className="rounded-lg border border-zinc-800 bg-black/40">
+            <div className="code-dark rounded-lg border-2 border-[#1c1a16] bg-[#1e1e1e]">
               <ExplorerTree nodes={result.explorer} />
             </div>
           )}
 
           {result.diagnosis && (result.runtimeError || result.syntaxError) && (
             <div className="space-y-3 rounded-xl border border-red-500/25 bg-red-500/[0.05] p-4">
-              <div className="text-xs font-semibold uppercase tracking-wider text-red-300">
-                Why your code crashed
-              </div>
+              <div className="text-[15px] font-bold text-red-300">Why your code crashed</div>
               <div className="font-semibold text-zinc-100">
                 <Rich text={result.diagnosis.title} />
               </div>
@@ -329,7 +328,7 @@ export function HomeworkPanel({
                 <Rich text={result.diagnosis.summary} />
               </p>
               {result.diagnosis.causes[0] && (
-                <div className="rounded-lg border border-zinc-800 bg-black/30 p-3 text-sm">
+                <div className="rounded-lg border border-zinc-800 bg-white p-3 text-sm">
                   <div className="font-medium text-zinc-100">
                     <Rich text={result.diagnosis.causes[0].text} />
                   </div>

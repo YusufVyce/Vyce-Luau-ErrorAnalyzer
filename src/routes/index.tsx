@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { GraduationCap, Sparkles } from "lucide-react";
+import { GraduationCap, MousePointerClick } from "lucide-react";
 import { ANALYZER_EXAMPLES } from "@/lib/analyzerExamples";
 import { SIGNATURES } from "@/lib/analyzer/precise/diagnose";
 import { analyzeErrorAndCode, type AnalyzerResult } from "@/utils/analyzerEngine";
@@ -139,38 +139,35 @@ function ErrorParserPage() {
       <div className="analyzer-container relative min-h-screen flex flex-col items-center pb-10">
         <div className="ep-aurora" aria-hidden="true" />
 
-        <header className="relative z-10 w-full max-w-4xl pt-10 md:pt-14 pb-8 space-y-5 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/5 text-[10px] tracking-[0.2em] uppercase text-emerald-300 mx-auto">
-            <span className="ep-dot" />
-            Roblox Studio · Luau error analyzer
-          </div>
-          <h1 className="serif-title text-4xl md:text-6xl leading-[1.05] text-zinc-50">
-            Got an error?
-            <br />
-            Let&apos;s{" "}
-            <span className="italic bg-gradient-to-r from-emerald-300 to-teal-400 bg-clip-text text-transparent">
-              fix it.
+        <header className="relative z-10 w-full max-w-4xl space-y-5 pt-10 pb-8 md:pt-16">
+          <div className="code-dark inline-flex max-w-full items-center gap-2 rounded-lg border-2 border-[#1c1a16] bg-[#1e1e1e] px-3 py-1.5 font-mono text-[12px] shadow-[3px_3px_0_#1c1a16]">
+            <span className="text-zinc-500">Output</span>
+            <span className="truncate text-red-400">
+              Script:12: attempt to index nil with &apos;Humanoid&apos;
             </span>
+          </div>
+          <h1 className="serif-title text-[42px] leading-[0.98] md:text-[68px]">
+            Got a red error in Studio? <span className="ep-mark">Let&apos;s fix it.</span>
           </h1>
-          <p className="text-sm md:text-base text-zinc-400 max-w-xl mx-auto leading-relaxed">
-            Paste the red error from Studio&apos;s <span className="text-zinc-200">Output</span>{" "}
-            window and the script it points to. You get the exact line, the real reason, and the
-            fixed code — in plain English.
+          <p className="max-w-2xl text-base leading-relaxed text-zinc-300 md:text-lg">
+            Paste the error from the <b className="font-semibold text-zinc-100">Output</b> window
+            and the script it points to. You get the exact line, the reason in plain words, and your
+            script with the fix already in it.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-zinc-500">
-            <span className="flex items-center gap-1.5">
-              <span className="text-emerald-400">✓</span>
-              Knows {SIGNATURES.length}+ exact Roblox error messages
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="text-emerald-400">✓</span>
-              Runs in your browser — no AI, nothing uploaded
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="text-emerald-400">✓</span>
-              Links only to official Roblox docs
-            </span>
-          </div>
+          <ul className="flex flex-wrap gap-2 text-[13px] text-zinc-200">
+            {[
+              `${SIGNATURES.length}+ real Roblox error messages`,
+              "Runs in your browser, no AI",
+              "Only official Roblox docs",
+            ].map((t) => (
+              <li
+                key={t}
+                className="inline-flex items-center gap-1.5 rounded-md border-2 border-[#1c1a16]/15 bg-white px-2.5 py-1"
+              >
+                <span className="font-bold text-emerald-600">✓</span> {t}
+              </li>
+            ))}
+          </ul>
         </header>
 
         <main
@@ -183,16 +180,14 @@ function ErrorParserPage() {
               <div>
                 <label
                   htmlFor="errorInput"
-                  className="flex items-center gap-2 text-xs text-zinc-400 uppercase tracking-wider mb-2"
+                  className="mb-2 flex items-center gap-2 text-sm font-semibold text-zinc-100"
                 >
                   <span className="ep-step">1</span>
                   Error from Output
                 </label>
                 <div
-                  className={`bg-black/40 border rounded-lg p-3 transition-all ${
-                    errorFlash
-                      ? "border-red-500/60 ring-2 ring-red-500/60"
-                      : "border-zinc-800/70 focus-within:border-emerald-500/40 focus-within:shadow-[0_0_0_3px_rgba(16,185,129,0.08)]"
+                  className={`code-dark rounded-lg border-2 bg-[#1e1e1e] p-3 transition-all ${
+                    errorFlash ? "border-[#e8483f] ring-2 ring-[#e8483f]/50" : "border-[#1c1a16]"
                   }`}
                 >
                   <textarea
@@ -203,22 +198,22 @@ function ErrorParserPage() {
                     onChange={(e) => setLogText(e.target.value)}
                     onKeyDown={onKeyDown}
                     placeholder="ServerScriptService.Script:12: attempt to index nil with 'Humanoid'"
-                    className="w-full bg-transparent text-sm text-zinc-300 placeholder-zinc-700 focus:outline-none resize-y font-mono"
+                    className="w-full resize-y bg-transparent font-mono text-sm text-red-300 placeholder-zinc-600 focus:outline-none"
                   />
                 </div>
               </div>
               <div>
                 <label
                   htmlFor="codeInput"
-                  className="flex items-center gap-2 text-xs text-zinc-400 uppercase tracking-wider mb-2"
+                  className="mb-2 flex items-center gap-2 text-sm font-semibold text-zinc-100"
                 >
                   <span className="ep-step">2</span>
                   Your script
-                  <span className="normal-case text-zinc-600 tracking-normal">
+                  <span className="font-normal text-zinc-500">
                     · optional, but much more accurate
                   </span>
                 </label>
-                <div className="bg-black/40 border border-zinc-800/70 rounded-lg p-3 focus-within:border-emerald-500/40 focus-within:shadow-[0_0_0_3px_rgba(16,185,129,0.08)] transition-all">
+                <div className="code-dark rounded-lg border-2 border-[#1c1a16] bg-[#1e1e1e] p-3">
                   <textarea
                     id="codeInput"
                     rows={7}
@@ -229,7 +224,7 @@ function ErrorParserPage() {
                     placeholder={
                       "local player = game.Players.LocalPlayer\nlocal humanoid = player.Character.Humanoid"
                     }
-                    className="w-full bg-transparent text-sm text-zinc-300 placeholder-zinc-700 focus:outline-none resize-y font-mono"
+                    className="w-full resize-y bg-transparent font-mono text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none"
                   />
                 </div>
               </div>
@@ -240,7 +235,7 @@ function ErrorParserPage() {
                 type="button"
                 disabled={!canAnalyze}
                 onClick={triggerAnalysis}
-                className="ep-cta px-5 py-2.5 rounded-lg text-xs font-semibold tracking-wide"
+                className="ep-cta rounded-lg px-5 py-2.5 text-sm font-semibold"
               >
                 Find the cause →
               </button>
@@ -250,15 +245,15 @@ function ErrorParserPage() {
               <button
                 type="button"
                 onClick={clearAll}
-                className="px-3.5 py-2 rounded-lg bg-zinc-900/60 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900 text-zinc-400 text-xs transition-all"
+                className="rounded-lg border-2 border-[#1c1a16]/20 bg-white px-3.5 py-2 text-sm text-zinc-300 transition-colors hover:border-[#1c1a16]"
               >
                 Clear
               </button>
             </div>
 
             <div className="border-t border-zinc-800/60 pt-4">
-              <div className="mb-2 flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-zinc-500">
-                <Sparkles className="h-3.5 w-3.5 text-emerald-400" aria-hidden="true" />
+              <div className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-zinc-100">
+                <MousePointerClick className="h-4 w-4 text-[#e8483f]" aria-hidden="true" />
                 Try a common error
               </div>
               <div className="flex flex-wrap gap-2">
@@ -267,7 +262,7 @@ function ErrorParserPage() {
                     key={ex.label}
                     type="button"
                     onClick={() => loadExample(i)}
-                    className="rounded-full border border-zinc-800 bg-zinc-950/50 px-3 py-1 text-xs text-zinc-400 transition-colors hover:border-emerald-500/40 hover:text-emerald-200"
+                    className="rounded-md border-2 border-[#1c1a16]/15 bg-white px-2.5 py-1 text-[13px] text-zinc-300 transition-colors hover:border-[#1c1a16] hover:bg-[#ffd23f] hover:text-[#1c1a16]"
                   >
                     {ex.label}
                   </button>
@@ -279,7 +274,7 @@ function ErrorParserPage() {
           <div ref={resultRef} aria-live="polite" className="scroll-mt-20">
             {result.kind === "idle" && (
               <div className="ep-card result-card border-dashed text-center space-y-3 py-10">
-                <div className="mx-auto w-12 h-12 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 flex items-center justify-center text-xl text-emerald-400 font-mono">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border-2 border-[#1c1a16] bg-[#ffd23f] font-mono text-xl font-bold text-[#1c1a16]">
                   {"{ }"}
                 </div>
                 <p className="text-sm text-zinc-400 max-w-md mx-auto leading-relaxed">
@@ -342,7 +337,6 @@ function ErrorParserPage() {
         </main>
 
         <footer className="relative z-10 w-full max-w-4xl mt-14 text-center text-[11px] text-zinc-600 flex items-center justify-center gap-2">
-          <span className="ep-dot" />
           Made by YusufVyce · Not affiliated with Roblox Corporation
         </footer>
       </div>

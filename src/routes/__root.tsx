@@ -91,8 +91,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         property: "og:description",
-        content:
-          "Instant, context-aware root cause analysis for Roblox script errors.",
+        content: "Instant, context-aware root cause analysis for Roblox script errors.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -102,15 +101,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         name: "twitter:description",
-        content:
-          "Paste an error, get the real root cause and a fix — not a generic guess.",
+        content: "Paste an error, get the real root cause and a fix — not a generic guess.",
       },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
       {
         rel: "icon",
-        href: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230b0f11'/%3E%3Ctext x='50' y='68' font-size='58' text-anchor='middle' fill='%2310b981' font-family='monospace'%3E%7B%7D%3C/text%3E%3C/svg%3E",
+        href: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23e8483f'/%3E%3Ctext x='50' y='68' font-size='54' font-weight='700' text-anchor='middle' fill='%23fff' font-family='monospace'%3E%7B%7D%3C/text%3E%3C/svg%3E",
       },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
@@ -120,7 +118,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Playfair+Display:ital,wght@1,500&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=JetBrains+Mono:wght@400;500;600&family=Rubik:wght@400;500;600;700&display=swap",
       },
     ],
   }),
