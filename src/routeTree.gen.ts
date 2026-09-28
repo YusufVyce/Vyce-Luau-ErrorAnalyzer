@@ -9,11 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PlaygroundRouteImport } from './routes/playground'
 import { Route as LearnRouteImport } from './routes/learn'
 import { Route as ErrorsRouteImport } from './routes/errors'
+import { Route as ChallengesRouteImport } from './routes/challenges'
 import { Route as IndexRouteImport } from './routes/index'
 
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlaygroundRoute = PlaygroundRouteImport.update({
   id: '/playground',
   path: '/playground',
@@ -29,6 +36,11 @@ const ErrorsRoute = ErrorsRouteImport.update({
   path: '/errors',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChallengesRoute = ChallengesRouteImport.update({
+  id: '/challenges',
+  path: '/challenges',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -37,40 +49,68 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/challenges': typeof ChallengesRoute
   '/errors': typeof ErrorsRoute
   '/learn': typeof LearnRoute
   '/playground': typeof PlaygroundRoute
+  '/profile': typeof ProfileRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/challenges': typeof ChallengesRoute
   '/errors': typeof ErrorsRoute
   '/learn': typeof LearnRoute
   '/playground': typeof PlaygroundRoute
+  '/profile': typeof ProfileRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/challenges': typeof ChallengesRoute
   '/errors': typeof ErrorsRoute
   '/learn': typeof LearnRoute
   '/playground': typeof PlaygroundRoute
+  '/profile': typeof ProfileRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/errors' | '/learn' | '/playground'
+  fullPaths:
+    | '/'
+    | '/challenges'
+    | '/errors'
+    | '/learn'
+    | '/playground'
+    | '/profile'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/errors' | '/learn' | '/playground'
-  id: '__root__' | '/' | '/errors' | '/learn' | '/playground'
+  to: '/' | '/challenges' | '/errors' | '/learn' | '/playground' | '/profile'
+  id:
+    | '__root__'
+    | '/'
+    | '/challenges'
+    | '/errors'
+    | '/learn'
+    | '/playground'
+    | '/profile'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ChallengesRoute: typeof ChallengesRoute
   ErrorsRoute: typeof ErrorsRoute
   LearnRoute: typeof LearnRoute
   PlaygroundRoute: typeof PlaygroundRoute
+  ProfileRoute: typeof ProfileRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/playground': {
       id: '/playground'
       path: '/playground'
@@ -92,6 +132,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ErrorsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/challenges': {
+      id: '/challenges'
+      path: '/challenges'
+      fullPath: '/challenges'
+      preLoaderRoute: typeof ChallengesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -104,9 +151,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChallengesRoute: ChallengesRoute,
   ErrorsRoute: ErrorsRoute,
   LearnRoute: LearnRoute,
   PlaygroundRoute: PlaygroundRoute,
+  ProfileRoute: ProfileRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

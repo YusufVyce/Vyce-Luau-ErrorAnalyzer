@@ -29,6 +29,7 @@ export const CHAPTERS_TR: Record<string, string> = {
   "3 · Making things happen": "3 · Bir şeyler olsun",
   "4 · Multiplayer & saving": "4 · Çok oyunculu ve kayıt",
   "5 · Build a game": "5 · Oyun yap",
+  "6 · Advanced scripting": "6 · İleri seviye scripting",
 };
 
 const TR: Record<string, LessonTr> = {
@@ -626,6 +627,198 @@ const TR: Record<string, LessonTr> = {
       q: "Output'ta 3 hata var. Hangisini önce düzeltirsin?",
       o: ["Sonuncuyu", "İlkini", "En uzununu", "Herhangi birini"],
       why: "İlk hata çoğu zaman diğerlerine sebep olur — onu düzelt, diğerleri kaybolabilir.",
+    },
+  },
+  "collection-service": {
+    title: "Etiketler: çok parça için tek script",
+    summary: "Parçaları etiketle ve hepsini CollectionService ile tek bir scriptten yönet.",
+    sections: [
+      {
+        t: [
+          "Her öldüren bloğun içine bir Script koymak işe yarar — ta ki 200 tane olana ve tek bir satırı değiştirmek isteyene kadar. Profesyonel oyunlar bunun yerine objeleri etiketler: her öldürücü parça `KillBrick` etiketini alır ve TEK bir script hepsini bulur.",
+          "Studio'da bir parçayı seç ve Properties → Tags altından etiket ekle. Kodda ise CollectionService sana belli bir etiketi taşıyan her objeyi verir.",
+        ],
+      },
+      { h: "Tek script, bütün öldüren bloklar" },
+      {
+        h: "Koddan etiketlemek",
+        tip: 'Etiketler düz metindir. "Killbrick" gibi bir yazım hatası hata vermez — sadece hiçbir şeyi etiketlemez, o yüzden etiket isimlerini dikkatle kopyala.',
+      },
+    ],
+    game: {
+      name: "Tower of Hell tarzı obby'ler",
+      text: "Yüzlerce öldüren bloğu, yürüyen bandı ve zıplama pedi olan obby'ler her birine script kopyalamaz. Her parça etiketlenir (KillBrick, Conveyor, JumpPad) ve ServerScriptService'teki birkaç script hepsini yönetir — bir hatayı bir kez düzeltirsin, bütün parçalar düzelir.",
+    },
+    mistake:
+      "GetTagged tek bir parça değil, bir parça listesi döndürür. Listenin Touched event'i yoktur, bu yüzden bricks.Touched nil'dir. Listede dön ve her parçayı ayrı bağla.",
+    quiz: {
+      q: 'CollectionService:GetTagged("Coin") ne döndürür?',
+      o: [
+        "İlk coini",
+        "Coin etiketli bütün objelerin listesini",
+        "Kaç coin olduğunu",
+        "Yeni bir Coin parçası",
+      ],
+      why: "for … in ile üzerinde döndüğün bir tablo (liste) döndürür.",
+    },
+  },
+  runservice: {
+    title: "RunService: her karede çalışan kod",
+    summary: "Heartbeat ve delta time ile parçaları yumuşakça döndür, zıplat ve hareket ettir.",
+    sections: [
+      {
+        t: [
+          "`RunService.Heartbeat` her karede çalışır — saniyede yaklaşık 60 kez. Sana `dt` verir: son kareden bu yana geçen saniye.",
+          "Her hızı dt ile çarp. Böylece bir parça hızlı bir PC'de de yavaş bir telefonda da aynı hızda döner.",
+        ],
+      },
+      { h: "Dönen bir engel" },
+      {
+        h: "Aşağı yukarı sallanan coin",
+        tip: "Heartbeat fonksiyonları saniyede 60 kez çalışır — kısa tut ve içine asla task.wait() koyma.",
+      },
+    ],
+    game: {
+      name: "Simülatör coinleri ve obby döneçleri",
+      text: "Simülatör oyunlarında süzülüp dönen coinler, obby'lerdeki dönen çubuklar ve yarış oyunlarındaki akıcı kamera her karede RunService'ten güncellenir. dt kullanmak kare hızı düşse bile hareketi akıcı tutar.",
+    },
+    mistake:
+      "Bu döngü hiç beklemiyor, bu yüzden Roblox kare çizmeye hiç sıra bulamıyor ve scripti durduruyor. Bunun yerine RunService.Heartbeat kullan (ya da döngüye task.wait() koy).",
+    quiz: {
+      q: "Hızlar neden dt ile çarpılır?",
+      o: [
+        "Daha hızlı olsun diye",
+        "Kare hızı ne olursa olsun hız aynı kalsın diye",
+        "Heartbeat onsuz çalışmaz",
+        "Hafıza tasarrufu için",
+      ],
+      why: "dt son kareden beri geçen süredir. hız × dt = o karede gidilecek mesafe, kare ne kadar sürerse sürsün.",
+    },
+  },
+  raycasting: {
+    title: "Raycasting: dünyayı görmek",
+    summary: "Altta, önde ya da arada ne olduğunu bulmak için görünmez çizgiler at.",
+    sections: [
+      {
+        t: [
+          "Işın (ray), bir başlangıç noktası (origin) ve bir yönü olan görünmez bir çizgidir. Yön vektörünün uzunluğu ne kadar uzağa gittiğidir.",
+          "`workspace:Raycast(origin, direction)` bir RaycastResult (`Instance`, `Position`, `Normal`, `Distance`) döndürür — ışın hiçbir şeye çarpmazsa nil.",
+        ],
+      },
+      { h: "Altımda ne var?" },
+      {
+        h: "Bazı şeyleri yok saymak",
+        tip: "Her zaman nil kontrolü yap. Iskalayan bir ışın nil döndürür ve result.Position okumak çöker.",
+      },
+    ],
+    game: {
+      name: "Arsenal tarzı silahlar",
+      text: "Roblox silahlarının çoğu hitscan'dir: ateş edince oyun namludan farenin gösterdiği yere bir ışın atar ve ilk çarptığı şeye hasar verir. Sunucu atışın mümkün olup olmadığını kontrol etmek için ışını tekrarlar — böylece hileciler duvarın arkasından vuramaz.",
+    },
+    mistake:
+      "Işın yukarı, boş gökyüzüne gitti ve hiçbir şeye çarpmadı, bu yüzden Raycast nil döndürdü. Kullanmadan önce `if result then` ile kontrol et.",
+    quiz: {
+      q: "Işın hiçbir şeye çarpmazsa workspace:Raycast ne döndürür?",
+      o: ["Boş bir RaycastResult", "nil", "false", "Başlangıç noktasını"],
+      why: "Çarpma yoksa nil — bu yüzden her raycast bir if kontrolü ister.",
+    },
+  },
+  oop: {
+    title: "Metatable'larla sınıflar",
+    summary:
+      "Kendi obje türlerini yap — büyük oyunlar petleri, kuleleri ve düşmanları böyle düzenler.",
+    sections: [
+      {
+        t: [
+          "Sınıf bir plandır. Ondan yapılan her objenin kendi verisi (isim, seviye) vardır ama aynı fonksiyonları (metotları) paylaşırlar.",
+          "Luau'da sınıf, `__index`'i kendisini gösteren bir metot tablosudur. `setmetatable` her yeni objeyi ona bağlar; böylece `obje:Metot()` fonksiyonu sınıfta bulur.",
+        ],
+      },
+      { h: "Bir Pet sınıfı" },
+      {
+        h: "Nokta mı iki nokta mı?",
+        t: [
+          "`dog:LevelUp()`, `Pet.LevelUp(dog)`'un kısaltmasıdır — iki nokta objeyi `self` olarak gönderir. Metotları iki noktayla tanımla ve iki noktayla çağır.",
+        ],
+        tip: "Sınıfları bir ModuleScript'e koy ve sonuna `return Pet` yaz; böylece her script pet oluşturabilir.",
+      },
+    ],
+    game: {
+      name: "Kule savunma ve pet oyunları",
+      text: "Bir kule savunma oyununda her kule, Tower sınıfından yapılmış bir objedir: kendi menzili, hasarı ve yükseltme seviyesi vardır; Attack, Upgrade ve Sell metotlarını paylaşır. Düşmanlar da birer objedir. Sınıflar binlerce satırlık oyun kodunu düzenli tutar.",
+    },
+    mistake:
+      "Noktayla yazılan `dog.LevelUp()` peti göndermez, bu yüzden self nil olur. İki noktayla çağır: `dog:LevelUp()`.",
+    quiz: {
+      q: "`Pet.__index = Pet` ne yapar?",
+      o: [
+        "Pet'i bir sayıya çevirir",
+        "Objelerin eksik anahtarları (metotları) Pet'te bulmasını sağlar",
+        "Eski petleri siler",
+        "Hiçbir şey, isteğe bağlı",
+      ],
+      why: "Bir anahtar objenin kendisinde yoksa Luau onu metatable'ın __index'inde — sınıfta — arar.",
+    },
+  },
+  tools: {
+    title: "Tool'lar: oyuncuların tuttuğu eşyalar",
+    summary: "Oyuncu tıklayınca bir şey yapan kılıçlar, iksirler ve aletler yap.",
+    sections: [
+      {
+        t: [
+          "StarterPack'teki bir Tool her oyuncunun Backpack'ine kopyalanır. İçindeki `Handle` adlı parça, karakterin elinde tuttuğu şeydir.",
+          "`tool.Activated`, oyuncu aleti tutarken tıklayınca çalışır. Tool'un içindeki Script sunucuda çalışır; alet tutulurken `tool.Parent` karakterdir.",
+        ],
+      },
+      { h: "İyileştirme iksiri" },
+      {
+        h: "Basit bir kılıç",
+        tip: "`hit.Parent ~= tool.Parent`, kılıcın kendi sahibine zarar vermesini engeller.",
+      },
+    ],
+    game: {
+      name: "Kılıç dövüşü ve BedWars tarzı eşyalar",
+      text: "Dövüş oyunlarındaki kılıçlar, kazmalar, yaylar ve iksirler hep Tool'dur. Activated event'i saldırıyı başlatır ve hasarı her zaman bir sunucu Script'i verir — asla oyuncunun kendi cihazı değil.",
+    },
+    mistake:
+      "Bu Script Handle'ın içine konmuş, bu yüzden script.Parent Tool değil Handle parçası. Script'i doğrudan Tool'un içine koy.",
+    quiz: {
+      q: "Her oyuncuya verilsin diye bir Tool nereye konur?",
+      o: ["Workspace", "StarterPack", "ServerStorage", "ReplicatedFirst"],
+      why: "StarterPack'teki her şey, oyuncu doğunca Backpack'ine kopyalanır.",
+    },
+  },
+  "round-system": {
+    title: "Tur tabanlı oyun döngüsü",
+    summary: "Lobi → bekleme → tur → sonuçlar: çoğu Roblox oyununun arkasındaki döngü.",
+    sections: [
+      {
+        t: [
+          "Tur oyunları bir durum makinesidir: oyun her zaman tek bir durumdadır (bekleme, ara, tur, sonuç) ve bir zamanlayıcı onu sonrakine geçirir.",
+          "Sunucu şu anki durumu ReplicatedStorage'daki bir StringValue'da tutar. Her oyuncunun arayüzü sadece bu değeri gösterir.",
+        ],
+      },
+      { h: "Tur döngüsü" },
+      {
+        h: "Oyunculara göstermek",
+        tip: "Tur mantığı sadece sunucuda yaşar. İstemciler durumu gösterir ama turun ne zaman başlayacağına asla karar vermez.",
+      },
+    ],
+    game: {
+      name: "Murder Mystery ve Natural Disaster Survival",
+      text: "İki oyun da bu döngüdür: yeterli oyuncuyu bekle, lobide geri say, herkesi tura ışınla, süre bitince (ya da biri kazanınca) bitir, sonuçları göster, tekrarla. Ekranın üstündeki durum yazısı yukarıdaki gibi bir StringValue'dur.",
+    },
+    mistake:
+      "Yeterli oyuncu yokken döngü hiç task.wait()'e ulaşmıyor, bu yüzden sonsuza kadar dönüyor. while true döngüsündeki her yolun bir beklemesi olmalı.",
+    quiz: {
+      q: "Tur zamanlayıcısı nerede çalışmalı?",
+      o: [
+        "Her oyuncunun LocalScript'inde",
+        "Tek bir sunucu Script'inde",
+        "Tek başına bir ModuleScript'te",
+        "StarterGui'de",
+      ],
+      why: "Tek bir sunucu Script'i tek doğru kaynaktır; istemciler sadece gösterir.",
     },
   },
 };

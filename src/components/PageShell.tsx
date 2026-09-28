@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { CheckCircle2, GitBranch, Zap } from "lucide-react";
 import { Logo, SiteNav } from "@/components/SiteNav";
+import { AchievementToaster } from "@/components/ProgressBits";
 import { usePrefs, useT } from "@/lib/prefs";
 
 /** Nav + page body + footer shared by every page. */
@@ -21,6 +22,7 @@ export function PageShell({
   return (
     <>
       <SiteNav />
+      <AchievementToaster />
       <div className={`relative mx-auto w-full ${width} px-4 pb-16`}>{children}</div>
       <footer className="border-t border-line bg-canvas/60">
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-start sm:justify-between">
@@ -40,6 +42,8 @@ export function PageShell({
                 ["/", "nav.analyzer"],
                 ["/errors", "nav.errors"],
                 ["/learn", "nav.learn"],
+                ["/challenges", "nav.challenges"],
+                ["/profile", "nav.profile"],
                 ["/playground", "nav.playground"],
               ] as const
             ).map(([to, key]) => (

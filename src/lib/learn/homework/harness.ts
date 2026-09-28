@@ -19,6 +19,8 @@ export interface HomeworkCheck {
 
 export interface ExplorerNode {
   name: string;
+  /** Full name, e.g. "Workspace.Lava" — used to look the instance up again. */
+  path?: string;
   className: string;
   value?: string;
   children: ExplorerNode[];
@@ -212,7 +214,12 @@ const SHOWN_SERVICES = [
 ];
 
 function snapshot(inst: Instance, depth: number): ExplorerNode {
-  const node: ExplorerNode = { name: inst.name, className: inst.className, children: [] };
+  const node: ExplorerNode = {
+    name: inst.name,
+    path: inst.getFullName(),
+    className: inst.className,
+    children: [],
+  };
   if (inst.isA("ValueBase")) node.value = fmtValue(inst.props.get("Value"));
   if (depth <= 0) return node;
   for (const c of inst.children.slice(0, 40)) {

@@ -290,6 +290,89 @@ const TR: Record<string, ExerciseText> = {
       "İkinci PlayerAdded'da çağrılan fonksiyonun adına dikkatlice bak.",
     ],
   },
+  "collection-service": {
+    title: "Kristal mağarası",
+    goal: "Crystal etiketli her parça parlasın — oyun çalışırken etiketlenen kristaller dahil.",
+    steps: [
+      'CollectionService:GetTagged ile "Crystal" etiketli bütün parçaları al',
+      "Material'ını Neon, Color'ını Color3.fromRGB(0, 255, 255) yap",
+      "Sonradan etiketlenen kristaller de parlamalı (GetInstanceAddedSignal)",
+    ],
+    hints: [
+      "İki özelliği ayarlayan bir glow(part) fonksiyonu yaz.",
+      'CollectionService:GetTagged("Crystal") içindeki her parça için çağır.',
+      'Ayrıca bağla: CollectionService:GetInstanceAddedSignal("Crystal"):Connect(glow)',
+    ],
+  },
+  runservice: {
+    title: "Süzülen platform",
+    goal: "workspace.Platform, Y 7 ile Y 13 arasında sonsuza kadar yumuşakça aşağı yukarı süzülsün.",
+    steps: [
+      "RunService.Heartbeat kullan ve dt'yi bir değişkende (elapsed) topla",
+      "Her karede Y'yi 10 + math.sin(elapsed) * 3 yap",
+      "X ve Z aynı kalmalı",
+    ],
+    hints: [
+      "Fonksiyonun dışında local elapsed = 0, içinde elapsed += dt.",
+      "platform.Position = Vector3.new(platform.Position.X, 10 + math.sin(elapsed) * 3, platform.Position.Z)",
+    ],
+  },
+  raycasting: {
+    title: "Yere olan mesafe",
+    goal: "Bir konumun yerden ne kadar yüksekte olduğunu raycast ile söyleyen bir fonksiyon yaz.",
+    steps: [
+      "local function distanceToGround(position) oluştur",
+      "position'dan dümdüz aşağı, 100 stud'lık bir ışın at (Vector3.new(0, -100, 0))",
+      "Bir şeye çarptıysa result.Distance'ı, yoksa nil döndür",
+    ],
+    hints: [
+      "local result = workspace:Raycast(position, Vector3.new(0, -100, 0))",
+      "return if result then result.Distance else nil",
+    ],
+  },
+  oop: {
+    title: "Enemy sınıfı",
+    goal: "Metatable'larla bir Enemy sınıfı yaz: her düşmanın kendi canı olsun ama aynı metotları paylaşsınlar.",
+    steps: [
+      "Enemy.new(name, health), Name, Health ve MaxHealth'i olan bir obje döndürür",
+      "enemy:TakeDamage(amount) Health'i düşürür ama asla 0'ın altına değil",
+      "enemy:IsDead() Health 0 olunca true döndürür",
+      "enemy:Heal(amount) Health'i artırır ama asla MaxHealth'in üstüne değil",
+    ],
+    hints: [
+      "function Enemy.new(name, health)\n\tlocal self = setmetatable({}, Enemy)\n\t...\n\treturn self\nend",
+      "self.Health = math.max(0, self.Health - amount)",
+      "self.Health = math.min(self.MaxHealth, self.Health + amount)",
+    ],
+  },
+  tools: {
+    title: "3 kullanımlık iksir",
+    goal: "Potion aletini yaz: onu tutanı iyileştirsin ve 3 yudumdan sonra bitsin.",
+    steps: [
+      "Alet kullanılınca tutanın Humanoid'ini 25 iyileştir",
+      "Health asla MaxHealth'i geçmemeli",
+      "3. kullanımdan sonra aleti yok et",
+    ],
+    hints: [
+      "tool.Activated:Connect(function() ... end) — alet tutulurken tool.Parent karakterdir.",
+      'local humanoid = tool.Parent:FindFirstChildOfClass("Humanoid")',
+      "Fonksiyonun dışında local uses = 3 tut; 0'a inince tool:Destroy() çağır.",
+    ],
+  },
+  "round-system": {
+    title: "Tur döngüsü",
+    goal: "Tur tabanlı bir oyunun döngüsünü yap ve durumunu ReplicatedStorage.Status'ta göster.",
+    steps: [
+      "ReplicatedStorage içinde Status adında bir StringValue oluştur",
+      'Sunucuda kimse yokken: Status = "Waiting for players" (her saniye tekrar kontrol et)',
+      'En az bir oyuncu varken: 5 saniye "Intermission", sonra 10 saniye "Round", sonra tekrar',
+    ],
+    hints: [
+      'local status = Instance.new("StringValue") … status.Parent = ReplicatedStorage',
+      "while true do … end ve oyuncuları saymak için #Players:GetPlayers()",
+      "Döngünün her dalında bir task.wait() olmalı — yoksa sunucu donar.",
+    ],
+  },
 };
 
 /** The exercise with its visible text in the chosen language. */

@@ -14,6 +14,14 @@ export interface Progress {
   hints: Record<string, number>;
   solutions: string[];
   quizMisses: Record<string, number>;
+  /** Solved challenge ids. */
+  challenges: string[];
+  challengeCode: Record<string, string>;
+  challengeAttempts: Record<string, number>;
+  challengeHints: Record<string, number>;
+  challengeSolutions: string[];
+  /** Days (YYYY-MM-DD, local time) with any activity, for streaks. */
+  days: string[];
 }
 
 const KEY = "vyce-learn-progress-v2";
@@ -27,26 +35,71 @@ export const EMPTY_PROGRESS: Progress = {
   hints: {},
   solutions: [],
   quizMisses: {},
+  challenges: [],
+  challengeCode: {},
+  challengeAttempts: {},
+  challengeHints: {},
+  challengeSolutions: [],
+  days: [],
 };
+
+const arr = (v: unknown): string[] =>
+  Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
+const rec = <T>(v: unknown): Record<string, T> =>
+  v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, T>) : {};
+
+/** Validates data from localStorage or an imported backup file. */
+export function normalizeProgress(raw: unknown): Progress {
+  const p = (raw && typeof raw === "object" ? raw : {}) as Partial<Progress>;
+  return {
+    quiz: arr(p.quiz),
+    homework: arr(p.homework),
+    xp: typeof p.xp === "number" && Number.isFinite(p.xp) ? Math.max(0, Math.round(p.xp)) : 0,
+    code: rec<string>(p.code),
+    attempts: rec<number>(p.attempts),
+    hints: rec<number>(p.hints),
+    solutions: arr(p.solutions),
+    quizMisses: rec<number>(p.quizMisses),
+    challenges: arr(p.challenges),
+    challengeCode: rec<string>(p.challengeCode),
+    challengeAttempts: rec<number>(p.challengeAttempts),
+    challengeHints: rec<number>(p.challengeHints),
+    challengeSolutions: arr(p.challengeSolutions),
+    days: arr(p.days),
+  };
+}
 
 export function loadProgress(): Progress {
   try {
     const raw = window.localStorage.getItem(KEY);
-    if (!raw) return { ...EMPTY_PROGRESS };
-    const p = JSON.parse(raw) as Partial<Progress>;
-    return {
-      quiz: Array.isArray(p.quiz) ? p.quiz : [],
-      homework: Array.isArray(p.homework) ? p.homework : [],
-      xp: typeof p.xp === "number" ? p.xp : 0,
-      code: p.code && typeof p.code === "object" ? p.code : {},
-      attempts: p.attempts && typeof p.attempts === "object" ? p.attempts : {},
-      hints: p.hints && typeof p.hints === "object" ? p.hints : {},
-      solutions: Array.isArray(p.solutions) ? p.solutions : [],
-      quizMisses: p.quizMisses && typeof p.quizMisses === "object" ? p.quizMisses : {},
-    };
+    return raw ? normalizeProgress(JSON.parse(raw)) : { ...EMPTY_PROGRESS };
   } catch {
     return { ...EMPTY_PROGRESS };
   }
+}
+
+export function today(d = new Date()): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+/** Marks today as active (for streaks). */
+export function withToday(p: Progress): Progress {
+  const t = today();
+  return p.days.includes(t) ? p : { ...p, days: [...p.days, t].slice(-400) };
+}
+
+/** Consecutive active days ending today (or yesterday, so a streak survives until midnight). */
+export function streakOf(days: string[], now = new Date()): number {
+  const set = new Set(days);
+  const d = new Date(now);
+  if (!set.has(today(d))) d.setDate(d.getDate() - 1);
+  let n = 0;
+  while (set.has(today(d))) {
+    n++;
+    d.setDate(d.getDate() - 1);
+  }
+  return n;
 }
 
 export function saveProgress(p: Progress) {
@@ -55,6 +108,17 @@ export function saveProgress(p: Progress) {
   } catch {
     // storage blocked (private mode): progress lasts until the tab closes
   }
+  // Lets the nav XP chip and achievement toasts update without a reload.
+  window.dispatchEvent(new CustomEvent("vyce-progress", { detail: p }));
+}
+
+export function clearProgress() {
+  try {
+    window.localStorage.removeItem(KEY);
+  } catch {
+    // ignore
+  }
+  window.dispatchEvent(new CustomEvent("vyce-progress", { detail: { ...EMPTY_PROGRESS } }));
 }
 
 export function lessonComplete(p: Progress, lesson: Lesson): boolean {
@@ -78,8 +142,10 @@ export const LEVELS = [
   { xp: 150, title: "Beginner Scripter" },
   { xp: 450, title: "Scripter" },
   { xp: 900, title: "Game Developer" },
-  { xp: 1400, title: "Pro Developer" },
-  { xp: 2000, title: "Legend" },
+  { xp: 1500, title: "Pro Developer" },
+  { xp: 2400, title: "Expert" },
+  { xp: 3600, title: "Master Scripter" },
+  { xp: 5000, title: "Legend" },
 ];
 
 export function levelFor(xp: number) {

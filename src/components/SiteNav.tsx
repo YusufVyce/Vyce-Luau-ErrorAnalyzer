@@ -10,13 +10,16 @@ import {
   Monitor,
   Moon,
   Sun,
+  Swords,
 } from "lucide-react";
 import { usePrefs, useT, type Lang, type Theme } from "@/lib/prefs";
+import { XpChip } from "@/components/ProgressBits";
 
 const ITEMS = [
   { to: "/", key: "nav.analyzer", icon: Bug, exact: true },
   { to: "/errors", key: "nav.errors", icon: Library, exact: false },
   { to: "/learn", key: "nav.learn", icon: BookOpen, exact: false },
+  { to: "/challenges", key: "nav.challenges", icon: Swords, exact: false },
   { to: "/playground", key: "nav.playground", icon: FlaskConical, exact: false },
 ] as const;
 
@@ -111,6 +114,7 @@ const TAB_FILES = {
   "/": "analyzer.luau",
   "/errors": "errors.md",
   "/learn": "learn/",
+  "/challenges": "challenges/",
   "/playground": "playground.luau",
 } as const;
 
@@ -153,6 +157,7 @@ export function SiteNav() {
               </Link>
             ))}
           </div>
+          <XpChip />
           <Menu<Lang>
             label={t("nav.language")}
             icon={

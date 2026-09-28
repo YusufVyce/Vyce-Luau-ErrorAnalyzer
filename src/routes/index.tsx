@@ -6,10 +6,16 @@ import {
   FlaskConical,
   GraduationCap,
   Library,
+  Check,
+  History,
+  Link2,
   Search,
+  Swords,
 } from "lucide-react";
+import { copyText } from "@/components/CodeBlock";
 import { ANALYZER_EXAMPLES } from "@/lib/analyzerExamples";
 import { SIGNATURES } from "@/lib/analyzer/precise/diagnose";
+import { LESSONS } from "@/lib/learn/lessons";
 import { analyzeErrorAndCode, type AnalyzerResult } from "@/utils/analyzerEngine";
 import { PageShell } from "@/components/PageShell";
 import { HeroDemo } from "@/components/HeroDemo";
@@ -25,6 +31,9 @@ export const Route = createFileRoute("/")({
   }),
   component: ErrorParserPage,
 });
+
+type HistoryItem = { log: string; code: string; title: string };
+const HISTORY_KEY = "vyce-analyzer-history";
 
 type Toast = { id: number; message: string; variant: "info" | "error" };
 type Matched = Extract<AnalyzerResult, { matched: true }>;
@@ -57,6 +66,23 @@ function ErrorParserPage() {
   }, [search.error, search.code]);
 
   const canAnalyze = logText.trim().length > 0 || codeText.trim().length > 0;
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  useEffect(() => {
+    try {
+      const h = JSON.parse(localStorage.getItem(HISTORY_KEY) ?? "[]");
+      if (Array.isArray(h)) setHistory(h.filter((x) => typeof x?.log === "string").slice(0, 6));
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  async function copyResultLink() {
+    const params = new URLSearchParams({ error: logText.trim(), code: codeText.trim() });
+    setLinkCopied(await copyText(`${window.location.origin}/?${params}`));
+    setTimeout(() => setLinkCopied(false), 1800);
+  }
 
   function showToast(message: string, variant: Toast["variant"] = "info") {
     const id = Date.now() + Math.random();
@@ -68,6 +94,19 @@ function ErrorParserPage() {
     const analysis = analyzeErrorAndCode(log, code);
     if (analysis.matched) {
       setResult({ kind: "match", data: analysis, key: Date.now() });
+      const title = analysis.precise?.title ?? analysis.title ?? log.slice(0, 60);
+      setHistory((h) => {
+        const next = [
+          { log, code, title },
+          ...h.filter((x) => x.log !== log || x.code !== code),
+        ].slice(0, 6);
+        try {
+          localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+        } catch {
+          // storage blocked
+        }
+        return next;
+      });
     } else {
       setResult({ kind: "none" });
       if (analysis.error) showToast(analysis.error, "error");
@@ -173,7 +212,7 @@ function ErrorParserPage() {
             {(
               [
                 [`${SIGNATURES.length}+`, "home.stat1"],
-                ["20", "home.stat2"],
+                [String(LESSONS.length), "home.stat2"],
                 ["0", "home.stat3"],
               ] as const
             ).map(([n, key]) => (
@@ -296,6 +335,30 @@ function ErrorParserPage() {
                 </button>
               ))}
             </div>
+            {history.length > 0 && (
+              <div className="mt-4">
+                <div className="mb-2 flex items-center gap-1.5 text-[13px] font-medium text-ink-3">
+                  <History className="h-3.5 w-3.5" aria-hidden="true" /> {t("home.recent")}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {history.map((h) => (
+                    <button
+                      key={`${h.log}|${h.code}`}
+                      type="button"
+                      title={h.log}
+                      onClick={() => {
+                        setLogText(h.log);
+                        setCodeText(h.code);
+                        runAnalysis(h.log, h.code);
+                      }}
+                      className="max-w-[18rem] truncate rounded-lg border border-line bg-surface-2/60 px-2.5 py-1 font-mono text-[12px] text-ink-3 transition-colors hover:border-brand-line hover:text-brand"
+                    >
+                      {h.title.replace(/`/g, "")}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </section>
 
@@ -326,7 +389,21 @@ function ErrorParserPage() {
           )}
 
           {result.kind === "match" && result.data.precise && (
-            <div key={result.key} className="slide-fade-enter-active">
+            <div key={result.key} className="slide-fade-enter-active space-y-2">
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={copyResultLink}
+                  className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[13px] text-ink-3 transition-colors hover:text-brand"
+                >
+                  {linkCopied ? (
+                    <Check className="h-4 w-4" aria-hidden="true" />
+                  ) : (
+                    <Link2 className="h-4 w-4" aria-hidden="true" />
+                  )}
+                  {t(linkCopied ? "pg.copied" : "home.shareResult")}
+                </button>
+              </div>
               <ResultView diagnosis={result.data.precise} advanced={result.data.advanced} />
             </div>
           )}
@@ -354,9 +431,17 @@ function ErrorParserPage() {
         <div className="ep-label pt-10">
           <b>//</b> 03 — {t("home.sec3")}
         </div>
-        <section className="grid gap-4 md:grid-cols-3" aria-label={t("home.moreLabel")}>
+        <section
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+          aria-label={t("home.moreLabel")}
+        >
           {[
-            { to: "/learn", icon: GraduationCap, title: t("home.card1t"), body: t("home.card1") },
+            {
+              to: "/learn",
+              icon: GraduationCap,
+              title: t("home.card1t"),
+              body: t("home.card1", { n: LESSONS.length }),
+            },
             {
               to: "/playground",
               icon: FlaskConical,
@@ -364,6 +449,7 @@ function ErrorParserPage() {
               body: t("home.card2"),
             },
             { to: "/errors", icon: Library, title: t("home.card3t"), body: t("home.card3") },
+            { to: "/challenges", icon: Swords, title: t("home.card4t"), body: t("home.card4") },
           ].map(({ to, icon: Icon, title, body }) => (
             <Link
               key={to}
