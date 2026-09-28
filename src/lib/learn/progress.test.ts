@@ -4,10 +4,13 @@ import { certificateId } from "./certificate";
 import { LESSONS } from "./lessons";
 import {
   EMPTY_PROGRESS,
+  gainXp,
   levelFor,
   normalizeProgress,
+  starsFor,
   streakOf,
   today,
+  todayXp,
   withToday,
 } from "./progress";
 
@@ -26,6 +29,26 @@ describe("progress", () => {
     expect(p.hints).toEqual({});
     expect(p.challenges).toEqual([]);
     expect(p.days).toEqual(["2026-01-01"]);
+  });
+  it("keeps old saves working and fills in the new fields", () => {
+    const old = normalizeProgress({ xp: 120, quiz: ["studio-tour"], dailyGoal: 7 });
+    expect(old.xp).toBe(120);
+    expect(old.stars).toEqual({});
+    expect(old.xpDays).toEqual({});
+    expect(old.dailyGoal).toBe(EMPTY_PROGRESS.dailyGoal);
+    expect(normalizeProgress({ dailyGoal: 120 }).dailyGoal).toBe(120);
+  });
+  it("counts XP towards today's goal", () => {
+    const p = gainXp(gainXp({ ...EMPTY_PROGRESS }, 20), 15);
+    expect(p.xp).toBe(35);
+    expect(todayXp(p)).toBe(35);
+    expect(gainXp(p, 0)).toBe(p);
+    const many = { ...EMPTY_PROGRESS, xpDays: {} as Record<string, number> };
+    for (let i = 1; i <= 80; i++) many.xpDays[`2025-01-${String(i).padStart(3, "0")}`] = 1;
+    expect(Object.keys(gainXp(many, 5).xpDays)).toHaveLength(60);
+  });
+  it("gives stars by mistakes", () => {
+    expect([0, 1, 2, 3, 9].map(starsFor)).toEqual([3, 2, 2, 1, 1]);
   });
   it("counts streaks ending today or yesterday", () => {
     const now = new Date(2026, 8, 28);

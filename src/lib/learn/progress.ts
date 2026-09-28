@@ -22,6 +22,12 @@ export interface Progress {
   challengeSolutions: string[];
   /** Days (YYYY-MM-DD, local time) with any activity, for streaks. */
   days: string[];
+  /** Best stars (1-3) per lesson from the bite-sized lesson session. */
+  stars: Record<string, number>;
+  /** XP earned per day (YYYY-MM-DD), for the daily goal. */
+  xpDays: Record<string, number>;
+  /** Daily XP goal. */
+  dailyGoal: number;
 }
 
 const KEY = "vyce-learn-progress-v2";
@@ -41,7 +47,18 @@ export const EMPTY_PROGRESS: Progress = {
   challengeHints: {},
   challengeSolutions: [],
   days: [],
+  stars: {},
+  xpDays: {},
+  dailyGoal: 60,
 };
+
+/** Daily goal choices (XP per day). */
+export const DAILY_GOALS = [
+  { xp: 30, en: "Casual", tr: "Rahat" },
+  { xp: 60, en: "Regular", tr: "Düzenli" },
+  { xp: 120, en: "Serious", tr: "Ciddi" },
+  { xp: 200, en: "Intense", tr: "Yoğun" },
+] as const;
 
 const arr = (v: unknown): string[] =>
   Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
@@ -66,6 +83,12 @@ export function normalizeProgress(raw: unknown): Progress {
     challengeHints: rec<number>(p.challengeHints),
     challengeSolutions: arr(p.challengeSolutions),
     days: arr(p.days),
+    stars: rec<number>(p.stars),
+    xpDays: rec<number>(p.xpDays),
+    dailyGoal:
+      typeof p.dailyGoal === "number" && DAILY_GOALS.some((g) => g.xp === p.dailyGoal)
+        ? p.dailyGoal
+        : EMPTY_PROGRESS.dailyGoal,
   };
 }
 
@@ -87,6 +110,26 @@ export function today(d = new Date()): string {
 export function withToday(p: Progress): Progress {
   const t = today();
   return p.days.includes(t) ? p : { ...p, days: [...p.days, t].slice(-400) };
+}
+
+/** Adds XP to the total and to today's count (for the daily goal). */
+export function gainXp(p: Progress, n: number): Progress {
+  if (n <= 0) return p;
+  const d = today();
+  const xpDays = { ...p.xpDays, [d]: (p.xpDays[d] ?? 0) + n };
+  // Keep the last 60 days only.
+  const keys = Object.keys(xpDays).sort();
+  for (const k of keys.slice(0, Math.max(0, keys.length - 60))) delete xpDays[k];
+  return { ...p, xp: p.xp + n, xpDays };
+}
+
+export function todayXp(p: Progress): number {
+  return p.xpDays[today()] ?? 0;
+}
+
+/** 3 stars with no mistakes, 2 with one or two, otherwise 1. */
+export function starsFor(mistakes: number): number {
+  return mistakes === 0 ? 3 : mistakes <= 2 ? 2 : 1;
 }
 
 /** Consecutive active days ending today (or yesterday, so a streak survives until midnight). */
@@ -125,6 +168,11 @@ export function lessonComplete(p: Progress, lesson: Lesson): boolean {
   const quizOk = !lesson.quiz || p.quiz.includes(lesson.id);
   const hwOk = !exerciseFor(lesson.id) || p.homework.includes(lesson.id);
   return quizOk && hwOk;
+}
+
+/** Lessons with anything to review: completed, or practiced at least once. */
+export function doneLessonIds(p: Progress): string[] {
+  return LESSONS.filter((l) => lessonComplete(p, l) || p.stars[l.id]).map((l) => l.id);
 }
 
 /** A lesson is unlocked when every lesson before it is complete. */

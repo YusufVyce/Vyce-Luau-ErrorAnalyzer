@@ -2,6 +2,7 @@
 @source "../src";
 @import "tw-animate-css";
 @import "./theme-remap.css";
+@import "./duo.css";
 
 @custom-variant dark (&:is(.dark *));
 
