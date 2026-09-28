@@ -398,6 +398,61 @@ describe("precise diagnosis — ground truth cases", () => {
   });
 });
 
+describe("beginner extras", () => {
+  it("walks through the failing expression and patches the whole script", () => {
+    const d = diagnose(
+      "ServerScriptService.Inventory:3: attempt to index nil with 'Value'",
+      'local stats = player:WaitForChild("leaderstats")\nlocal coins = stats:FindFirstChild("Coinz")\nprint(coins.Value)',
+    )!;
+    expect(d.breakdown?.map((s) => s.state)).toEqual(["nil", "error"]);
+    expect(d.patched?.code).toContain('stats:WaitForChild("Coinz", 5)');
+    expect(d.patched?.code).toContain("print(coins.Value)");
+    expect(d.analogy).toBeTruthy();
+    expect(d.glossary?.some((g) => g.term === "nil")).toBe(true);
+  });
+
+  it("keeps the user's variable names when patching", () => {
+    const d = diagnose(
+      "Players.Bob.PlayerScripts.LocalScript:3: attempt to index nil with 'Humanoid'",
+      "local player = game.Players.LocalPlayer\nlocal char = player.Character\nlocal hum = char.Humanoid",
+    )!;
+    expect(d.patched?.code).toContain(
+      "local char = player.Character or player.CharacterAdded:Wait()",
+    );
+  });
+
+  it("patches DataStore loads with pcall and a default", () => {
+    const d = diagnose(
+      "ServerScriptService.Data:5: attempt to index nil with 'Coins'",
+      'local store = game:GetService("DataStoreService"):GetDataStore("x")\ngame.Players.PlayerAdded:Connect(function(player)\n\tlocal data = store:GetAsync(player.UserId)\n\n\tprint(data.Coins)\nend)',
+    )!;
+    expect(d.patched?.code).toContain("local ok, data = pcall(function()");
+    expect(d.patched?.code).toContain("data = data or { Coins = 0 }");
+  });
+
+  it("explains a non-character touching a Touched part instead of suggesting WaitForChild", () => {
+    const code =
+      "local lava = script.Parent\n\nlava.Touched:Connect(function(hit)\n\thit.Parent.Humanoid.Health = 0\nend)";
+    const d = diagnose(
+      'Workspace.Lava.Script:4: Humanoid is not a valid member of Workspace "Workspace"',
+      code,
+    )!;
+    expect(d.causes[0].text).toMatch(/isn't a character/);
+    expect(d.causes.some((c) => /hasn't loaded/.test(c.text))).toBe(false);
+    expect(d.fixCode?.after).toContain('FindFirstChildOfClass("Humanoid")');
+    expect(d.fixCode?.after).not.toContain("WaitForChild");
+    expect(d.patched?.code).toContain("\tif not humanoid then return end\n\thumanoid.Health = 0");
+  });
+
+  it("rewrites `if hit.Parent.Humanoid then` inline", () => {
+    const d = diagnose(
+      'Workspace.Spikes.Script:2: Humanoid is not a valid member of Model "Workspace.Rock"',
+      "script.Parent.Touched:Connect(function(hit)\n\tif hit.Parent.Humanoid then\n\t\thit.Parent.Humanoid.Health -= 10\n\tend\nend)",
+    )!;
+    expect(d.fixCode?.after).toBe('if hit.Parent:FindFirstChildOfClass("Humanoid") then');
+  });
+});
+
 describe("log parsing", () => {
   it("strips Studio timestamps and side suffixes", () => {
     const parsed = parseLog(
@@ -461,7 +516,7 @@ describe("static checks", () => {
   it("detects missing ends", () => {
     expect(
       lintCode("local function f()\n\tif a then\n\t\tprint(1)\nend").some(
-        (w) => w.id === "missing-end",
+        (w) => w.id === "syntax-error" && /Expected 'end'/.test(w.message),
       ),
     ).toBe(true);
   });

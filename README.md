@@ -49,9 +49,25 @@ Its purpose is not only to tell you **where** an error occurred—but to explain
 - **Code tracing** — finds the failing line, the exact nil expression, and where it came from (`FindFirstChild` miss, `LocalPlayer` on the server, `player.Character` before spawn, `GetAsync` for new players, typos, functions used before their definition…).
 - **Explainable confidence** — the score only increases for evidence the analyzer verified; the "Why?" button lists every step. Unrecognized messages are reported honestly instead of guessed.
 - **Only real documentation links** — links come from an allowlist of official create.roblox.com pages (`src/lib/analyzer/precise/docs.ts`); nothing is generated from API names and no forum links are shown.
-- **Learn page (`/learn`)** — a free course that teaches Roblox Studio scripting from zero, with illustrations, copy-paste code, examples inspired by popular games, common mistakes (openable in the analyzer) and quizzes.
+- **Beginner explanations** — every diagnosis adds an everyday analogy ("In plain words"), a step-by-step walk through the failing expression (`hit` ✓ → `.Parent` ✓ → `.Humanoid` ✗), a mini glossary of the words used, and **your whole script with the fix applied** (only shown when the patched script still parses).
+- **Real syntax check** — pasted code is parsed by a real Luau parser, so missing `end`s, `=` instead of `==`, `!=` and similar mistakes are reported with Studio-style messages and the exact line.
+- **Only real documentation links** — links come from an allowlist of official create.roblox.com pages (`src/lib/analyzer/precise/docs.ts`); nothing is generated from API names and no forum links are shown.
 
 Engine: `src/lib/analyzer/precise/` · Ground-truth tests: `src/lib/analyzer/precise/diagnose.test.ts`
+
+# Learn, Homework & Playground
+
+- **Learn (`/learn`)** — a free course that teaches Roblox Studio scripting from zero: illustrations, copy-paste code, examples inspired by popular games, common mistakes (openable in the analyzer) and quizzes.
+- **Homework after every lesson** — the learner writes real code in an editor. It runs in a simulated Roblox server in the browser and is graded by concrete checks ("Output shows 42", "the Lava kills a player", "leaderstats has Coins = 0"…). Failing checks say exactly what the checker saw, runtime errors are explained by the analyzer, and the code is re-run with different starting values so hard-coded answers don't pass. Hints and a solution (after a few tries) are available.
+- **Progress** — passing the quiz and the homework unlocks the next lesson; XP and levels (Noob → Legend). Progress is stored only in the browser (localStorage).
+- **Playground (`/playground`)** — a tiny Roblox server in the browser: write a Script and a LocalScript, press Run, then make players join/leave, touch parts, press keys or click GUI buttons and watch Output and Explorer update.
+- **Error library (`/errors`)** — searchable list of ~60 common Roblox errors with the usual cause and a link to the full explanation.
+
+### Offline Luau simulator
+
+`src/lib/luau/` contains a small Luau interpreter written for this site — lexer, parser (with type annotations skipped), and a tree-walking evaluator with coroutines, `task` scheduling on a virtual clock and Roblox-exact error messages. `src/lib/luau/roblox/` simulates the parts of the engine beginners use: Instances and ~100 classes, properties with type checking, events (`Touched`, `PlayerAdded`, `Changed`…), players and characters, RemoteEvents/Functions with client/server rules, TweenService, DataStores (in memory), CollectionService, Debris, raycasts and ModuleScripts. Physics, rendering and networking lag are not simulated.
+
+Homework exercises and graders: `src/lib/learn/homework/` (graded in a Web Worker).
 
 ---
 

@@ -76,6 +76,14 @@ export interface PreciseDiagnosis {
   warnings: CodeWarning[];
   /** false when the message wasn't recognized and only generic advice is available. */
   recognized: boolean;
+  /** Everyday comparison for beginners. */
+  analogy?: string;
+  /** The failing expression walked through piece by piece. */
+  breakdown?: Array<{ code: string; state: "ok" | "nil" | "error"; note: string }>;
+  /** Short definitions of the scripting words used in this explanation. */
+  glossary?: Array<{ term: string; meaning: string }>;
+  /** The user's whole script with the fix applied (only when it still parses). */
+  patched?: { code: string; changed: number[] };
 }
 
 export interface DiagnoseContext {

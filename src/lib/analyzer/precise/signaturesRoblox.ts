@@ -35,6 +35,52 @@ import type { DiagnosisCause, Signature, SignatureResult } from "./types";
 const CHILD_LIKE =
   /^(leaderstats|PlayerGui|Backpack|Humanoid|HumanoidRootPart|Head|Torso|UpperTorso|Animator|PlayerScripts)$|^[A-Z]?[a-z]+[A-Za-z0-9]*$/;
 
+const CHARACTER_PARTS = /^(Humanoid|HumanoidRootPart|Head|Torso|UpperTorso)$/;
+
+/**
+ * Rewrites `hit.Parent.Humanoid...` so it first checks the part belongs to a
+ * character. Keeps the user's own line when possible.
+ */
+function touchGuardFix(member: string, line?: string): SignatureResult["fixCode"] {
+  const getter =
+    member === "Humanoid" ? `:FindFirstChildOfClass("Humanoid")` : `:FindFirstChild("${member}")`;
+  const varName =
+    member === "Humanoid"
+      ? "humanoid"
+      : member === "HumanoidRootPart"
+        ? "rootPart"
+        : member[0].toLowerCase() + member.slice(1);
+  const generic = {
+    after: `local ${varName} = hit.Parent${getter}\nif not ${varName} then return end -- not a character, ignore it`,
+    caption: "Put this at the top of your Touched function.",
+  };
+  if (!line) return generic;
+  const m = line.match(new RegExp(`([A-Za-z_][\\w.]*)\\s*\\.\\s*${escapeRegExp(member)}\\b`));
+  if (!m) return generic;
+  const parentExpr = m[1];
+  const found = `${parentExpr}${getter}`;
+  const caption = "Only characters have a " + member + " — check for it first.";
+  // `if hit.Parent.Humanoid then` → `if hit.Parent:FindFirstChildOfClass("Humanoid") then`
+  if (/^(if|elseif)\b/.test(line))
+    return { before: line, after: line.replace(m[0], found), caption };
+  // `local hum = hit.Parent.Humanoid`
+  const decl = line.match(
+    new RegExp(`^local\\s+([A-Za-z_]\\w*)\\s*=\\s*${escapeRegExp(m[0])}\\s*$`),
+  );
+  if (decl)
+    return {
+      before: line,
+      after: `local ${decl[1]} = ${found}\nif not ${decl[1]} then return end`,
+      caption,
+    };
+  // `hit.Parent.Humanoid.Health = 0`
+  return {
+    before: line,
+    after: `local ${varName} = ${found}\nif not ${varName} then return end\n${line.replace(m[0], varName)}`,
+    caption,
+  };
+}
+
 const invalidMember: Signature = {
   id: "invalid-member",
   category: "invalid-member",
@@ -118,23 +164,36 @@ const invalidMember: Signature = {
       evidence.push(ev(18, `${cls} parent means the touch came from an accessory/tool`));
     }
 
-    if (
-      cls === "Model" &&
-      (member === "Humanoid" || member === "HumanoidRootPart") &&
-      path &&
-      /^Workspace\./i.test(path)
-    ) {
+    // `hit.Parent.Humanoid` in a Touched handler, but the thing that touched
+    // wasn't a character (a loose part, a rock in a Model, a Folder…).
+    const touchCode = ctx.hasCode && /\.Touched\b|\bhit\.Parent\b/.test(ctx.code);
+    const nonCharacterTouch =
+      CHARACTER_PARTS.test(member) &&
+      !["Accessory", "Tool", "Accoutrement", "Player"].includes(cls) &&
+      (touchCode ||
+        cls === "Workspace" ||
+        cls === "Folder" ||
+        (!ctx.hasCode && cls === "Model" && !!path && /^Workspace\./i.test(path)));
+    if (nonCharacterTouch) {
+      const what =
+        cls === "Workspace"
+          ? "a part that sits directly in Workspace"
+          : `${path ? q(path.split(".").pop()!) : "something"}, which is a ${cls}, not a character`;
       causes.push(
         cause(
-          `Something other than a character touched it (${path.split(".").pop()} is just a Model)`,
+          `Something that isn't a character touched it — hit.Parent was ${what}`,
           "likely",
-          'Touched fires for every part. Check with FindFirstChildOfClass("Humanoid") before using it.',
+          `Touched fires for every part that bumps into it: other parts, falling rocks, hats, tools. Only player (and NPC) characters have a ${member}, so check that it exists before using it.`,
+          touchCode,
         ),
       );
-      fixCode ??= {
-        after:
-          'local humanoid = hit.Parent:FindFirstChildOfClass("Humanoid")\nif not humanoid then return end',
-      };
+      fixCode = touchGuardFix(member, located?.text) ?? fixCode;
+      evidence.push(
+        ev(
+          touchCode ? 20 : 10,
+          touchCode ? "the script uses Touched / hit.Parent" : `${cls} can't be a character`,
+        ),
+      );
     }
 
     if (member === "leaderstats" && cls === "Player") {
@@ -179,6 +238,7 @@ const invalidMember: Signature = {
 
     const isChildName =
       !hint &&
+      !nonCharacterTouch &&
       !(owner && !owner.owner.includes(cls)) &&
       !(typo && typo.toLowerCase() === member.toLowerCase()) &&
       CHILD_LIKE.test(member);
@@ -209,6 +269,29 @@ const invalidMember: Signature = {
             caption: "WaitForChild waits until the object exists.",
           };
       }
+    }
+
+    if (nonCharacterTouch) {
+      return result({
+        title: `hit.Parent isn't a character — it has no ${member}`,
+        severity: "High",
+        summary: `The part that touched yours belongs to ${path ? q(path) : `a ${cls}`}, not to a player's character, so there is no ${q(member)} inside it.`,
+        explanation: `Touched fires for every part that bumps into yours — not just players. \`hit\` is the part that touched, and \`hit.Parent\` is whatever holds it. For a player's leg that's the character (which has a ${member}); for a loose part it's Workspace or a Model. Writing \`hit.Parent.${member}\` assumes a character and errors for everything else.`,
+        location: locationOf(located, member),
+        causes: rankCauses(causes),
+        steps: [
+          `Get the ${member} with ${member === "Humanoid" ? ':FindFirstChildOfClass("Humanoid")' : `:FindFirstChild("${member}")`} — it returns nil instead of erroring.`,
+          "If it's nil, `return` early: whatever touched you wasn't a character.",
+          "Only players? Use game.Players:GetPlayerFromCharacter(hit.Parent) and check it isn't nil.",
+        ],
+        fixCode,
+        docs: docs(
+          ["BasePart", "Touched"],
+          ["Instance", "FindFirstChildOfClass"],
+          ["Players", "GetPlayerFromCharacter"],
+        ),
+        evidence,
+      });
     }
 
     return result({

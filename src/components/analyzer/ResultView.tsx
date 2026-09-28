@@ -5,13 +5,16 @@ import {
   CheckCircle2,
   ChevronDown,
   ExternalLink,
+  GraduationCap,
   Lightbulb,
+  ListOrdered,
   MapPin,
+  Smile,
   Wrench,
 } from "lucide-react";
 import type { AdvancedAnalyzerOutput } from "@/lib/analyzer/advancedRobloxAnalyzer";
 import type { CodeWarning, DiagnosisCause, PreciseDiagnosis } from "@/lib/analyzer/precise/types";
-import { CodeBlock, highlightLuau } from "@/components/CodeBlock";
+import { CodeBlock, copyText, highlightLuau } from "@/components/CodeBlock";
 
 const SEVERITY_STYLE: Record<PreciseDiagnosis["severity"], string> = {
   Critical: "border-red-500/40 bg-red-500/10 text-red-300",
@@ -159,6 +162,75 @@ function Section({
   );
 }
 
+function Breakdown({ steps }: { steps: NonNullable<PreciseDiagnosis["breakdown"]> }) {
+  const tone = {
+    ok: "border-emerald-500/25 bg-emerald-500/[0.06] text-emerald-200",
+    nil: "border-amber-500/40 bg-amber-500/10 text-amber-200",
+    error: "border-red-500/40 bg-red-500/10 text-red-200",
+  } as const;
+  const icon = { ok: "✓", nil: "∅", error: "✗" } as const;
+  return (
+    <ol className="space-y-1.5" aria-label="Step by step">
+      {steps.map((s, i) => (
+        <li key={i} className="flex items-center gap-3">
+          <span className="w-5 shrink-0 text-right font-mono text-[11px] text-zinc-600">
+            {i + 1}
+          </span>
+          <code
+            className={`shrink-0 rounded-md border px-2 py-1 font-mono text-[12px] ${tone[s.state]}`}
+          >
+            <span className="mr-1.5 opacity-70">{icon[s.state]}</span>
+            {s.code}
+          </code>
+          <span className="min-w-0 text-xs text-zinc-400">
+            <Rich text={s.note} />
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function PatchedScript({ patched }: { patched: NonNullable<PreciseDiagnosis["patched"]> }) {
+  const [label, setLabel] = useState("Copy whole script");
+  const lines = patched.code.split("\n");
+  const changed = new Set(patched.changed);
+  return (
+    <div className="overflow-hidden rounded-lg border border-emerald-500/30 bg-[#0b0e12]">
+      <div className="flex items-center justify-between border-b border-zinc-800 px-3 py-1.5 text-[11px]">
+        <span className="font-semibold uppercase tracking-wider text-emerald-300">
+          Your script, fixed
+        </span>
+        <button
+          type="button"
+          onClick={async () => {
+            setLabel((await copyText(patched.code)) ? "Copied ✓" : "Copy failed");
+            setTimeout(() => setLabel("Copy whole script"), 1600);
+          }}
+          className="rounded px-2 py-0.5 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
+        >
+          {label}
+        </button>
+      </div>
+      <pre
+        className="max-h-96 overflow-auto py-2 font-mono text-[12.5px] leading-[1.65]"
+        style={{ tabSize: 4 }}
+      >
+        {lines.map((l, i) => (
+          <div key={i} className={changed.has(i + 1) ? "bg-emerald-500/10" : ""}>
+            <span
+              className={`inline-block w-10 select-none pr-3 text-right ${changed.has(i + 1) ? "text-emerald-400" : "text-zinc-600"}`}
+            >
+              {changed.has(i + 1) ? "+" : i + 1}
+            </span>
+            <span className="text-zinc-200">{highlightLuau(l)}</span>
+          </div>
+        ))}
+      </pre>
+    </div>
+  );
+}
+
 export function ResultView({
   diagnosis,
   advanced,
@@ -263,11 +335,29 @@ export function ResultView({
         <p className="text-sm leading-relaxed text-zinc-300">
           <Rich text={diagnosis.explanation} />
         </p>
+        {diagnosis.analogy && (
+          <div className="flex gap-3 rounded-lg border border-violet-500/25 bg-violet-500/[0.06] p-3 text-sm text-violet-100">
+            <Smile className="mt-0.5 h-4 w-4 shrink-0 text-violet-300" aria-hidden="true" />
+            <span>
+              <span className="font-semibold">In plain words: </span>
+              {diagnosis.analogy}
+            </span>
+          </div>
+        )}
       </Section>
 
       {diagnosis.location && (
         <Section icon={<MapPin className="h-4 w-4" />} title="Where">
           <CodeLine {...diagnosis.location} />
+          {diagnosis.breakdown && diagnosis.breakdown.length > 0 && (
+            <div className="space-y-2 rounded-lg border border-zinc-800 bg-zinc-950/40 p-3">
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                <ListOrdered className="h-3.5 w-3.5" aria-hidden="true" /> What Luau did, step by
+                step
+              </div>
+              <Breakdown steps={diagnosis.breakdown} />
+            </div>
+          )}
         </Section>
       )}
 
@@ -333,7 +423,9 @@ export function ResultView({
           ))}
         </ol>
         {diagnosis.fixCode && (
-          <div className={`grid gap-3 ${diagnosis.fixCode.before ? "md:grid-cols-2" : ""}`}>
+          <div
+            className={`grid gap-3 ${diagnosis.fixCode.before && diagnosis.fixCode.after.length + diagnosis.fixCode.before.length < 110 ? "md:grid-cols-2" : ""}`}
+          >
             {diagnosis.fixCode.before && (
               <CodeBlock
                 code={diagnosis.fixCode.before}
@@ -352,6 +444,7 @@ export function ResultView({
         {diagnosis.fixCode?.caption && (
           <p className="text-xs text-zinc-500">{diagnosis.fixCode.caption}</p>
         )}
+        {diagnosis.patched && <PatchedScript patched={diagnosis.patched} />}
       </Section>
 
       {warnings.length > 0 && (
@@ -362,6 +455,19 @@ export function ResultView({
           }
         >
           <WarningList warnings={warnings} />
+        </Section>
+      )}
+
+      {diagnosis.glossary && diagnosis.glossary.length > 0 && (
+        <Section icon={<GraduationCap className="h-4 w-4" />} title="Words used here">
+          <dl className="grid gap-2 sm:grid-cols-2">
+            {diagnosis.glossary.map((g) => (
+              <div key={g.term} className="rounded-lg border border-zinc-800 bg-zinc-950/40 p-3">
+                <dt className="font-mono text-xs font-semibold text-emerald-300">{g.term}</dt>
+                <dd className="mt-1 text-xs leading-relaxed text-zinc-400">{g.meaning}</dd>
+              </div>
+            ))}
+          </dl>
         </Section>
       )}
 

@@ -14,6 +14,7 @@ import {
   splitLines,
   type Side,
 } from "./codeTools";
+import { parse } from "@/lib/luau/parser";
 import type { CodeWarning } from "./types";
 
 const OPENERS = /\b(function|do|if|repeat)\b/g;
@@ -161,23 +162,16 @@ export function lintCode(code: string, scriptPath?: string): CodeWarning[] {
     }
   });
 
-  // --- Block balance ---------------------------------------------------------
-  const balance = clean.reduce((sum, line) => sum + blockDelta(line), 0);
-  if (balance > 0) {
+  // --- Real syntax check (same parser the simulator uses) -------------------
+  const syntax = parse(code);
+  if (syntax.error) {
+    const partial = /<eof>|'end'|'until'/.test(syntax.error.message);
     push({
-      id: "missing-end",
-      title: `Missing ${balance === 1 ? "an `end`" : `${balance} \`end\`s`}`,
-      message:
-        "Every `function`, `if`, `for` and `while` needs its own `end`. Something in this snippet is never closed.",
+      id: "syntax-error",
+      title: `Luau can't read line ${syntax.error.line}`,
+      message: `${syntax.error.message}.${partial ? " (If you pasted only part of a script, this can be expected — otherwise a block is missing its end.)" : " The whole script won't run until this is fixed."}`,
+      line: syntax.error.line,
       severity: "error",
-    });
-  } else if (balance < 0 && !/^\s*end\b/.test(clean[0] ?? "")) {
-    push({
-      id: "extra-end",
-      title: "Extra `end`",
-      message:
-        "There are more `end`s than blocks. (If you only pasted part of a script this can be a false alarm.)",
-      severity: "warning",
     });
   }
 
