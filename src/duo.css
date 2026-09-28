@@ -1,0 +1,597 @@
+/*
+ * Duolingo-style learning path: chunky 3D buttons, round path nodes, the
+ * mascot and the small animations used in lesson sessions.
+ */
+
+:root,
+:root[data-theme="dark"] {
+  --ok: #4ade80;
+  --ok-dark: #1f9d55;
+  --ok-ink: #04210f;
+  --bad: #ff6b81;
+  --bad-dark: #c43d56;
+  --bad-ink: #2b0710;
+  --gold: #ffcb6b;
+  --gold-dark: #c7922e;
+  --node-ink: #0b1020;
+}
+:root[data-theme="light"] {
+  --ok: #22b35e;
+  --ok-dark: #13843f;
+  --ok-ink: #ffffff;
+  --bad: #ec3f5f;
+  --bad-dark: #b3203d;
+  --bad-ink: #ffffff;
+  --gold: #ffc233;
+  --gold-dark: #d09112;
+  --node-ink: #ffffff;
+}
+
+/* Unit colors (one per chapter) */
+.vy-unit-0 {
+  --u: #82aaff;
+  --u-dark: #4c70c4;
+}
+.vy-unit-1 {
+  --u: #c792ea;
+  --u-dark: #8b58b0;
+}
+.vy-unit-2 {
+  --u: #a8e06a;
+  --u-dark: #6d9e38;
+}
+.vy-unit-3 {
+  --u: #f78c6c;
+  --u-dark: #b9573a;
+}
+.vy-unit-4 {
+  --u: #89ddff;
+  --u-dark: #4b9fc2;
+}
+.vy-unit-5 {
+  --u: #ff8cc6;
+  --u-dark: #c0508a;
+}
+:root[data-theme="light"] .vy-unit-0 {
+  --u: #5b7fe8;
+  --u-dark: #3656d8;
+}
+:root[data-theme="light"] .vy-unit-1 {
+  --u: #a667d6;
+  --u-dark: #7d3fb0;
+}
+:root[data-theme="light"] .vy-unit-2 {
+  --u: #6fb83b;
+  --u-dark: #4f8a22;
+}
+:root[data-theme="light"] .vy-unit-3 {
+  --u: #f07b50;
+  --u-dark: #c4582f;
+}
+:root[data-theme="light"] .vy-unit-4 {
+  --u: #2fb3dd;
+  --u-dark: #1a86ab;
+}
+:root[data-theme="light"] .vy-unit-5 {
+  --u: #ec5f9e;
+  --u-dark: #bd3c76;
+}
+
+@layer components {
+  /* ---------- Chunky buttons ---------- */
+  .vy-btn {
+    --b: var(--brand);
+    --b-dark: color-mix(in srgb, var(--brand) 62%, #000);
+    --b-ink: var(--node-ink);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 16px;
+    padding: 0.8rem 1.4rem;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: var(--b);
+    color: var(--b-ink);
+    box-shadow: 0 4px 0 var(--b-dark);
+    transition:
+      transform 80ms ease,
+      box-shadow 80ms ease,
+      filter 150ms ease;
+    user-select: none;
+  }
+  .vy-btn:hover:not(:disabled) {
+    filter: brightness(1.07);
+  }
+  .vy-btn:active:not(:disabled) {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 var(--b-dark);
+  }
+  .vy-btn:disabled {
+    background: var(--surface-2);
+    color: var(--ink-3);
+    box-shadow: 0 4px 0 var(--line-strong);
+    cursor: not-allowed;
+  }
+  .vy-btn-ok {
+    --b: var(--ok);
+    --b-dark: var(--ok-dark);
+    --b-ink: var(--ok-ink);
+  }
+  .vy-btn-bad {
+    --b: var(--bad);
+    --b-dark: var(--bad-dark);
+    --b-ink: var(--bad-ink);
+  }
+  .vy-btn-gold {
+    --b: var(--gold);
+    --b-dark: var(--gold-dark);
+    --b-ink: #2a1b00;
+  }
+  .vy-btn-unit {
+    --b: var(--u);
+    --b-dark: var(--u-dark);
+    --b-ink: var(--node-ink);
+  }
+  .vy-btn-ghost {
+    background: var(--surface);
+    color: var(--ink-2);
+    border: 2px solid var(--line-strong);
+    box-shadow: 0 4px 0 var(--line-strong);
+  }
+  .vy-btn-ghost:hover:not(:disabled) {
+    background: var(--surface-2);
+    filter: none;
+  }
+  .vy-btn-ghost:active:not(:disabled) {
+    box-shadow: 0 0 0 var(--line-strong);
+  }
+
+  /* ---------- Answer options and tiles ---------- */
+  .vy-opt {
+    border: 2px solid var(--line-strong);
+    border-radius: 16px;
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 4px 0 var(--line-strong);
+    transition:
+      transform 80ms ease,
+      box-shadow 80ms ease,
+      background-color 150ms ease,
+      border-color 150ms ease;
+  }
+  .vy-opt:hover:not(:disabled) {
+    background: var(--surface-2);
+  }
+  .vy-opt:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 var(--line-strong);
+  }
+  .vy-opt[data-state="selected"] {
+    border-color: var(--brand);
+    background: var(--brand-soft);
+    box-shadow: 0 4px 0 var(--brand);
+    color: var(--brand-ink);
+  }
+  .vy-opt[data-state="right"] {
+    border-color: var(--ok);
+    background: color-mix(in srgb, var(--ok) 14%, var(--surface));
+    box-shadow: 0 4px 0 var(--ok-dark);
+    color: var(--ink);
+  }
+  .vy-opt[data-state="wrong"] {
+    border-color: var(--bad);
+    background: color-mix(in srgb, var(--bad) 12%, var(--surface));
+    box-shadow: 0 4px 0 var(--bad-dark);
+    animation: vy-shake 420ms ease;
+  }
+  .vy-opt[data-state="dim"] {
+    opacity: 0.45;
+  }
+  .vy-key {
+    display: inline-flex;
+    height: 1.6rem;
+    min-width: 1.6rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 2px solid var(--line-strong);
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+  .vy-opt[data-state="selected"] .vy-key {
+    border-color: var(--brand);
+    color: var(--brand);
+  }
+
+  /* ---------- Path nodes ---------- */
+  .vy-node {
+    position: relative;
+    display: inline-flex;
+    height: 68px;
+    width: 76px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--u);
+    color: var(--node-ink);
+    box-shadow:
+      0 8px 0 var(--u-dark),
+      inset 0 -3px 0 rgba(0, 0, 0, 0.08);
+    transition:
+      transform 90ms ease,
+      box-shadow 90ms ease,
+      filter 150ms ease;
+  }
+  .vy-node:hover {
+    filter: brightness(1.06);
+  }
+  .vy-node:active {
+    transform: translateY(6px);
+    box-shadow: 0 2px 0 var(--u-dark);
+  }
+  .vy-node[data-state="done"] {
+    background: var(--gold);
+    box-shadow: 0 8px 0 var(--gold-dark);
+    color: #3a2600;
+  }
+  .vy-node[data-state="done"]:active {
+    box-shadow: 0 2px 0 var(--gold-dark);
+  }
+  .vy-node[data-state="locked"] {
+    background: var(--surface-2);
+    box-shadow: 0 8px 0 var(--line-strong);
+    color: var(--ink-3);
+  }
+  .vy-node[data-state="locked"]:active {
+    box-shadow: 0 2px 0 var(--line-strong);
+  }
+  .vy-node-ring {
+    position: absolute;
+    inset: -11px -11px -3px;
+    border-radius: 50%;
+    border: 5px solid color-mix(in srgb, var(--u) 35%, transparent);
+    animation: vy-pulse 1.8s ease-in-out infinite;
+  }
+  .vy-chest {
+    border-radius: 18px;
+  }
+
+  /* Unit banner */
+  .vy-banner {
+    background:
+      radial-gradient(120% 140% at 100% 0%, rgba(255, 255, 255, 0.22), transparent 55%), var(--u);
+    color: var(--node-ink);
+    box-shadow: 0 5px 0 var(--u-dark);
+  }
+
+  /* ---------- Progress bar ---------- */
+  .vy-bar {
+    height: 16px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    overflow: hidden;
+  }
+  .vy-bar > div {
+    position: relative;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--ok), color-mix(in srgb, var(--ok) 70%, #fff));
+    transition: width 450ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  }
+  .vy-bar > div::after {
+    content: "";
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: 3px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.35);
+  }
+
+  /* ---------- Feedback sheet ---------- */
+  .vy-sheet {
+    animation: vy-sheet 260ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  }
+  .vy-sheet[data-tone="ok"] {
+    background: color-mix(in srgb, var(--ok) 16%, var(--surface));
+    border-color: color-mix(in srgb, var(--ok) 45%, transparent);
+  }
+  .vy-sheet[data-tone="bad"] {
+    background: color-mix(in srgb, var(--bad) 14%, var(--surface));
+    border-color: color-mix(in srgb, var(--bad) 45%, transparent);
+  }
+  .vy-ok-text {
+    color: color-mix(in srgb, var(--ok) 80%, var(--ink));
+  }
+  .vy-bad-text {
+    color: color-mix(in srgb, var(--bad) 85%, var(--ink));
+  }
+
+  /* ---------- Speech bubble ---------- */
+  .vy-bubble {
+    position: relative;
+    border: 2px solid var(--line-strong);
+    border-radius: 16px;
+    background: var(--surface);
+    color: var(--ink);
+    animation: vy-pop 380ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  }
+  .vy-bubble::before {
+    content: "";
+    position: absolute;
+    left: -9px;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    margin-top: -8px;
+    background: var(--surface);
+    border-left: 2px solid var(--line-strong);
+    border-bottom: 2px solid var(--line-strong);
+    transform: rotate(45deg);
+  }
+  .vy-bubble-up::before {
+    left: 50%;
+    top: auto;
+    bottom: -9px;
+    margin-left: -8px;
+    margin-top: 0;
+    border-left: 0;
+    border-right: 2px solid var(--line-strong);
+    transform: rotate(45deg);
+  }
+
+  /* ---------- Mascot ---------- */
+  .vy-mascot .vy-m-body {
+    transform-origin: 60px 110px;
+    transform-box: view-box;
+  }
+  .vy-mascot[data-mood="idle"] .vy-m-body,
+  .vy-mascot[data-mood="think"] .vy-m-body {
+    animation: vy-float 3.2s ease-in-out infinite;
+  }
+  .vy-mascot[data-mood="happy"] .vy-m-body {
+    animation: vy-hop 520ms ease 2;
+  }
+  .vy-mascot[data-mood="cheer"] .vy-m-body {
+    animation: vy-jump 900ms ease-in-out infinite;
+  }
+  .vy-mascot[data-mood="sad"] .vy-m-body {
+    transform: translateY(5px) rotate(-5deg);
+    transition: transform 300ms ease;
+  }
+  .vy-mascot .vy-m-eyes {
+    transform-origin: 60px 56px;
+    transform-box: view-box;
+    animation: vy-blink 4.5s infinite;
+  }
+  .vy-mascot .vy-m-bulb {
+    animation: vy-glow 1.6s ease-in-out infinite;
+  }
+  .vy-mascot .vy-m-arm-l,
+  .vy-mascot .vy-m-arm-r {
+    transform-box: view-box;
+    transition: transform 250ms ease;
+  }
+  .vy-mascot .vy-m-arm-l {
+    transform-origin: 24px 92px;
+  }
+  .vy-mascot .vy-m-arm-r {
+    transform-origin: 96px 92px;
+  }
+  .vy-mascot[data-mood="cheer"] .vy-m-arm-l {
+    transform: rotate(125deg);
+  }
+  .vy-mascot[data-mood="cheer"] .vy-m-arm-r {
+    transform: rotate(-125deg);
+  }
+  .vy-mascot[data-mood="happy"] .vy-m-arm-r {
+    animation: vy-wave 500ms ease-in-out 3;
+  }
+
+  /* ---------- Misc animations ---------- */
+  .vy-pop {
+    animation: vy-pop 420ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  }
+  .vy-rise {
+    animation: vy-rise 420ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  }
+  .vy-shake {
+    animation: vy-shake 420ms ease;
+  }
+  .vy-bounce {
+    animation: vy-bounce 1.3s ease-in-out infinite;
+  }
+  .vy-heartbeat {
+    animation: vy-heartbeat 1.4s ease-in-out infinite;
+  }
+  .vy-heart-lost {
+    animation: vy-heart-lost 600ms ease both;
+  }
+  .vy-star {
+    animation: vy-star 620ms cubic-bezier(0.2, 1.5, 0.4, 1) both;
+  }
+  .vy-flame {
+    transform-origin: 50% 90%;
+    animation: vy-flicker 1.2s ease-in-out infinite;
+  }
+}
+
+@keyframes vy-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+@keyframes vy-hop {
+  0%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  30% {
+    transform: translateY(0) scale(1.08, 0.92);
+  }
+  60% {
+    transform: translateY(-16px) scale(0.96, 1.04);
+  }
+}
+@keyframes vy-jump {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+  25% {
+    transform: translateY(-14px) rotate(-5deg);
+  }
+  50% {
+    transform: translateY(0) rotate(0);
+  }
+  75% {
+    transform: translateY(-14px) rotate(5deg);
+  }
+}
+@keyframes vy-wave {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  50% {
+    transform: rotate(-60deg);
+  }
+}
+@keyframes vy-blink {
+  0%,
+  94%,
+  100% {
+    transform: scaleY(1);
+  }
+  97% {
+    transform: scaleY(0.1);
+  }
+}
+@keyframes vy-glow {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+@keyframes vy-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-8px);
+  }
+  40% {
+    transform: translateX(7px);
+  }
+  60% {
+    transform: translateX(-5px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+@keyframes vy-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes vy-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes vy-sheet {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes vy-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+@keyframes vy-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 0.55;
+  }
+}
+@keyframes vy-heartbeat {
+  0%,
+  40%,
+  100% {
+    transform: scale(1);
+  }
+  20% {
+    transform: scale(1.18);
+  }
+}
+@keyframes vy-heart-lost {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.4) rotate(-12deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+@keyframes vy-star {
+  from {
+    opacity: 0;
+    transform: scale(0.2) rotate(-40deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+@keyframes vy-flicker {
+  0%,
+  100% {
+    transform: scale(1) rotate(0);
+  }
+  30% {
+    transform: scale(1.06, 0.95) rotate(-3deg);
+  }
+  60% {
+    transform: scale(0.96, 1.05) rotate(2deg);
+  }
+}

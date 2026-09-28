@@ -24,6 +24,7 @@ import { challengeExercise, examplesFor } from "@/lib/challenges/runner";
 import { checkChallenge } from "@/lib/learn/homework/client";
 import {
   EMPTY_PROGRESS,
+  gainXp,
   loadProgress,
   saveProgress,
   streakOf,
@@ -170,7 +171,7 @@ function ChallengesPage() {
       const gain = progress.challengeSolutions.includes(id)
         ? Math.round(base / 3)
         : Math.max(Math.round(base / 2), base - (progress.challengeHints[id] ?? 0) * 10);
-      update((p) => ({ ...p, challenges: [...p.challenges, id], xp: p.xp + gain }));
+      update((p) => gainXp({ ...p, challenges: [...p.challenges, id] }, gain));
       setToast(t("ch.xp", { n: gain }));
       setTimeout(() => setToast(null), 2600);
     }
