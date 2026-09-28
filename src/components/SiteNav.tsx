@@ -26,7 +26,8 @@ export function Logo({ className = "" }: { className?: string }) {
       className={`relative inline-flex h-8 w-8 items-center justify-center ${className}`}
       aria-hidden="true"
     >
-      <span className="absolute inset-0 rotate-[12deg] rounded-[9px] bg-brand shadow-sm" />
+      <span className="absolute inset-0 rotate-[12deg] rounded-[9px] bg-[linear-gradient(135deg,var(--brand),var(--syn-purple))] shadow-[0_6px_20px_-6px_var(--brand)]" />
+      <span className="absolute inset-[1px] rotate-[12deg] rounded-[8px] bg-[linear-gradient(135deg,rgba(255,255,255,0.25),transparent_60%)]" />
       <span className="relative font-mono text-[12px] font-bold text-white">{"{}"}</span>
     </span>
   );
@@ -70,14 +71,14 @@ function Menu<T extends string>({
         aria-haspopup="menu"
         aria-expanded={open}
         title={label}
-        className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-line bg-surface px-2 text-[13px] font-medium text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
+        className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-line bg-surface/70 px-2.5 text-[13px] font-medium text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
       >
         {icon}
       </button>
       {open && (
         <div
           role="menu"
-          className="absolute right-0 z-50 mt-2 min-w-40 overflow-hidden rounded-xl border border-line bg-surface p-1 shadow-lg"
+          className="ep-card ep-rise absolute right-0 z-50 mt-2 min-w-44 overflow-hidden p-1"
         >
           {options.map((o) => (
             <button
@@ -106,6 +107,13 @@ function Menu<T extends string>({
   );
 }
 
+const TAB_FILES = {
+  "/": "analyzer.luau",
+  "/errors": "errors.md",
+  "/learn": "learn/",
+  "/playground": "playground.luau",
+} as const;
+
 export function SiteNav() {
   const t = useT();
   const { theme, resolvedTheme, setTheme, lang, setLang } = usePrefs();
@@ -113,26 +121,32 @@ export function SiteNav() {
   return (
     <nav
       aria-label="Main"
-      className="sticky top-0 z-40 w-full border-b border-line bg-canvas/80 backdrop-blur-md"
+      className="sticky top-0 z-40 w-full border-b border-line bg-canvas/75 backdrop-blur-xl"
     >
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4">
-        <Link to="/" className="flex shrink-0 items-center gap-2.5 text-ink">
+        <Link to="/" className="group flex shrink-0 items-center gap-2.5 text-ink">
           <Logo />
-          <span className="hidden font-display text-[15px] font-semibold tracking-tight md:inline">
-            Vyce LuaUtility
+          <span className="hidden font-mono text-[14px] font-semibold tracking-tight md:inline">
+            vyce<span className="text-[var(--syn-purple)]">.</span>
+            <span className="text-brand">lua</span>
+            <span className="ep-caret" aria-hidden="true" />
           </span>
         </Link>
-        <div className="flex items-center gap-1 sm:gap-2">
-          <div className="flex items-center gap-0.5 rounded-xl border border-line bg-surface p-0.5">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex h-9 items-end gap-0.5 overflow-hidden rounded-xl border border-line bg-surface/70 px-1 pt-1">
             {ITEMS.map(({ to, key, icon: Icon, exact }) => (
               <Link
                 key={to}
                 to={to}
                 aria-label={t(key)}
+                title={TAB_FILES[to]}
                 activeOptions={{ exact }}
-                className="inline-flex h-7 items-center gap-1.5 rounded-[9px] px-2 text-[13px] font-medium transition-colors sm:px-2.5"
-                activeProps={{ className: "bg-brand-soft text-brand" }}
-                inactiveProps={{ className: "text-ink-2 hover:bg-surface-2 hover:text-ink" }}
+                className="relative inline-flex h-7 items-center gap-1.5 rounded-t-lg rounded-b-md px-2 text-[13px] font-medium transition-colors sm:px-2.5"
+                activeProps={{
+                  className:
+                    "bg-surface-2 text-ink before:absolute before:inset-x-2 before:top-0 before:h-[2px] before:rounded-full before:bg-[linear-gradient(90deg,var(--brand),var(--syn-purple))]",
+                }}
+                inactiveProps={{ className: "text-ink-3 hover:bg-surface-2/60 hover:text-ink" }}
               >
                 <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                 <span className="hidden sm:inline">{t(key)}</span>
@@ -144,7 +158,7 @@ export function SiteNav() {
             icon={
               <>
                 <Languages className="h-4 w-4" aria-hidden="true" />
-                <span className="hidden uppercase sm:inline">{lang}</span>
+                <span className="hidden font-mono text-[12px] uppercase sm:inline">{lang}</span>
               </>
             }
             value={lang}
@@ -160,14 +174,14 @@ export function SiteNav() {
             value={theme}
             options={[
               {
-                value: "light",
-                label: t("theme.light"),
-                icon: <Sun className="h-4 w-4" aria-hidden="true" />,
-              },
-              {
                 value: "dark",
                 label: t("theme.dark"),
                 icon: <Moon className="h-4 w-4" aria-hidden="true" />,
+              },
+              {
+                value: "light",
+                label: t("theme.light"),
+                icon: <Sun className="h-4 w-4" aria-hidden="true" />,
               },
               {
                 value: "system",

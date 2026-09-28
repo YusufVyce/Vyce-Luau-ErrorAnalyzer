@@ -12,6 +12,7 @@ import { ANALYZER_EXAMPLES } from "@/lib/analyzerExamples";
 import { SIGNATURES } from "@/lib/analyzer/precise/diagnose";
 import { analyzeErrorAndCode, type AnalyzerResult } from "@/utils/analyzerEngine";
 import { PageShell } from "@/components/PageShell";
+import { HeroDemo } from "@/components/HeroDemo";
 import { useLang, useT } from "@/lib/prefs";
 import { ResultView } from "@/components/analyzer/ResultView";
 
@@ -140,28 +141,60 @@ function ErrorParserPage() {
         ))}
       </div>
 
-      <header className="relative z-10 space-y-5 pt-12 pb-10 text-center md:pt-20">
-        <div className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-[13px] font-medium text-ink-2 shadow-sm">
-          <span className="ep-dot" />
-          {t("home.badge")}
+      <header className="relative z-10 grid items-center gap-12 pt-12 pb-16 md:pt-20 lg:grid-cols-[1.05fr_1fr]">
+        <div className="space-y-7">
+          <div className="inline-flex items-center gap-2 rounded-full border border-line bg-surface/70 px-3 py-1 font-mono text-[12px] text-ink-2 backdrop-blur">
+            <span className="ep-dot" />
+            {t("home.badge")}
+          </div>
+          <h1 className="serif-title text-[44px] leading-[0.98] md:text-[68px]">
+            {t("home.title1")} <span className="ep-mark">{t("home.title2")}</span>
+          </h1>
+          <p className="max-w-xl text-base leading-relaxed text-ink-2 md:text-lg">
+            {t("home.lead")}
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <a
+              href="#main"
+              className="ep-cta inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold"
+            >
+              <Search className="h-4 w-4" aria-hidden="true" />
+              {t("home.ctaTry")}
+            </a>
+            <Link
+              to="/learn"
+              className="inline-flex items-center gap-2 rounded-xl border border-line bg-surface/70 px-5 py-3 text-sm font-medium text-ink backdrop-blur transition-colors hover:border-brand-line hover:bg-brand-soft"
+            >
+              <GraduationCap className="h-4 w-4 text-brand" aria-hidden="true" />
+              {t("home.ctaLearn")}
+            </Link>
+          </div>
+          <dl className="grid max-w-md grid-cols-3 divide-x divide-line rounded-2xl border border-line bg-surface/60 backdrop-blur">
+            {(
+              [
+                [`${SIGNATURES.length}+`, "home.stat1"],
+                ["20", "home.stat2"],
+                ["0", "home.stat3"],
+              ] as const
+            ).map(([n, key]) => (
+              <div key={key} className="px-4 py-3">
+                <dt className="font-mono text-2xl font-semibold text-ink">{n}</dt>
+                <dd className="text-[12px] leading-snug text-ink-3">{t(key)}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
-        <h1 className="serif-title mx-auto max-w-3xl text-[40px] leading-[1.02] md:text-[64px]">
-          {t("home.title1")} <span className="ep-mark">{t("home.title2")}</span>
-        </h1>
-        <p className="mx-auto max-w-2xl text-base leading-relaxed text-ink-2 md:text-lg">
-          {t("home.lead")}
-        </p>
-        <ul className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-[13px] text-ink-2">
-          {[t("home.f1", { n: SIGNATURES.length }), t("home.f2"), t("home.f3")].map((f) => (
-            <li key={f} className="inline-flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-brand" aria-hidden="true" /> {f}
-            </li>
-          ))}
-        </ul>
+        <HeroDemo />
       </header>
 
-      <main id="main" tabIndex={-1} className="relative z-10 space-y-6 outline-none">
-        <section className="ep-card space-y-5 p-4 md:p-6" aria-label={t("home.inputLabel")}>
+      <main id="main" tabIndex={-1} className="relative z-10 scroll-mt-24 space-y-6 outline-none">
+        <div className="ep-label">
+          <b>//</b> 01 — {t("home.sec1")}
+        </div>
+        <section
+          className="ep-card ep-card-accent space-y-5 p-4 md:p-6"
+          aria-label={t("home.inputLabel")}
+        >
           <div className="grid gap-4 md:grid-cols-2">
             <div className="min-w-0">
               <label
@@ -268,21 +301,26 @@ function ErrorParserPage() {
 
         <div ref={resultRef} aria-live="polite" className="scroll-mt-20">
           {result.kind === "idle" && (
-            <div className="rounded-2xl border border-dashed border-line-strong px-6 py-10 text-center">
-              <div className="mx-auto grid max-w-3xl gap-6 text-left sm:grid-cols-3">
-                {[
-                  [t("home.how1t"), t("home.how1")],
-                  [t("home.how2t"), t("home.how2")],
-                  [t("home.how3t"), t("home.how3")],
-                ].map(([title, body], i) => (
-                  <div key={title} className="space-y-1.5">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-ink">
-                      <span className="ep-step">{i + 1}</span>
-                      {title}
+            <div className="space-y-4">
+              <div className="ep-label">
+                <b>//</b> 02 — {t("home.sec2")}
+              </div>
+              <div className="ep-card px-6 py-8">
+                <div className="mx-auto grid max-w-3xl gap-6 text-left sm:grid-cols-3">
+                  {[
+                    [t("home.how1t"), t("home.how1")],
+                    [t("home.how2t"), t("home.how2")],
+                    [t("home.how3t"), t("home.how3")],
+                  ].map(([title, body], i) => (
+                    <div key={title} className="space-y-1.5">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-ink">
+                        <span className="ep-step">{i + 1}</span>
+                        {title}
+                      </div>
+                      <p className="text-[13px] leading-relaxed text-ink-3">{body}</p>
                     </div>
-                    <p className="text-[13px] leading-relaxed text-ink-3">{body}</p>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -313,7 +351,10 @@ function ErrorParserPage() {
           )}
         </div>
 
-        <section className="grid gap-4 pt-6 md:grid-cols-3" aria-label={t("home.moreLabel")}>
+        <div className="ep-label pt-10">
+          <b>//</b> 03 — {t("home.sec3")}
+        </div>
+        <section className="grid gap-4 md:grid-cols-3" aria-label={t("home.moreLabel")}>
           {[
             { to: "/learn", icon: GraduationCap, title: t("home.card1t"), body: t("home.card1") },
             {
@@ -327,9 +368,9 @@ function ErrorParserPage() {
             <Link
               key={to}
               to={to}
-              className="ep-card group flex flex-col gap-3 p-5 transition-colors hover:border-brand-line"
+              className="ep-card group flex flex-col gap-3 p-6 transition-transform duration-200 hover:-translate-y-1"
             >
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-brand-soft text-brand">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-brand-line bg-brand-soft text-brand shadow-[0_0_24px_-6px_var(--brand)]">
                 <Icon className="h-5 w-5" aria-hidden="true" />
               </span>
               <div className="font-semibold text-ink">{title}</div>

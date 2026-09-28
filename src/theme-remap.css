@@ -5,7 +5,7 @@
  * Code panels opt back into the original dark scales with .code-dark, like
  * Studio's script editor. The dark theme uses Tailwind's scales unchanged.
  */
-html:not([data-theme="dark"]) .ep-body {
+html[data-theme="light"] .ep-body {
   --color-red-50: oklch(25.8% 0.092 26.042);
   --color-red-100: oklch(39.6% 0.141 25.723);
   --color-red-200: oklch(44.4% 0.177 26.899);
@@ -205,7 +205,7 @@ html:not([data-theme="dark"]) .ep-body {
   --color-zinc-900: oklch(96.7% 0.001 286.375);
   --color-zinc-950: oklch(98.5% 0 0);
 }
-html:not([data-theme="dark"]) .ep-body .code-dark {
+html[data-theme="light"] .ep-body .code-dark {
   --color-red-50: oklch(97.1% 0.013 17.38);
   --color-red-100: oklch(93.6% 0.032 17.717);
   --color-red-200: oklch(88.5% 0.062 18.334);

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, Library, Search } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
 import { useT } from "@/lib/prefs";
@@ -54,6 +54,20 @@ function ErrorsPage() {
   const t = useT();
   const [query, setQuery] = useState("");
   const [group, setGroup] = useState("All");
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  // Press "/" anywhere to jump to the search box, like in code editors.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement;
+      if (e.key === "/" && !/INPUT|TEXTAREA/.test(el.tagName)) {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const entries = useMemo(
     () =>
@@ -100,15 +114,19 @@ function ErrorsPage() {
           <label className="relative flex-1">
             <span className="sr-only">{t("err.search")}</span>
             <Search
-              className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-ink-3"
+              className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-brand"
               aria-hidden="true"
             />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t("err.placeholder")}
-              className="w-full rounded-xl border border-line bg-canvas py-2.5 pr-3 pl-9 text-sm text-ink placeholder-zinc-500 focus:border-brand-line focus:ring-2 focus:ring-brand/20 focus:outline-none"
+              ref={searchRef}
+              className="w-full rounded-xl border border-line bg-canvas py-3 pr-16 pl-10 font-mono text-[13px] text-ink placeholder-zinc-500 focus:border-brand-line focus:ring-2 focus:ring-brand/20 focus:outline-none"
             />
+            <kbd className="absolute top-1/2 right-3 -translate-y-1/2 rounded-md border border-line bg-surface-2 px-1.5 py-0.5 text-[11px] text-ink-3">
+              /
+            </kbd>
           </label>
           <div className="flex flex-wrap gap-1.5">
             {groups.map((g) => (
@@ -123,13 +141,15 @@ function ErrorsPage() {
             ))}
           </div>
         </div>
-        <p className="text-[13px] text-ink-3">{t("err.count", { n: shown.length })}</p>
+        <p className="ep-label">
+          <b>//</b> {t("err.count", { n: shown.length })}
+        </p>
         <ul className="grid gap-4 md:grid-cols-2">
           {shown.map((e) => (
             <li key={e.log}>
               <a
                 href={analyzerLink(e.log, e.code ?? "")}
-                className="ep-card group flex h-full flex-col gap-2.5 p-5 transition-colors hover:border-brand-line"
+                className="ep-card group flex h-full flex-col gap-2.5 p-5 transition-transform duration-200 hover:-translate-y-1"
               >
                 <div className="text-[12px] font-medium text-ink-3">{groupName(e.group)}</div>
                 <code className="code-dark rounded-lg bg-code px-2.5 py-2 font-mono text-[12px] break-words text-red-400">

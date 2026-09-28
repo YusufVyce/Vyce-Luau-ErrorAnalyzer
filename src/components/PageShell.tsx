@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { CheckCircle2, GitBranch, Zap } from "lucide-react";
 import { Logo, SiteNav } from "@/components/SiteNav";
-import { useT } from "@/lib/prefs";
+import { usePrefs, useT } from "@/lib/prefs";
 
 /** Nav + page body + footer shared by every page. */
 export function PageShell({
@@ -12,6 +13,7 @@ export function PageShell({
   width?: string;
 }) {
   const t = useT();
+  const { lang, resolvedTheme } = usePrefs();
   useEffect(() => {
     document.body.classList.add("ep-body");
     return () => document.body.classList.remove("ep-body");
@@ -19,26 +21,55 @@ export function PageShell({
   return (
     <>
       <SiteNav />
-      <div className={`relative mx-auto w-full ${width} px-4 pb-10`}>{children}</div>
-      <footer className="border-t border-line">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-6 text-[13px] text-ink-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2">
-            <Logo className="scale-75" />
-            <span>{t("footer.made")}</span>
+      <div className={`relative mx-auto w-full ${width} px-4 pb-16`}>{children}</div>
+      <footer className="border-t border-line bg-canvas/60">
+        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-start sm:justify-between">
+          <div className="max-w-sm space-y-3">
+            <div className="flex items-center gap-2.5">
+              <Logo />
+              <span className="font-mono text-[14px] font-semibold text-ink">
+                vyce<span className="text-[var(--syn-purple)]">.</span>
+                <span className="text-brand">lua</span>
+              </span>
+            </div>
+            <p className="text-[13px] leading-relaxed text-ink-3">{t("footer.tagline")}</p>
           </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-1">
-            <Link to="/" className="hover:text-ink">
-              {t("nav.analyzer")}
-            </Link>
-            <Link to="/errors" className="hover:text-ink">
-              {t("nav.errors")}
-            </Link>
-            <Link to="/learn" className="hover:text-ink">
-              {t("nav.learn")}
-            </Link>
-            <Link to="/playground" className="hover:text-ink">
-              {t("nav.playground")}
-            </Link>
+          <div className="grid grid-cols-2 gap-x-10 gap-y-2 font-mono text-[13px]">
+            {(
+              [
+                ["/", "nav.analyzer"],
+                ["/errors", "nav.errors"],
+                ["/learn", "nav.learn"],
+                ["/playground", "nav.playground"],
+              ] as const
+            ).map(([to, key]) => (
+              <Link key={to} to={to} className="text-ink-3 transition-colors hover:text-brand">
+                <span className="text-[var(--syn-purple)]">→</span> {t(key)}
+              </Link>
+            ))}
+          </div>
+        </div>
+        {/* Editor-style status bar */}
+        <div className="border-t border-line bg-surface/80">
+          <div className="mx-auto flex h-8 max-w-6xl items-center justify-between gap-4 overflow-hidden px-4 font-mono text-[11px] text-ink-3">
+            <div className="flex items-center gap-4">
+              <span className="inline-flex items-center gap-1.5">
+                <GitBranch className="h-3.5 w-3.5 text-brand" aria-hidden="true" /> main
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 text-[var(--syn-green)]" aria-hidden="true" />
+                {t("footer.noAi")}
+              </span>
+              <span className="hidden items-center gap-1.5 sm:inline-flex">
+                <Zap className="h-3.5 w-3.5 text-[var(--syn-orange)]" aria-hidden="true" /> Luau
+              </span>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="hidden sm:inline">UTF-8</span>
+              <span className="uppercase">{lang}</span>
+              <span className="hidden sm:inline">{resolvedTheme}</span>
+              <span className="truncate">{t("footer.made")}</span>
+            </div>
           </div>
         </div>
       </footer>

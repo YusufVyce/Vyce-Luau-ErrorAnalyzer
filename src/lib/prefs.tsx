@@ -20,7 +20,7 @@ const THEME_KEY = "vyce-theme";
 const LANG_KEY = "vyce-lang";
 
 /** Inline script for <head>: applies the saved theme before the first paint. */
-export const THEME_BOOT_SCRIPT = `try{var t=localStorage.getItem("${THEME_KEY}")||"system";var d=t==="dark"||(t==="system"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.setAttribute("data-theme",d?"dark":"light");var l=localStorage.getItem("${LANG_KEY}")||((navigator.language||"").toLowerCase().indexOf("tr")===0?"tr":"en");document.documentElement.setAttribute("lang",l)}catch(e){}`;
+export const THEME_BOOT_SCRIPT = `try{var t=localStorage.getItem("${THEME_KEY}")||"dark";var d=t==="dark"||(t==="system"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.setAttribute("data-theme",d?"dark":"light");var l=localStorage.getItem("${LANG_KEY}")||((navigator.language||"").toLowerCase().indexOf("tr")===0?"tr":"en");document.documentElement.setAttribute("lang",l)}catch(e){}`;
 
 interface Prefs {
   theme: Theme;
@@ -31,8 +31,8 @@ interface Prefs {
 }
 
 const PrefsContext = createContext<Prefs>({
-  theme: "system",
-  resolvedTheme: "light",
+  theme: "dark",
+  resolvedTheme: "dark",
   lang: "en",
   setTheme: () => {},
   setLang: () => {},
@@ -55,7 +55,7 @@ function write(key: string, value: string) {
 }
 
 export function PrefsProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("system");
+  const [theme, setThemeState] = useState<Theme>("dark");
   const [lang, setLangState] = useState<Lang>("en");
   const [systemDark, setSystemDark] = useState(false);
 

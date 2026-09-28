@@ -16,11 +16,12 @@ export function PageHeader({
     <header
       className={`relative z-10 space-y-4 pt-12 pb-10 md:pt-16 ${center ? "text-center" : ""}`}
     >
-      <div className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1 text-[13px] font-medium text-ink-2 shadow-sm">
+      <div className="inline-flex items-center gap-2 rounded-full border border-line bg-surface/70 px-3 py-1 font-mono text-[12px] text-ink-2 backdrop-blur">
+        <span className="ep-dot" />
         {sticker}
       </div>
       <h1
-        className={`serif-title max-w-3xl text-[36px] leading-[1.05] md:text-[54px] ${center ? "mx-auto" : ""}`}
+        className={`serif-title max-w-3xl text-[40px] leading-[1.02] md:text-[60px] ${center ? "mx-auto" : ""}`}
       >
         {title}
       </h1>

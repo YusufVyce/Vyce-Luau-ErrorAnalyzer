@@ -9,7 +9,7 @@ const en = {
   "theme.light": "Light",
   "theme.dark": "Dark",
   "theme.system": "System",
-  "footer.made": "Made by YusufVyce · Not affiliated with Roblox Corporation",
+  "footer.made": "Made by YusufVyce · not affiliated with Roblox",
 
   "home.skip": "Skip to input",
   "home.badge": "Roblox Studio · Luau error analyzer",
@@ -214,6 +214,26 @@ const en = {
   "learn.finishFirst": "Finish this lesson first",
   "learn.next": "Next: {title}",
   "res.enNote": "",
+  "footer.tagline":
+    "A Roblox Luau error analyzer, a scripting course with real homework and a tiny Roblox server — all running offline in your browser.",
+  "footer.noAi": "0 AI · 0 APIs",
+  "demo.analyzing": "analyzing error…",
+  "demo.parse": "parsed script (5 lines)",
+  "demo.trace": "traced hit.Parent → Workspace",
+  "demo.match": "matched Roblox error signature",
+  "demo.found": "Cause found",
+  "demo.confidence": "confidence 92%",
+  "demo.title": "Something that isn't a player touched the lava",
+  "demo.idle": "// press Play in Studio…",
+  "demo.pasted": "// paste the error → Find the cause",
+  "home.ctaLearn": "Start the course",
+  "home.ctaTry": "Analyze an error",
+  "home.stat1": "error messages",
+  "home.stat2": "lessons with homework",
+  "home.stat3": "AI or API calls",
+  "home.sec1": "paste your error",
+  "home.sec2": "how it works",
+  "home.sec3": "more tools",
 };
 
 export type UiKey = keyof typeof en;
@@ -228,7 +248,7 @@ const tr: Partial<Record<UiKey, string>> = {
   "theme.light": "Açık",
   "theme.dark": "Koyu",
   "theme.system": "Sistem",
-  "footer.made": "YusufVyce tarafından yapıldı · Roblox Corporation ile bağlantılı değildir",
+  "footer.made": "YusufVyce yaptı · Roblox ile bağlantılı değil",
 
   "home.skip": "Giriş alanına geç",
   "home.badge": "Roblox Studio · Luau hata analizcisi",
@@ -436,6 +456,26 @@ const tr: Partial<Record<UiKey, string>> = {
   "learn.next": "Sonraki: {title}",
   "res.enNote":
     "Not: hata açıklamalarının kendisi şimdilik İngilizce; başlıklar, benzetmeler ve sözlük Türkçe.",
+  "footer.tagline":
+    "Roblox Luau hata analizcisi, gerçek ödevli bir script kursu ve küçük bir Roblox sunucusu — hepsi tarayıcında, çevrimdışı çalışır.",
+  "footer.noAi": "0 yapay zekâ · 0 API",
+  "demo.analyzing": "hata analiz ediliyor…",
+  "demo.parse": "script ayrıştırıldı (5 satır)",
+  "demo.trace": "hit.Parent izlendi → Workspace",
+  "demo.match": "Roblox hata imzası eşleşti",
+  "demo.found": "Sebep bulundu",
+  "demo.confidence": "güven %92",
+  "demo.title": "Lava'ya oyuncu olmayan bir şey dokundu",
+  "demo.idle": "// Studio'da Play'e bas…",
+  "demo.pasted": "// hatayı yapıştır → Sebebi bul",
+  "home.ctaLearn": "Kursa başla",
+  "home.ctaTry": "Bir hatayı analiz et",
+  "home.stat1": "hata mesajı",
+  "home.stat2": "ödevli ders",
+  "home.stat3": "yapay zekâ / API çağrısı",
+  "home.sec1": "hatanı yapıştır",
+  "home.sec2": "nasıl çalışır",
+  "home.sec3": "diğer araçlar",
 };
 
 export const UI: Record<"en" | "tr", Partial<Record<UiKey, string>>> & {

@@ -97,7 +97,7 @@ export function HomeworkPanel({
   return (
     <section
       id="homework"
-      className="scroll-mt-20 space-y-5 rounded-2xl border border-brand-line bg-surface p-5 shadow-[0_0_0_4px_var(--brand-soft)] md:p-6"
+      className="ep-glow scroll-mt-20 space-y-5 p-5 md:p-7"
       aria-label={t("hw.homework")}
     >
       <header className="space-y-2">
