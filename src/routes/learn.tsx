@@ -21,6 +21,7 @@ import { PageShell } from "@/components/PageShell";
 import { CodeBlock } from "@/components/CodeBlock";
 import { Visual } from "@/components/learn/Visuals";
 import { HomeworkPanel } from "@/components/learn/HomeworkPanel";
+import { RunnableCode } from "@/components/learn/RunnableCode";
 import { PageHeader } from "@/components/PageHeader";
 import { analyzerLink, CHAPTERS, LESSONS, type Lesson } from "@/lib/learn/lessons";
 import { chapterName, lessonTitle, localizeLesson } from "@/lib/learn/lessons.tr";
@@ -34,6 +35,7 @@ import {
   levelFor,
   loadProgress,
   saveProgress,
+  withToday,
   type Progress,
 } from "@/lib/learn/progress";
 import { useLang, useT, type TFunction } from "@/lib/prefs";
@@ -189,6 +191,13 @@ function Quiz({
 }
 
 function LessonBody({ lesson, t }: { lesson: Lesson; t: TFunction }) {
+  // ModuleScript samples in this lesson, so "Using it" samples can require them.
+  const modules = lesson.sections
+    .filter((s) => s.code && /ModuleScript/.test(s.code.where ?? ""))
+    .map((s) => ({
+      name: s.code!.where!.match(/(\w+) \(ModuleScript\)/)?.[1] ?? "Module",
+      code: s.code!.code,
+    }));
   return (
     <>
       {lesson.sections.map((section, i) => (
@@ -223,7 +232,12 @@ function LessonBody({ lesson, t }: { lesson: Lesson; t: TFunction }) {
                   <span className="font-mono">{section.code.where}</span>
                 </div>
               )}
-              <CodeBlock code={section.code.code} title={section.code.title ?? "Luau"} />
+              <RunnableCode
+                code={section.code.code}
+                title={section.code.title ?? "Luau"}
+                where={section.code.where}
+                modules={modules}
+              />
             </div>
           )}
           {section.tip && (
@@ -341,7 +355,7 @@ function LearnPage() {
 
   function update(fn: (p: Progress) => Progress) {
     setProgress((p) => {
-      const n = fn(p);
+      const n = withToday(fn(p));
       saveProgress(n);
       return n;
     });

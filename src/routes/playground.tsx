@@ -1,8 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
+  Check,
   Clock,
   FlaskConical,
+  Pause,
+  Radio,
+  Share2,
   Hand,
   Keyboard,
   MousePointerClick,
@@ -16,13 +20,28 @@ import type { UiKey } from "@/lib/i18n/ui";
 import { PageHeader } from "@/components/PageHeader";
 import { CodeEditor } from "@/components/CodeEditor";
 import { ExplorerTree, OutputConsole } from "@/components/learn/SimPanels";
-import { explorerOf, type ExplorerNode, type OutputLine } from "@/lib/learn/homework/harness";
+import { Viewport2D, viewOf, type ViewShape } from "@/components/learn/Viewport2D";
+import { copyText } from "@/components/CodeBlock";
+import {
+  explorerOf,
+  fmtValue,
+  type ExplorerNode,
+  type OutputLine,
+} from "@/lib/learn/homework/harness";
 import { analyzerLink } from "@/lib/learn/lessons";
 import { Color3, Vector3 } from "@/lib/luau/roblox/datatypes";
 import type { Instance } from "@/lib/luau/roblox/instance";
 import { World } from "@/lib/luau/roblox/world";
 
+type PgSearch = { server?: string; client?: string };
+
+const SAVE_KEY = "vyce-playground";
+
 export const Route = createFileRoute("/playground")({
+  validateSearch: (s: Record<string, unknown>): PgSearch => ({
+    server: typeof s.server === "string" ? s.server : undefined,
+    client: typeof s.client === "string" ? s.client : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Luau Playground — Vyce LuaUtility" },
@@ -152,16 +171,87 @@ function PlaygroundPage() {
   const [explorer, setExplorer] = useState<ExplorerNode[]>([]);
   const [time, setTime] = useState(0);
   const [running, setRunning] = useState(false);
+  const [view, setView] = useState<ViewShape[]>([]);
+  const [panel, setPanel] = useState<"explorer" | "viewport">("explorer");
+  const [selected, setSelected] = useState<string | undefined>();
+  const [live, setLive] = useState(false);
+  const [shared, setShared] = useState(false);
+  const [custom, setCustom] = useState(false);
   const world = useRef<World | null>(null);
   const playerCount = useRef(0);
+  const search = Route.useSearch();
+
+  // Code from a lesson's "Open in Playground" link wins; otherwise restore the last session.
+  useEffect(() => {
+    if (search.server !== undefined || search.client !== undefined) {
+      setServer(search.server ?? "");
+      setClient(search.client ?? "");
+      setTab(search.server === undefined ? "client" : "server");
+      setCustom(true);
+      return;
+    }
+    try {
+      const saved = JSON.parse(localStorage.getItem(SAVE_KEY) ?? "null");
+      if (saved && typeof saved.server === "string") {
+        setServer(saved.server);
+        setClient(typeof saved.client === "string" ? saved.client : "");
+        setCustom(true);
+      }
+    } catch {
+      // ignore broken saves
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify({ server, client }));
+      } catch {
+        // storage blocked
+      }
+    }, 400);
+    return () => clearTimeout(id);
+  }, [server, client]);
 
   function refresh() {
     const w = world.current;
     if (!w) return;
     setOutput(w.output.map((o) => ({ kind: o.kind, text: o.text, time: o.time })));
     setExplorer(explorerOf(w));
+    setView(viewOf(w));
     setTime(w.interp.time);
   }
+
+  // Live mode: advance the simulation in real time so moving things animate.
+  useEffect(() => {
+    if (!live) return;
+    const id = setInterval(() => {
+      const w = world.current;
+      if (!w) return;
+      w.run(0.1);
+      refresh();
+    }, 100);
+    return () => clearInterval(id);
+  }, [live]);
+
+  async function share() {
+    const params = new URLSearchParams();
+    if (server.trim()) params.set("server", server);
+    if (client.trim()) params.set("client", client);
+    const ok = await copyText(`${window.location.origin}/playground?${params}`);
+    setShared(ok);
+    setTimeout(() => setShared(false), 1800);
+  }
+
+  const selectedInst = selected && world.current ? world.current.find(selected) : undefined;
+  const props = selectedInst
+    ? [...selectedInst.props.entries()]
+        .filter(([k]) => !/^(Archivable|RobloxLocked|UniqueId|SourceAssetId)$/.test(k))
+        .sort(([a], [b]) => a.localeCompare(b))
+        .slice(0, 40)
+        .map(([k, v]) => [k, fmtValue(v)] as const)
+    : [];
 
   function act(fn: (w: World) => void, seconds = 1) {
     const w = world.current;
@@ -173,6 +263,7 @@ function PlaygroundPage() {
 
   function run() {
     setRunning(true);
+    setSelected(undefined);
     setTimeout(() => {
       playerCount.current = 0;
       world.current = buildWorld(server, client);
@@ -183,6 +274,9 @@ function PlaygroundPage() {
   }
 
   function loadTemplate(name: string) {
+    setCustom(false);
+    setLive(false);
+    setSelected(undefined);
     setTemplate(name);
     setServer(TEMPLATES[name].server);
     setClient(TEMPLATES[name].client);
@@ -190,6 +284,7 @@ function PlaygroundPage() {
     world.current = null;
     setOutput([]);
     setExplorer([]);
+    setView([]);
     setTime(0);
   }
 
@@ -251,10 +346,11 @@ function PlaygroundPage() {
             </label>
             <select
               id="template"
-              value={template}
+              value={custom ? "" : template}
               onChange={(e) => loadTemplate(e.target.value)}
               className="rounded-lg border border-line bg-surface px-2 py-1.5 text-[13px] text-ink"
             >
+              {custom && <option value="">{t("pg.mine")}</option>}
               {Object.keys(TEMPLATES).map((name) => (
                 <option key={name} value={name}>
                   {lang === "tr" ? TEMPLATES[name].nameTr : name}
@@ -262,7 +358,11 @@ function PlaygroundPage() {
               ))}
             </select>
             <span className="text-[13px] text-ink-3">
-              {lang === "tr" ? TEMPLATES[template].noteTr : TEMPLATES[template].note}
+              {custom
+                ? t("pg.autosave")
+                : lang === "tr"
+                  ? TEMPLATES[template].noteTr
+                  : TEMPLATES[template].note}
             </span>
           </div>
           <div
@@ -312,9 +412,38 @@ function PlaygroundPage() {
               <Play className="h-4 w-4" aria-hidden="true" />
               {t(running ? "pg.starting" : world.current ? "pg.restart" : "pg.run")}
             </button>
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={() => setLive((v) => !v)}
+              aria-pressed={live}
+              className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-[13px] transition-colors disabled:opacity-40 ${live ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400" : "border-line text-ink-2 hover:text-ink"}`}
+            >
+              {live ? (
+                <Pause className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <Radio className="h-4 w-4" aria-hidden="true" />
+              )}
+              {t(live ? "pg.pause" : "pg.live")}
+            </button>
             <span className="rounded-md border border-line bg-surface-2 px-2 py-0.5 font-mono text-[12px] text-ink-3">
+              {live && (
+                <span className="mr-1 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400 align-middle" />
+              )}
               {t("pg.time", { s: time.toFixed(1) })}
             </span>
+            <button
+              type="button"
+              onClick={share}
+              className="ml-auto inline-flex items-center gap-1.5 rounded-xl px-2 py-2 text-[13px] text-ink-3 transition-colors hover:text-brand"
+            >
+              {shared ? (
+                <Check className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <Share2 className="h-4 w-4" aria-hidden="true" />
+              )}
+              {t(shared ? "pg.copied" : "pg.share")}
+            </button>
           </div>
           <div>
             <div className="mb-2 text-[13px] font-medium text-ink-3">{t("pg.actions")}</div>
@@ -367,11 +496,67 @@ function PlaygroundPage() {
             <OutputConsole lines={output} emptyText={t("pg.empty")} />
           </div>
           <div className="code-dark overflow-hidden rounded-2xl border border-code-line bg-code">
-            <div className="border-b border-code-line bg-code-head px-3 py-2 text-[13px] font-medium text-zinc-200">
-              Explorer
+            <div
+              role="tablist"
+              className="flex items-center gap-1 border-b border-code-line bg-code-head px-2 py-1.5 text-[13px]"
+            >
+              {(["explorer", "viewport"] as const).map((k) => (
+                <button
+                  key={k}
+                  role="tab"
+                  type="button"
+                  aria-selected={panel === k}
+                  onClick={() => setPanel(k)}
+                  className={`rounded-md px-2.5 py-1 font-medium transition-colors ${panel === k ? "bg-white/10 text-zinc-100" : "text-zinc-400 hover:text-zinc-200"}`}
+                >
+                  {k === "explorer" ? "Explorer" : t("pg.viewport")}
+                </button>
+              ))}
             </div>
-            <ExplorerTree nodes={explorer} emptyText={t("pg.emptyExplorer")} />
+            {panel === "explorer" ? (
+              <ExplorerTree
+                nodes={explorer}
+                emptyText={t("pg.emptyExplorer")}
+                selected={selected}
+                onSelect={(n) => setSelected(n.path)}
+              />
+            ) : (
+              <Viewport2D
+                shapes={view}
+                selected={selected}
+                onSelect={setSelected}
+                emptyText={t("pg.emptyExplorer")}
+              />
+            )}
           </div>
+          {selectedInst && (
+            <div className="code-dark ep-rise overflow-hidden rounded-2xl border border-code-line bg-code">
+              <div className="flex items-center justify-between border-b border-code-line bg-code-head px-3 py-2 text-[13px]">
+                <span className="font-medium text-zinc-200">
+                  Properties{" "}
+                  <span className="font-mono text-[12px] text-zinc-500">
+                    · {selectedInst.name} ({selectedInst.className})
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSelected(undefined)}
+                  className="text-zinc-500 hover:text-zinc-200"
+                  aria-label="Close"
+                >
+                  ×
+                </button>
+              </div>
+              <dl className="max-h-64 overflow-auto px-3 py-2 font-mono text-[12px]">
+                {props.map(([k, v]) => (
+                  <div key={k} className="flex gap-3 border-b border-white/5 py-0.5 last:border-0">
+                    <dt className="w-36 shrink-0 truncate text-zinc-400">{k}</dt>
+                    <dd className="min-w-0 truncate text-sky-200">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          )}
           <p className="text-[12px] leading-relaxed text-ink-3">{t("pg.note")}</p>
         </section>
       </div>

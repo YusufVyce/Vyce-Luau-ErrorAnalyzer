@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   CheckCircle2,
   CircleX,
@@ -38,6 +38,13 @@ function Rich({ text }: { text: string }) {
   );
 }
 
+const BADGE_TONE = {
+  brand: "bg-brand text-canvas",
+  easy: "bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30",
+  medium: "bg-amber-500/15 text-amber-400 ring-1 ring-amber-500/30",
+  hard: "bg-red-500/15 text-red-400 ring-1 ring-red-500/30",
+} as const;
+
 export function HomeworkPanel({
   exercise,
   code,
@@ -48,7 +55,23 @@ export function HomeworkPanel({
   onChecked,
   onHint,
   onSolution,
+  runner,
+  badge,
+  badgeTone = "brand",
+  passedText,
+  extra,
+  sectionId = "homework",
 }: {
+  /** Custom grader (challenges); defaults to the lesson homework checker. */
+  runner?: (code: string, lang: "en" | "tr") => Promise<HomeworkResult>;
+  /** Replaces the "Homework" badge. */
+  badge?: ReactNode;
+  badgeTone?: "brand" | "easy" | "medium" | "hard";
+  /** Replaces "Homework passed! The next lesson is unlocked." */
+  passedText?: string;
+  /** Rendered under the goal, e.g. examples. */
+  extra?: ReactNode;
+  sectionId?: string;
   exercise: Exercise;
   code: string;
   onCode: (code: string) => void;
@@ -78,7 +101,9 @@ export function HomeworkPanel({
     setRunning(true);
     setRunError(null);
     try {
-      const r = await checkHomework(exercise.lessonId, code, lang);
+      const r = runner
+        ? await runner(code, lang)
+        : await checkHomework(exercise.lessonId, code, lang);
       setResult(r);
       setTab("checks");
       onChecked(r.passed);
@@ -96,14 +121,16 @@ export function HomeworkPanel({
 
   return (
     <section
-      id="homework"
+      id={sectionId}
       className="ep-glow scroll-mt-20 space-y-5 p-5 md:p-7"
       aria-label={t("hw.homework")}
     >
       <header className="space-y-2">
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand px-2.5 py-0.5 text-[12px] font-semibold text-white">
-            <Trophy className="h-3.5 w-3.5" aria-hidden="true" /> {t("hw.homework")}
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[12px] font-semibold ${BADGE_TONE[badgeTone]}`}
+          >
+            <Trophy className="h-3.5 w-3.5" aria-hidden="true" /> {badge ?? t("hw.homework")}
           </span>
           <span className="rounded-full border border-line px-2.5 py-0.5 text-[12px] text-zinc-300">
             {t(exercise.kind === "fix" ? "hw.fix" : "hw.write")}
@@ -115,7 +142,9 @@ export function HomeworkPanel({
           )}
         </div>
         <h2 className="text-xl font-semibold tracking-tight text-zinc-50">{exercise.title}</h2>
-        <p className="text-sm text-zinc-300">{exercise.goal}</p>
+        <p className="text-sm leading-relaxed text-zinc-300">
+          <Rich text={exercise.goal} />
+        </p>
         <ul className="space-y-1.5 pt-1">
           {exercise.steps.map((s, i) => (
             <li key={i} className="flex gap-2 text-sm text-zinc-300">
@@ -126,6 +155,7 @@ export function HomeworkPanel({
             </li>
           ))}
         </ul>
+        {extra}
       </header>
 
       <div className="space-y-2">
@@ -244,7 +274,7 @@ export function HomeworkPanel({
             <div>
               <div className="font-semibold">
                 {result.passed
-                  ? t("hw.passed")
+                  ? (passedText ?? t("hw.passed"))
                   : t(
                       passedCount === 0
                         ? "hw.notYet"

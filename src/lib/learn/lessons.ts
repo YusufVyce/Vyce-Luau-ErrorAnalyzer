@@ -47,6 +47,7 @@ export const CHAPTERS = [
   "3 · Making things happen",
   "4 · Multiplayer & saving",
   "5 · Build a game",
+  "6 · Advanced scripting",
 ] as const;
 
 export const LESSONS: Lesson[] = [
@@ -1365,6 +1366,476 @@ end
       options: ["The last one", "The first one", "The longest one", "Any of them"],
       answer: 1,
       why: "The first error often causes the others — fix it and they may disappear.",
+    },
+  },
+  // ------------------------------------------------------------------ 6
+  {
+    id: "collection-service",
+    chapter: CHAPTERS[5],
+    title: "Tags: one script for many parts",
+    minutes: 8,
+    summary: "Tag parts and control all of them from a single script with CollectionService.",
+    sections: [
+      {
+        text: [
+          "Putting a Script inside every kill brick works — until you have 200 of them and want to change one line. Professional games tag objects instead: every deadly part gets the tag `KillBrick`, and ONE script finds them all.",
+          "In Studio, select a part and add a tag under Properties → Tags. In code, the CollectionService gives you every object with a tag.",
+        ],
+      },
+      {
+        heading: "One script, every kill brick",
+        code: {
+          where: "ServerScriptService › KillBricks",
+          code: lua`
+local CollectionService = game:GetService("CollectionService")
+
+local function makeDeadly(part)
+	part.Touched:Connect(function(hit)
+		local humanoid = hit.Parent:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			humanoid.Health = 0
+		end
+	end)
+end
+
+-- Parts that already have the tag
+for _, part in CollectionService:GetTagged("KillBrick") do
+	makeDeadly(part)
+end
+
+-- Parts tagged later (cloned, spawned or streamed in)
+CollectionService:GetInstanceAddedSignal("KillBrick"):Connect(makeDeadly)
+`,
+        },
+      },
+      {
+        heading: "Tagging from code",
+        code: {
+          where: "ServerScriptService › Script",
+          code: lua`
+local CollectionService = game:GetService("CollectionService")
+
+local lava = Instance.new("Part")
+lava.Name = "Lava"
+lava.Anchored = true
+lava.Position = Vector3.new(0, 1, 20)
+lava.Parent = workspace
+CollectionService:AddTag(lava, "KillBrick")
+
+print(CollectionService:HasTag(lava, "KillBrick")) -- true
+print(#CollectionService:GetTagged("KillBrick"))   -- 1
+`,
+        },
+        tip: 'Tags are plain text. A typo like "Killbrick" doesn\'t error — it just tags nothing, so copy tag names carefully.',
+      },
+    ],
+    game: {
+      name: "Tower of Hell-style obbies",
+      text: "Obbies with hundreds of kill bricks, conveyors and jump pads don't copy a script into each one. Every part is tagged (KillBrick, Conveyor, JumpPad) and a handful of scripts in ServerScriptService handle all of them — fix a bug once and every part is fixed.",
+    },
+    mistake: {
+      error: "ServerScriptService.KillBricks:3: attempt to index nil with 'Connect'",
+      code: 'local CollectionService = game:GetService("CollectionService")\nlocal bricks = CollectionService:GetTagged("KillBrick")\nbricks.Touched:Connect(function(hit) end)',
+      explain:
+        "GetTagged returns a list of parts, not one part. A list has no Touched event, so bricks.Touched is nil. Loop over the list and connect each part.",
+    },
+    quiz: {
+      question: 'What does CollectionService:GetTagged("Coin") return?',
+      options: [
+        "The first coin",
+        "A list of every object tagged Coin",
+        "How many coins there are",
+        "A new Coin part",
+      ],
+      answer: 1,
+      why: "It returns a table (list) you loop over with for … in.",
+    },
+  },
+  {
+    id: "runservice",
+    chapter: CHAPTERS[5],
+    title: "RunService: code that runs every frame",
+    minutes: 8,
+    summary: "Spin, bob and move things smoothly with Heartbeat and delta time.",
+    sections: [
+      {
+        text: [
+          "`RunService.Heartbeat` fires every frame — about 60 times a second. It gives you `dt`: how many seconds passed since the last frame.",
+          "Multiply every speed by dt. Then a part spins at the same speed on a fast PC and on a slow phone.",
+        ],
+      },
+      {
+        heading: "A spinning obstacle",
+        code: {
+          where: "ServerScriptService › Spinner",
+          code: lua`
+local RunService = game:GetService("RunService")
+
+local part = Instance.new("Part")
+part.Name = "Spinner"
+part.Anchored = true
+part.Size = Vector3.new(12, 1, 1)
+part.Position = Vector3.new(0, 5, 0)
+part.Parent = workspace
+
+local DEGREES_PER_SECOND = 90
+
+RunService.Heartbeat:Connect(function(dt)
+	part.CFrame = part.CFrame * CFrame.Angles(0, math.rad(DEGREES_PER_SECOND * dt), 0)
+end)
+`,
+        },
+      },
+      {
+        heading: "A bobbing coin",
+        code: {
+          where: "ServerScriptService › CoinBob",
+          code: lua`
+local RunService = game:GetService("RunService")
+
+local coin = Instance.new("Part")
+coin.Name = "Coin"
+coin.Anchored = true
+coin.Position = Vector3.new(0, 5, 10)
+coin.Parent = workspace
+
+local startY = coin.Position.Y
+local elapsed = 0
+
+RunService.Heartbeat:Connect(function(dt)
+	elapsed += dt
+	local y = startY + math.sin(elapsed * 3) * 0.5
+	coin.Position = Vector3.new(coin.Position.X, y, coin.Position.Z)
+end)
+`,
+        },
+        tip: "Heartbeat functions run 60 times a second — keep them short, and never put task.wait() inside one.",
+      },
+    ],
+    game: {
+      name: "Simulator coins and obby spinners",
+      text: "The coins that float and spin in simulator games, the rotating bars in obbies and the smooth camera in racing games all update every frame from RunService. Using dt keeps them smooth even when the frame rate drops.",
+    },
+    mistake: {
+      error: "Script timeout: exhausted allowed execution time",
+      code: "local part = workspace.Spinner\nwhile true do\n\tpart.CFrame = part.CFrame * CFrame.Angles(0, 0.05, 0)\nend",
+      explain:
+        "This loop never waits, so Roblox never gets a turn to draw a frame and stops the script. Use RunService.Heartbeat instead (or put task.wait() in the loop).",
+    },
+    quiz: {
+      question: "Why multiply speeds by dt?",
+      options: [
+        "To make things faster",
+        "So the speed is the same at any frame rate",
+        "Heartbeat won't run without it",
+        "To save memory",
+      ],
+      answer: 1,
+      why: "dt is the time since the last frame. speed × dt = distance for that frame, however long the frame took.",
+    },
+  },
+  {
+    id: "raycasting",
+    chapter: CHAPTERS[5],
+    title: "Raycasting: seeing the world",
+    minutes: 9,
+    summary: "Shoot invisible lines to find what is below, in front of, or between things.",
+    sections: [
+      {
+        text: [
+          "A ray is an invisible line with a start point (origin) and a direction. The length of the direction vector is how far it goes.",
+          "`workspace:Raycast(origin, direction)` returns a RaycastResult — `Instance`, `Position`, `Normal`, `Distance` — or nil if the ray hit nothing.",
+        ],
+      },
+      {
+        heading: "What is below me?",
+        code: {
+          where: "ServerScriptService › Script",
+          code: lua`
+local origin = Vector3.new(0, 50, 0)
+local direction = Vector3.new(0, -100, 0) -- straight down, 100 studs
+
+local result = workspace:Raycast(origin, direction)
+if result then
+	print("Hit", result.Instance.Name, "at", result.Position)
+	print("Distance:", result.Distance)
+else
+	print("Nothing below")
+end
+`,
+        },
+      },
+      {
+        heading: "Ignoring things",
+        code: {
+          where: "ServerScriptService › Script",
+          code: lua`
+local params = RaycastParams.new()
+params.FilterType = Enum.RaycastFilterType.Exclude
+params.FilterDescendantsInstances = { workspace.Baseplate }
+
+local result = workspace:Raycast(Vector3.new(0, 50, 0), Vector3.new(0, -100, 0), params)
+print(if result then result.Instance.Name else "Only the Baseplate was below")
+`,
+        },
+        tip: "Always check for nil. A ray that misses returns nil, and reading result.Position would crash.",
+      },
+    ],
+    game: {
+      name: "Arsenal-style guns",
+      text: "Most Roblox guns are hitscan: when you shoot, the game casts a ray from the barrel towards your mouse and damages whatever it hits first. The server repeats the ray to check the shot was possible — so exploiters can't hit people through walls.",
+    },
+    mistake: {
+      error: "ServerScriptService.Gun:2: attempt to index nil with 'Instance'",
+      code: "local result = workspace:Raycast(Vector3.new(0, 50, 0), Vector3.new(0, 10, 0))\nprint(result.Instance.Name)",
+      explain:
+        "The ray pointed up into empty sky and hit nothing, so Raycast returned nil. Check `if result then` before using it.",
+    },
+    quiz: {
+      question: "What does workspace:Raycast return when the ray hits nothing?",
+      options: ["An empty RaycastResult", "nil", "false", "The origin"],
+      answer: 1,
+      why: "No hit means nil — that's why every raycast needs an if-check.",
+    },
+  },
+  {
+    id: "oop",
+    chapter: CHAPTERS[5],
+    title: "Classes with metatables",
+    minutes: 10,
+    summary: "Build your own object types — how big games organize pets, towers and enemies.",
+    sections: [
+      {
+        text: [
+          "A class is a blueprint. Every object made from it has its own data (name, level) but shares the same functions (methods).",
+          "In Luau a class is a table of methods with `__index` pointing to itself. `setmetatable` connects each new object to it, so `object:Method()` finds the function in the class.",
+        ],
+      },
+      {
+        heading: "A Pet class",
+        code: {
+          where: "ServerScriptService › Pets",
+          code: lua`
+local Pet = {}
+Pet.__index = Pet
+
+function Pet.new(name, power)
+	local self = setmetatable({}, Pet)
+	self.Name = name
+	self.Power = power
+	self.Level = 1
+	return self
+end
+
+function Pet:LevelUp()
+	self.Level += 1
+	self.Power = math.floor(self.Power * 1.5)
+end
+
+function Pet:Describe()
+	return self.Name .. " (level " .. self.Level .. ", power " .. self.Power .. ")"
+end
+
+local dog = Pet.new("Dog", 10)
+local dragon = Pet.new("Dragon", 200)
+dog:LevelUp()
+print(dog:Describe())    -- Dog (level 2, power 15)
+print(dragon:Describe()) -- Dragon (level 1, power 200)
+`,
+        },
+      },
+      {
+        heading: "Dot or colon?",
+        text: [
+          "`dog:LevelUp()` is short for `Pet.LevelUp(dog)` — the colon passes the object in as `self`. Define methods with a colon and call them with a colon.",
+        ],
+        tip: "Put classes in a ModuleScript and `return Pet` at the end, so every script can create pets.",
+      },
+    ],
+    game: {
+      name: "Tower defense and pet games",
+      text: "In a tower defense game every tower is an object made from a Tower class: it has its own range, damage and upgrade level, and shares Attack, Upgrade and Sell methods. Enemies are objects too. Classes keep thousands of lines of game code organized.",
+    },
+    mistake: {
+      error: "ServerScriptService.Pets:13: attempt to index nil with 'Level'",
+      code: 'local Pet = {}\nPet.__index = Pet\n\nfunction Pet.new(name)\n\tlocal self = setmetatable({}, Pet)\n\tself.Name = name\n\tself.Level = 1\n\treturn self\nend\n\nfunction Pet:LevelUp()\n\tself.Level += 1\nend\n\nlocal dog = Pet.new("Dog")\ndog.LevelUp()',
+      explain:
+        "`dog.LevelUp()` with a dot doesn't pass the pet in, so self is nil. Call it with a colon: `dog:LevelUp()`.",
+    },
+    quiz: {
+      question: "What does `Pet.__index = Pet` do?",
+      options: [
+        "Turns Pet into a number",
+        "Lets objects find missing keys (the methods) in Pet",
+        "Deletes old pets",
+        "Nothing, it's optional",
+      ],
+      answer: 1,
+      why: "When a key isn't in the object itself, Luau looks it up in the metatable's __index — the class.",
+    },
+  },
+  {
+    id: "tools",
+    chapter: CHAPTERS[5],
+    title: "Tools: items players can hold",
+    minutes: 9,
+    summary: "Make swords, potions and gadgets that do something when the player clicks.",
+    sections: [
+      {
+        text: [
+          "A Tool in StarterPack is copied into every player's Backpack. A part named `Handle` inside it is what the character holds in their hand.",
+          "`tool.Activated` fires when the player clicks while holding the tool. A Script inside the Tool runs on the server; while the tool is held, `tool.Parent` is the character.",
+        ],
+      },
+      {
+        heading: "A healing potion",
+        code: {
+          where: "StarterPack › HealPotion (Tool) › Script",
+          code: lua`
+local tool = script.Parent
+
+tool.Activated:Connect(function()
+	local character = tool.Parent
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		humanoid.Health = math.min(humanoid.MaxHealth, humanoid.Health + 25)
+		print(character.Name, "healed to", humanoid.Health)
+	end
+end)
+`,
+        },
+      },
+      {
+        heading: "A simple sword",
+        code: {
+          where: "StarterPack › Sword (Tool) › Script",
+          code: lua`
+local tool = script.Parent
+local handle = tool:WaitForChild("Handle")
+local swinging = false
+
+tool.Activated:Connect(function()
+	swinging = true
+	task.wait(0.5)
+	swinging = false
+end)
+
+handle.Touched:Connect(function(hit)
+	if not swinging then return end
+	local humanoid = hit.Parent:FindFirstChildOfClass("Humanoid")
+	if humanoid and hit.Parent ~= tool.Parent then
+		humanoid:TakeDamage(20)
+	end
+end)
+`,
+        },
+        tip: "`hit.Parent ~= tool.Parent` stops the sword from hurting its own owner.",
+      },
+    ],
+    game: {
+      name: "Sword fighting and BedWars-style items",
+      text: "Swords, pickaxes, bows and potions in fighting games are all Tools. The Activated event starts the attack, and the damage is always applied by a server Script — never by the player's own device.",
+    },
+    mistake: {
+      error: 'Activated is not a valid member of Part "Workspace.Sword.Handle"',
+      code: 'local tool = script.Parent\ntool.Activated:Connect(function()\n\tprint("swing")\nend)',
+      explain:
+        "This Script was put inside the Handle, so script.Parent is the Handle part, not the Tool. Put the Script directly inside the Tool.",
+    },
+    quiz: {
+      question: "Where do you put a Tool so every player gets one?",
+      options: ["Workspace", "StarterPack", "ServerStorage", "ReplicatedFirst"],
+      answer: 1,
+      why: "Everything in StarterPack is copied into each player's Backpack when they spawn.",
+    },
+  },
+  {
+    id: "round-system",
+    chapter: CHAPTERS[5],
+    title: "A round-based game loop",
+    minutes: 12,
+    summary: "Lobby → intermission → round → results: the loop behind most Roblox games.",
+    sections: [
+      {
+        text: [
+          "Round games are a state machine: the game is always in one state (waiting, intermission, round, results) and a timer moves it to the next.",
+          "The server stores the current state in a StringValue in ReplicatedStorage. Every player's UI just shows that value.",
+        ],
+      },
+      {
+        heading: "The round loop",
+        code: {
+          where: "ServerScriptService › Rounds",
+          code: lua`
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local status = Instance.new("StringValue")
+status.Name = "Status"
+status.Parent = ReplicatedStorage
+
+local INTERMISSION = 10
+local ROUND_TIME = 30
+
+local function countdown(label, seconds)
+	for t = seconds, 1, -1 do
+		status.Value = label .. " " .. t
+		task.wait(1)
+	end
+end
+
+while true do
+	if #Players:GetPlayers() == 0 then
+		status.Value = "Waiting for players..."
+		task.wait(1)
+	else
+		countdown("Intermission:", INTERMISSION)
+		countdown("Round ends in", ROUND_TIME)
+		status.Value = "Round over!"
+		task.wait(3)
+	end
+end
+`,
+        },
+      },
+      {
+        heading: "Showing it to players",
+        code: {
+          where: "StarterGui › ScreenGui › StatusLabel (TextLabel) › LocalScript",
+          code: lua`
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local status = ReplicatedStorage:WaitForChild("Status")
+local label = script.Parent
+
+label.Text = status.Value
+status.Changed:Connect(function(value)
+	label.Text = value
+end)
+`,
+        },
+        tip: "The round logic lives only on the server. Clients display the status but never decide when a round starts.",
+      },
+    ],
+    game: {
+      name: "Murder Mystery and Natural Disaster Survival",
+      text: "Both games are this loop: wait for enough players, count down in the lobby, teleport everyone into the round, end it when the timer runs out (or someone wins), show results, repeat. The status text at the top of the screen is a StringValue like the one above.",
+    },
+    mistake: {
+      error: "Script timeout: exhausted allowed execution time",
+      code: 'local status = game.ReplicatedStorage.Status\nwhile true do\n\tif #game.Players:GetPlayers() < 2 then\n\t\tstatus.Value = "Waiting..."\n\telse\n\t\ttask.wait(10)\n\tend\nend',
+      explain:
+        "When there aren't enough players the loop never reaches a task.wait(), so it spins forever. Every path through a while-true loop needs a wait.",
+    },
+    quiz: {
+      question: "Where should the round timer run?",
+      options: [
+        "In each player's LocalScript",
+        "In one server Script",
+        "In a ModuleScript by itself",
+        "In StarterGui",
+      ],
+      answer: 1,
+      why: "One server Script is the single source of truth; clients only display it.",
     },
   },
 ];

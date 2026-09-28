@@ -28,15 +28,29 @@ function iconColor(className: string) {
   return "bg-zinc-500";
 }
 
-function Node({ node, depth }: { node: ExplorerNode; depth: number }) {
+function Node({
+  node,
+  depth,
+  onSelect,
+  selected,
+}: {
+  node: ExplorerNode;
+  depth: number;
+  onSelect?: (node: ExplorerNode) => void;
+  selected?: string;
+}) {
   const [open, setOpen] = useState(depth < 2);
   const hasKids = node.children.length > 0;
+  const isSel = selected !== undefined && selected === node.path;
   return (
     <li>
       <button
         type="button"
-        onClick={() => hasKids && setOpen((v) => !v)}
-        className="flex w-full items-center gap-1.5 rounded px-1 py-0.5 text-left hover:bg-zinc-800/60"
+        onClick={() => {
+          if (onSelect) onSelect(node);
+          if (hasKids && (!onSelect || isSel || !open)) setOpen((v) => !v);
+        }}
+        className={`flex w-full items-center gap-1.5 rounded px-1 py-0.5 text-left ${isSel ? "bg-sky-400/15 ring-1 ring-sky-400/30" : "hover:bg-zinc-800/60"}`}
         style={{ paddingLeft: depth * 14 + 4 }}
         aria-expanded={hasKids ? open : undefined}
       >
@@ -61,7 +75,13 @@ function Node({ node, depth }: { node: ExplorerNode; depth: number }) {
       {open && hasKids && (
         <ul>
           {node.children.map((c, i) => (
-            <Node key={`${c.name}-${i}`} node={c} depth={depth + 1} />
+            <Node
+              key={`${c.name}-${i}`}
+              node={c}
+              depth={depth + 1}
+              onSelect={onSelect}
+              selected={selected}
+            />
           ))}
         </ul>
       )}
@@ -72,15 +92,19 @@ function Node({ node, depth }: { node: ExplorerNode; depth: number }) {
 export function ExplorerTree({
   nodes,
   emptyText = "Run your code to see what it created.",
+  onSelect,
+  selected,
 }: {
   nodes: ExplorerNode[];
   emptyText?: string;
+  onSelect?: (node: ExplorerNode) => void;
+  selected?: string;
 }) {
   if (nodes.length === 0) return <p className="p-3 text-xs text-zinc-500">{emptyText}</p>;
   return (
     <ul className="max-h-72 overflow-auto p-2 text-xs" aria-label="Explorer">
       {nodes.map((n) => (
-        <Node key={n.name} node={n} depth={0} />
+        <Node key={n.name} node={n} depth={0} onSelect={onSelect} selected={selected} />
       ))}
     </ul>
   );

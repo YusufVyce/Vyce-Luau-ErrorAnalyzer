@@ -648,7 +648,7 @@ export class UDim2 extends Userdata {
 }
 
 // ------------------------------------------------------------------ Enum
-const ENUMS: Record<string, Record<string, number>> = {
+export const ENUMS: Record<string, Record<string, number>> = {
   Material: {
     Plastic: 256,
     SmoothPlastic: 272,

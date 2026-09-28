@@ -1593,6 +1593,508 @@ end`,
       );
     },
   },
+  // ---------------------------------------------------------------- collection-service
+  {
+    lessonId: "collection-service",
+    title: "Crystal cave",
+    kind: "write",
+    goal: "Make every part tagged Crystal glow — including crystals tagged while the game is running.",
+    steps: [
+      'Get every part tagged "Crystal" with CollectionService:GetTagged',
+      "Set its Material to Neon and its Color to Color3.fromRGB(0, 255, 255)",
+      "Crystals tagged later must glow too (GetInstanceAddedSignal)",
+    ],
+    scriptKind: "Script",
+    location: "ServerScriptService › Crystals",
+    starter: 'local CollectionService = game:GetService("CollectionService")\n\n',
+    hints: [
+      "Write a function glow(part) that sets the two properties.",
+      'Call it for every part in CollectionService:GetTagged("Crystal").',
+      'Also connect it: CollectionService:GetInstanceAddedSignal("Crystal"):Connect(glow)',
+    ],
+    solution:
+      'local CollectionService = game:GetService("CollectionService")\n\nlocal function glow(part)\n\tpart.Material = Enum.Material.Neon\n\tpart.Color = Color3.fromRGB(0, 255, 255)\nend\n\nfor _, part in CollectionService:GetTagged("Crystal") do\n\tglow(part)\nend\nCollectionService:GetInstanceAddedSignal("Crystal"):Connect(glow)\n',
+    grade(h) {
+      const w = h.newWorld();
+      const crystals = [0, 1, 2].map((i) => {
+        const part = w.create(
+          "Part",
+          { Name: `Crystal${i}`, Anchored: true, Position: new Vector3(i * 6, 2, 30) },
+          w.workspace,
+        );
+        w.addTag(part, "Crystal");
+        return part;
+      });
+      const rock = w.create(
+        "Part",
+        { Name: "Rock", Anchored: true, Position: new Vector3(-10, 2, 30) },
+        w.workspace,
+      );
+      h.addStudentScript(w, w.service("ServerScriptService"), { name: "Crystals" });
+      w.run(0.5);
+      const glowing = (p: Instance) => {
+        const c = p.props.get("Color") as Color3;
+        return (
+          fmtValue(p.props.get("Material")) === "Enum.Material.Neon" &&
+          c instanceof Color3 &&
+          c.r < 0.05 &&
+          c.g > 0.95 &&
+          c.b > 0.95
+        );
+      };
+      const bad = crystals.find((c) => !glowing(c));
+      h.check(
+        h.t("Every tagged crystal is neon cyan", "Etiketli her kristal neon camgöbeği"),
+        !bad,
+        bad &&
+          h.t(
+            `${bad.name}: Material ${fmtValue(bad.props.get("Material"))}, Color ${fmtValue(bad.props.get("Color"))}`,
+            `${bad.name}: Material ${fmtValue(bad.props.get("Material"))}, Color ${fmtValue(bad.props.get("Color"))}`,
+          ),
+      );
+      h.check(
+        h.t("Parts without the tag don't change", "Etiketsiz parçalar değişmiyor"),
+        !glowing(rock),
+        h.t("The untagged Rock also started glowing.", "Etiketsiz Rock da parlamaya başladı."),
+      );
+      const late = w.create(
+        "Part",
+        { Name: "NewCrystal", Anchored: true, Position: new Vector3(20, 2, 30) },
+        w.workspace,
+      );
+      w.addTag(late, "Crystal");
+      w.run(0.3);
+      h.check(
+        h.t("A crystal tagged later also glows", "Sonradan etiketlenen kristal de parlıyor"),
+        glowing(late),
+        h.t(
+          'Connect CollectionService:GetInstanceAddedSignal("Crystal").',
+          'CollectionService:GetInstanceAddedSignal("Crystal") bağla.',
+        ),
+      );
+    },
+  },
+  // ---------------------------------------------------------------- runservice
+  {
+    lessonId: "runservice",
+    title: "Hover platform",
+    kind: "write",
+    goal: "Make workspace.Platform float smoothly up and down forever, between Y 7 and Y 13.",
+    steps: [
+      "Use RunService.Heartbeat and add up dt in a variable (elapsed)",
+      "Every frame set Y to 10 + math.sin(elapsed) * 3",
+      "X and Z must stay the same",
+    ],
+    scriptKind: "Script",
+    location: "ServerScriptService › Hover",
+    starter:
+      'local RunService = game:GetService("RunService")\nlocal platform = workspace.Platform\n\n',
+    hints: [
+      "local elapsed = 0 outside the function, elapsed += dt inside it.",
+      "platform.Position = Vector3.new(platform.Position.X, 10 + math.sin(elapsed) * 3, platform.Position.Z)",
+    ],
+    solution:
+      'local RunService = game:GetService("RunService")\nlocal platform = workspace.Platform\n\nlocal elapsed = 0\nRunService.Heartbeat:Connect(function(dt)\n\telapsed += dt\n\tlocal pos = platform.Position\n\tplatform.Position = Vector3.new(pos.X, 10 + math.sin(elapsed) * 3, pos.Z)\nend)\n',
+    grade(h) {
+      const w = h.newWorld();
+      const plat = w.create(
+        "Part",
+        {
+          Name: "Platform",
+          Anchored: true,
+          Size: new Vector3(8, 1, 8),
+          Position: new Vector3(5, 10, -5),
+        },
+        w.workspace,
+      );
+      h.addStudentScript(w, w.service("ServerScriptService"), { name: "Hover" });
+      const ys: number[] = [];
+      let xz = true;
+      for (let i = 0; i < 70; i++) {
+        w.run(0.1);
+        const p = plat.props.get("Position") as Vector3;
+        ys.push(p.y);
+        if (Math.abs(p.x - 5) > 0.01 || Math.abs(p.z + 5) > 0.01) xz = false;
+      }
+      const lo = Math.min(...ys);
+      const hi = Math.max(...ys);
+      const maxJump = Math.max(...ys.slice(1).map((y, i) => Math.abs(y - ys[i])));
+      h.check(
+        h.t("The platform moves up and down", "Platform aşağı yukarı hareket ediyor"),
+        hi - lo >= 2,
+        h.t(
+          `Y only went between ${lo.toFixed(2)} and ${hi.toFixed(2)}.`,
+          `Y sadece ${lo.toFixed(2)} ile ${hi.toFixed(2)} arasında kaldı.`,
+        ),
+      );
+      h.check(
+        h.t("It stays between Y 7 and Y 13", "Y 7 ile Y 13 arasında kalıyor"),
+        lo >= 6.9 && hi <= 13.1,
+        h.t(
+          `Y went from ${lo.toFixed(2)} to ${hi.toFixed(2)}.`,
+          `Y ${lo.toFixed(2)} ile ${hi.toFixed(2)} arasında değişti.`,
+        ),
+      );
+      h.check(
+        h.t("It moves smoothly (no teleporting)", "Yumuşak hareket ediyor (ışınlanma yok)"),
+        maxJump < 1.5 && new Set(ys.map((y) => y.toFixed(2))).size > 10,
+        h.t(
+          `Biggest jump in 0.1 s: ${maxJump.toFixed(2)} studs.`,
+          `0.1 sn'deki en büyük sıçrama: ${maxJump.toFixed(2)} stud.`,
+        ),
+      );
+      h.check(
+        h.t("X and Z stay the same", "X ve Z aynı kalıyor"),
+        xz,
+        h.t(
+          `Position is now ${fmtValue(plat.props.get("Position"))}.`,
+          `Position şu an ${fmtValue(plat.props.get("Position"))}.`,
+        ),
+      );
+    },
+  },
+  // ---------------------------------------------------------------- raycasting
+  {
+    lessonId: "raycasting",
+    title: "Distance to the ground",
+    kind: "write",
+    goal: "Write a function that tells how high above the ground a position is, using a raycast.",
+    steps: [
+      "Create local function distanceToGround(position)",
+      "Cast a ray from position straight down, 100 studs (Vector3.new(0, -100, 0))",
+      "Return result.Distance if it hit something, otherwise nil",
+    ],
+    scriptKind: "Script",
+    location: "ServerScriptService › Ground",
+    starter: "local function distanceToGround(position)\n\t\nend\n",
+    hints: [
+      "local result = workspace:Raycast(position, Vector3.new(0, -100, 0))",
+      "return if result then result.Distance else nil",
+    ],
+    solution:
+      "local function distanceToGround(position)\n\tlocal result = workspace:Raycast(position, Vector3.new(0, -100, 0))\n\tif result then\n\t\treturn result.Distance\n\tend\n\treturn nil\nend\n",
+    testFooter: `
+if type(distanceToGround) ~= "function" then
+	print("__TEST__ missing")
+else
+	for _, pos in { Vector3.new(40, 10, 40), Vector3.new(0, 30, 0), Vector3.new(1000, 10, 1000), Vector3.new(0, 150, 0) } do
+		local ok, r = pcall(distanceToGround, pos)
+		print("__TEST__", if ok then "ok" else "err", tostring(r))
+	end
+end`,
+    grade(h) {
+      const w = h.newWorld();
+      w.create(
+        "Part",
+        {
+          Name: "Platform",
+          Anchored: true,
+          Size: new Vector3(10, 1, 10),
+          Position: new Vector3(0, 20, 0),
+        },
+        w.workspace,
+      );
+      h.addStudentScript(w, w.service("ServerScriptService"), { name: "Ground" });
+      w.run(0.5);
+      const tv = h.testValues(w);
+      if (
+        !h.check(
+          h.t(
+            "A function called distanceToGround exists",
+            "distanceToGround adında bir fonksiyon var",
+          ),
+          tv.length > 0 && tv[0][0] !== "missing",
+          h.t(
+            "Define it at the top level: local function distanceToGround(position)",
+            "En dış seviyede tanımla: local function distanceToGround(position)",
+          ),
+        )
+      )
+        return;
+      const val = (i: number) =>
+        tv[i]?.[0] === "ok" ? tv[i][1] : `error: ${tv[i]?.slice(1).join(" ")}`;
+      const near = (i: number, n: number) => Math.abs(Number(val(i)) - n) < 0.05;
+      h.check(
+        h.t("10 studs above the Baseplate → 10", "Baseplate'in 10 stud üstü → 10"),
+        near(0, 10),
+        h.t(`It returned ${val(0)}.`, `${val(0)} döndürdü.`),
+      );
+      h.check(
+        h.t(
+          "Above the platform it measures to the platform → 9.5",
+          "Platformun üstünde platforma kadar ölçüyor → 9.5",
+        ),
+        near(1, 9.5),
+        h.t(`It returned ${val(1)}.`, `${val(1)} döndürdü.`),
+      );
+      h.check(
+        h.t("Over empty space → nil", "Boşluğun üstünde → nil"),
+        val(2) === "nil",
+        h.t(`It returned ${val(2)}.`, `${val(2)} döndürdü.`),
+      );
+      h.check(
+        h.t("Higher than 100 studs → nil", "100 stud'dan yüksekte → nil"),
+        val(3) === "nil",
+        h.t(
+          `It returned ${val(3)} — the ray should only be 100 studs long.`,
+          `${val(3)} döndürdü — ışın sadece 100 stud uzunluğunda olmalı.`,
+        ),
+      );
+    },
+  },
+  // ---------------------------------------------------------------- oop
+  {
+    lessonId: "oop",
+    title: "Enemy class",
+    kind: "write",
+    goal: "Write an Enemy class with metatables: every enemy has its own health but shares the same methods.",
+    steps: [
+      "Enemy.new(name, health) returns an object with Name, Health and MaxHealth",
+      "enemy:TakeDamage(amount) lowers Health, but never below 0",
+      "enemy:IsDead() returns true when Health is 0",
+      "enemy:Heal(amount) raises Health, but never above MaxHealth",
+    ],
+    scriptKind: "Script",
+    location: "ServerScriptService › Enemies",
+    starter: "local Enemy = {}\nEnemy.__index = Enemy\n\n",
+    hints: [
+      "function Enemy.new(name, health)\n\tlocal self = setmetatable({}, Enemy)\n\t...\n\treturn self\nend",
+      "self.Health = math.max(0, self.Health - amount)",
+      "self.Health = math.min(self.MaxHealth, self.Health + amount)",
+    ],
+    solution:
+      "local Enemy = {}\nEnemy.__index = Enemy\n\nfunction Enemy.new(name, health)\n\tlocal self = setmetatable({}, Enemy)\n\tself.Name = name\n\tself.Health = health\n\tself.MaxHealth = health\n\treturn self\nend\n\nfunction Enemy:TakeDamage(amount)\n\tself.Health = math.max(0, self.Health - amount)\nend\n\nfunction Enemy:IsDead()\n\treturn self.Health == 0\nend\n\nfunction Enemy:Heal(amount)\n\tself.Health = math.min(self.MaxHealth, self.Health + amount)\nend\n",
+    testFooter: `
+local __ok, __err = pcall(function()
+	local a = Enemy.new("Zombie", 100)
+	local b = Enemy.new("Boss", 500)
+	print("__TEST__", "new", tostring(a.Name), tostring(a.Health), tostring(a.MaxHealth))
+	a:TakeDamage(30)
+	print("__TEST__", "dmg", tostring(a.Health), tostring(b.Health))
+	a:TakeDamage(1000)
+	print("__TEST__", "dead", tostring(a.Health), tostring(a:IsDead()), tostring(b:IsDead()))
+	b:TakeDamage(200)
+	b:Heal(50)
+	print("__TEST__", "heal", tostring(b.Health))
+	b:Heal(1000)
+	print("__TEST__", "max", tostring(b.Health))
+	print("__TEST__", "shared", tostring(rawget(a, "TakeDamage") == nil and getmetatable(a) ~= nil and a.TakeDamage == b.TakeDamage))
+end)
+if not __ok then print("__TEST__", "error", tostring(__err)) end`,
+    grade(h) {
+      const w = h.newWorld();
+      h.addStudentScript(w, w.service("ServerScriptService"), { name: "Enemies" });
+      w.run(0.5);
+      const tv = h.testValues(w);
+      const row = (k: string) => tv.find((r) => r[0] === k);
+      const err = row("error");
+      const why = err ? `${h.t("Error:", "Hata:")} ${err.slice(1).join(" ")}` : undefined;
+      const n = row("new");
+      h.check(
+        h.t(
+          'Enemy.new("Zombie", 100) sets Name, Health and MaxHealth',
+          'Enemy.new("Zombie", 100) Name, Health ve MaxHealth ayarlıyor',
+        ),
+        n?.[1] === "Zombie" && n?.[2] === "100" && n?.[3] === "100",
+        why ??
+          h.t(
+            `Got Name ${n?.[1]}, Health ${n?.[2]}, MaxHealth ${n?.[3]}.`,
+            `Name ${n?.[1]}, Health ${n?.[2]}, MaxHealth ${n?.[3]} geldi.`,
+          ),
+      );
+      const d = row("dmg");
+      h.check(
+        h.t(
+          "TakeDamage(30) → 70, other enemies unchanged",
+          "TakeDamage(30) → 70, diğer düşmanlar değişmiyor",
+        ),
+        d?.[1] === "70" && d?.[2] === "500",
+        why ?? h.t(`Health ${d?.[1]}, Boss ${d?.[2]}.`, `Health ${d?.[1]}, Boss ${d?.[2]}.`),
+      );
+      const dead = row("dead");
+      h.check(
+        h.t("Health never goes below 0", "Health 0'ın altına inmiyor"),
+        dead?.[1] === "0",
+        why ??
+          h.t(
+            `After huge damage Health is ${dead?.[1]}.`,
+            `Büyük hasardan sonra Health ${dead?.[1]}.`,
+          ),
+      );
+      h.check(
+        h.t("IsDead() is true only for dead enemies", "IsDead() sadece ölü düşmanlar için true"),
+        dead?.[2] === "true" && dead?.[3] === "false",
+        why ??
+          h.t(
+            `IsDead gave ${dead?.[2]} and ${dead?.[3]}.`,
+            `IsDead ${dead?.[2]} ve ${dead?.[3]} verdi.`,
+          ),
+      );
+      h.check(
+        h.t("Heal(50) adds 50", "Heal(50) 50 ekliyor"),
+        row("heal")?.[1] === "350",
+        why ??
+          h.t(
+            `Health is ${row("heal")?.[1]} (expected 350).`,
+            `Health ${row("heal")?.[1]} (beklenen 350).`,
+          ),
+      );
+      h.check(
+        h.t("Heal never goes above MaxHealth", "Heal MaxHealth'i geçmiyor"),
+        row("max")?.[1] === "500",
+        why ?? h.t(`Health is ${row("max")?.[1]}.`, `Health ${row("max")?.[1]}.`),
+      );
+      h.check(
+        h.t(
+          "Methods live in the class (metatable), not in each enemy",
+          "Metotlar her düşmanda değil, sınıfta (metatable) duruyor",
+        ),
+        row("shared")?.[1] === "true",
+        why ??
+          h.t(
+            "Create enemies with setmetatable({}, Enemy) and define methods as function Enemy:Name().",
+            "Düşmanları setmetatable({}, Enemy) ile oluştur ve metotları function Enemy:Ad() olarak tanımla.",
+          ),
+      );
+    },
+  },
+  // ---------------------------------------------------------------- tools
+  {
+    lessonId: "tools",
+    title: "Potion with 3 uses",
+    kind: "write",
+    goal: "Script the Potion tool: it heals whoever holds it, and it's used up after 3 drinks.",
+    steps: [
+      "When the tool is activated, heal the holder's Humanoid by 25",
+      "Health must never go above MaxHealth",
+      "After the 3rd use, destroy the tool",
+    ],
+    scriptKind: "Script",
+    location: "StarterPack › Potion (Tool) › Script",
+    starter: "local tool = script.Parent\n\n",
+    hints: [
+      "tool.Activated:Connect(function() ... end) — tool.Parent is the character while it's held.",
+      'local humanoid = tool.Parent:FindFirstChildOfClass("Humanoid")',
+      "Keep local uses = 3 outside the function; when it reaches 0 call tool:Destroy().",
+    ],
+    solution:
+      'local tool = script.Parent\nlocal uses = 3\n\ntool.Activated:Connect(function()\n\tlocal humanoid = tool.Parent:FindFirstChildOfClass("Humanoid")\n\tif not humanoid then return end\n\thumanoid.Health = math.min(humanoid.MaxHealth, humanoid.Health + 25)\n\tuses -= 1\n\tif uses <= 0 then\n\t\ttool:Destroy()\n\tend\nend)\n',
+    grade(h) {
+      const w = h.newWorld();
+      const tool = w.create("Tool", { Name: "Potion" }, w.service("StarterPack"));
+      w.create("Part", { Name: "Handle", Size: new Vector3(1, 2, 1) }, tool);
+      h.addStudentScript(w, tool);
+      const p = w.addPlayer("Ann");
+      h.studentPaths.add("Players.Ann.Backpack.Potion.Script");
+      h.studentPaths.add("Workspace.Ann.Potion.Script");
+      w.run(1);
+      const char = character(p);
+      const hum = char?.findFirstChild("Humanoid");
+      const potion = p.findFirstChild("Backpack")?.findFirstChild("Potion");
+      if (
+        !h.check(h.t("Ann got the Potion", "Ann'e Potion verildi"), Boolean(potion && char && hum))
+      )
+        return;
+      hum!.setProp("Health", 20);
+      potion!.setParent(char!);
+      w.run(0.2);
+      const drink = () => {
+        w.click(potion!, p);
+        w.run(0.3);
+        return hum!.props.get("Health");
+      };
+      const first = drink();
+      h.check(
+        h.t("One drink heals 25 (20 → 45)", "Bir yudum 25 iyileştiriyor (20 → 45)"),
+        first === 45,
+        `Health = ${fmtValue(first)}`,
+      );
+      drink();
+      hum!.setProp("Health", 90);
+      const capped = drink();
+      h.check(
+        h.t("Health stops at MaxHealth (90 → 100)", "Health MaxHealth'te duruyor (90 → 100)"),
+        capped === 100,
+        `Health = ${fmtValue(capped)}`,
+      );
+      h.check(
+        h.t("After 3 uses the potion is gone", "3 kullanımdan sonra iksir yok oluyor"),
+        !potion!.isDescendantOf(w.game),
+        h.t(
+          "The Potion still exists — call tool:Destroy() after the 3rd use.",
+          "Potion hâlâ var — 3. kullanımdan sonra tool:Destroy() çağır.",
+        ),
+      );
+    },
+  },
+  // ---------------------------------------------------------------- round-system
+  {
+    lessonId: "round-system",
+    title: "Round loop",
+    kind: "write",
+    goal: "Build the loop of a round-based game and show its state in ReplicatedStorage.Status.",
+    steps: [
+      "Create a StringValue named Status in ReplicatedStorage",
+      'While nobody is in the server: Status = "Waiting for players" (check again every second)',
+      'When there is at least one player: "Intermission" for 5 seconds, then "Round" for 10 seconds, then repeat',
+    ],
+    scriptKind: "Script",
+    location: "ServerScriptService › Rounds",
+    starter:
+      'local Players = game:GetService("Players")\nlocal ReplicatedStorage = game:GetService("ReplicatedStorage")\n\n',
+    hints: [
+      'local status = Instance.new("StringValue") … status.Parent = ReplicatedStorage',
+      "while true do … end, with #Players:GetPlayers() to count players",
+      "Every branch of the loop needs a task.wait() — otherwise the server freezes.",
+    ],
+    solution:
+      'local Players = game:GetService("Players")\nlocal ReplicatedStorage = game:GetService("ReplicatedStorage")\n\nlocal status = Instance.new("StringValue")\nstatus.Name = "Status"\nstatus.Parent = ReplicatedStorage\n\nwhile true do\n\tif #Players:GetPlayers() == 0 then\n\t\tstatus.Value = "Waiting for players"\n\t\ttask.wait(1)\n\telse\n\t\tstatus.Value = "Intermission"\n\t\ttask.wait(5)\n\t\tstatus.Value = "Round"\n\t\ttask.wait(10)\n\tend\nend\n',
+    grade(h) {
+      const w = h.newWorld();
+      h.addStudentScript(w, w.service("ServerScriptService"), { name: "Rounds" });
+      w.run(2);
+      const status = () => w.service("ReplicatedStorage").findFirstChild("Status");
+      const value = () => String(status()?.props.get("Value") ?? "");
+      if (
+        !h.check(
+          h.t(
+            "ReplicatedStorage.Status is a StringValue",
+            "ReplicatedStorage.Status bir StringValue",
+          ),
+          status()?.className === "StringValue",
+          h.t(
+            'Create it with Instance.new("StringValue") and name it Status.',
+            'Instance.new("StringValue") ile oluştur ve adını Status koy.',
+          ),
+        )
+      )
+        return;
+      h.check(
+        h.t('No players → "Waiting for players"', 'Oyuncu yok → "Waiting for players"'),
+        /waiting for players/i.test(value()),
+        `Status = "${value()}"`,
+      );
+      w.addPlayer("Ann");
+      w.run(1.5);
+      h.check(
+        h.t("A player joins → Intermission", "Bir oyuncu girer → Intermission"),
+        /intermission/i.test(value()),
+        `Status = "${value()}"`,
+      );
+      w.run(5.5);
+      h.check(
+        h.t("After 5 seconds → Round", "5 saniye sonra → Round"),
+        /round/i.test(value()) && !/intermission/i.test(value()),
+        `Status = "${value()}"`,
+      );
+      w.run(10.5);
+      h.check(
+        h.t("After the round → Intermission again", "Tur bitince → yine Intermission"),
+        /intermission/i.test(value()),
+        `Status = "${value()}"`,
+      );
+    },
+  },
 ];
 
 export function exerciseFor(lessonId: string): Exercise | undefined {

@@ -4,6 +4,7 @@
  * available (e.g. very old browsers).
  */
 import type { HomeworkResult } from "./harness";
+import type { SampleModule, SampleResult } from "../runSample";
 
 let worker: Worker | undefined;
 let seq = 0;
@@ -39,26 +40,44 @@ function getWorker(): Worker | undefined {
   return worker;
 }
 
-export async function checkHomework(
-  lessonId: string,
-  code: string,
-  lang: "en" | "tr" = "en",
-  timeoutMs = 12000,
-): Promise<HomeworkResult> {
-  const w = getWorker();
-  if (!w) {
-    const [{ exerciseFor }, { runHomework }] = await Promise.all([
-      import("./exercises"),
-      import("./harness"),
-    ]);
-    const ex = exerciseFor(lessonId);
-    if (!ex) throw new Error("No homework for this lesson");
-    return runHomework(ex, code, lang);
+type Job = {
+  lessonId?: string;
+  challengeId?: string;
+  sample?: { where?: string; modules: SampleModule[] };
+  code: string;
+  lang: "en" | "tr";
+};
+
+async function runOnMainThread(job: Job): Promise<HomeworkResult> {
+  if (job.sample) {
+    const { runSample } = await import("../runSample");
+    return runSample(job.code, job.sample.where, job.sample.modules) as unknown as HomeworkResult;
   }
+  if (job.challengeId) {
+    const [{ challengeById }, { runChallenge }] = await Promise.all([
+      import("@/lib/challenges/challenges"),
+      import("@/lib/challenges/runner"),
+    ]);
+    const ch = challengeById(job.challengeId);
+    if (!ch) throw new Error("Unknown challenge");
+    return runChallenge(ch, job.code, job.lang);
+  }
+  const [{ exerciseFor }, { runHomework }] = await Promise.all([
+    import("./exercises"),
+    import("./harness"),
+  ]);
+  const ex = exerciseFor(job.lessonId ?? "");
+  if (!ex) throw new Error("No homework for this lesson");
+  return runHomework(ex, job.code, job.lang);
+}
+
+function run(job: Job, timeoutMs: number): Promise<HomeworkResult> {
+  const w = getWorker();
+  if (!w) return runOnMainThread(job);
   const id = ++seq;
   return new Promise<HomeworkResult>((resolve, reject) => {
     pending.set(id, { resolve, reject });
-    w.postMessage({ id, lessonId, code, lang });
+    w.postMessage({ id, ...job });
     setTimeout(() => {
       if (!pending.has(id)) return;
       pending.delete(id);
@@ -67,11 +86,39 @@ export async function checkHomework(
       worker = undefined;
       reject(
         new Error(
-          lang === "tr"
+          job.lang === "tr"
             ? "Kodunun çalışması çok uzun sürdü. task.wait() olmayan bir döngü mü var?"
             : "Your code took too long to run. Is there a loop without task.wait()?",
         ),
       );
     }, timeoutMs);
   });
+}
+
+export function checkHomework(
+  lessonId: string,
+  code: string,
+  lang: "en" | "tr" = "en",
+  timeoutMs = 12000,
+): Promise<HomeworkResult> {
+  return run({ lessonId, code, lang }, timeoutMs);
+}
+
+export function checkChallenge(
+  challengeId: string,
+  code: string,
+  lang: "en" | "tr" = "en",
+  timeoutMs = 12000,
+): Promise<HomeworkResult> {
+  return run({ challengeId, code, lang }, timeoutMs);
+}
+
+/** Runs a lesson code sample (off the main thread when possible). */
+export function runLessonSample(
+  code: string,
+  where: string | undefined,
+  modules: SampleModule[],
+  lang: "en" | "tr" = "en",
+): Promise<SampleResult> {
+  return run({ sample: { where, modules }, code, lang }, 12000) as unknown as Promise<SampleResult>;
 }

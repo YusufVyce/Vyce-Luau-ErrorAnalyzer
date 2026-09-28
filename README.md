@@ -57,17 +57,21 @@ Engine: `src/lib/analyzer/precise/` · Ground-truth tests: `src/lib/analyzer/pre
 
 # Learn, Homework & Playground
 
-- **Learn (`/learn`)** — a free course that teaches Roblox Studio scripting from zero: illustrations, copy-paste code, examples inspired by popular games, common mistakes (openable in the analyzer) and quizzes.
+- **Learn (`/learn`)** — a free 26-lesson course that teaches Roblox Studio scripting from zero, in English and Turkish: illustrations, examples inspired by popular games, common mistakes (openable in the analyzer) and quizzes. Chapter 6 covers advanced topics: CollectionService tags, RunService/Heartbeat, raycasting, classes with metatables, Tools and a round-based game loop.
+- **Runnable examples** — every code sample in a lesson has a "Run in simulator" button. The sample is placed where its Explorer path says, a player joins, the relevant action (touch, click, prompt, tool use) is simulated, and the Output plus a "What changed" list (e.g. `Humanoid.Health: 100 → 0`) are shown inline.
 - **Homework after every lesson** — the learner writes real code in an editor. It runs in a simulated Roblox server in the browser and is graded by concrete checks ("Output shows 42", "the Lava kills a player", "leaderstats has Coins = 0"…). Failing checks say exactly what the checker saw, runtime errors are explained by the analyzer, and the code is re-run with different starting values so hard-coded answers don't pass. Hints and a solution (after a few tries) are available.
-- **Progress** — passing the quiz and the homework unlocks the next lesson; XP and levels (Noob → Legend). Progress is stored only in the browser (localStorage).
-- **Playground (`/playground`)** — a tiny Roblox server in the browser: write a Script and a LocalScript, press Run, then make players join/leave, touch parts, press keys or click GUI buttons and watch Output and Explorer update.
+- **Challenges (`/challenges`)** — 31 Codewars-style Luau challenges (easy → hard, from string and table puzzles to game math and real Roblox scripts). Each submission runs against visible and hidden test cases; expected values come from running the reference solution through the same simulator.
+- **Profile (`/profile`)** — XP and levels, a daily streak with an activity heatmap, 16 achievements, a downloadable completion certificate (drawn on a canvas in the browser) and progress export/import. Everything is stored only in the browser (localStorage).
+- **Code editor** — autocomplete for Luau keywords, locals, Roblox services, classes, enums, library functions and methods; auto-closing brackets and quotes; Studio-style automatic `end`; Ctrl+/ to comment.
+- **Playground (`/playground`)** — a tiny Roblox server in the browser: write a Script and a LocalScript, press Run, then make players join/leave, touch parts, press keys or click GUI buttons. Live mode advances the simulation in real time; Explorer items show their properties; a top-down view draws parts and players; code autosaves and can be shared as a link.
 - **Error library (`/errors`)** — searchable list of ~60 common Roblox errors with the usual cause and a link to the full explanation.
+- **Themes & languages** — dark, light or system theme and an English/Turkish switch.
 
 ### Offline Luau simulator
 
 `src/lib/luau/` contains a small Luau interpreter written for this site — lexer, parser (with type annotations skipped), and a tree-walking evaluator with coroutines, `task` scheduling on a virtual clock and Roblox-exact error messages. `src/lib/luau/roblox/` simulates the parts of the engine beginners use: Instances and ~100 classes, properties with type checking, events (`Touched`, `PlayerAdded`, `Changed`…), players and characters, RemoteEvents/Functions with client/server rules, TweenService, DataStores (in memory), CollectionService, Debris, raycasts and ModuleScripts. Physics, rendering and networking lag are not simulated.
 
-Homework exercises and graders: `src/lib/learn/homework/` (graded in a Web Worker).
+Homework exercises and graders: `src/lib/learn/homework/`, challenges: `src/lib/challenges/` (both graded in a Web Worker).
 
 ---
 
