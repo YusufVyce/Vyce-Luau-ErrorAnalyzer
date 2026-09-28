@@ -381,7 +381,7 @@ function LockedLesson({
   return (
     <PageShell>
       <div className="relative z-10 mx-auto flex max-w-md flex-col items-center gap-5 py-20 text-center">
-        <Mascot mood="think" size={120} />
+        <Mascot mood="sleepy" size={120} />
         <h1 className="text-2xl font-bold text-ink">
           {t("learn.lockedTitle", { title: lessonTitle(base, lang) })}
         </h1>

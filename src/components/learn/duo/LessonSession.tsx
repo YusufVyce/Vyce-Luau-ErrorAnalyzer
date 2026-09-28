@@ -427,6 +427,7 @@ export function LessonSession(props: LessonSessionProps) {
         ready={ready}
         phrase={phrase}
         hearts={hearts}
+        combo={combo}
         homeworkPassed={Boolean(props.homeworkPassed)}
         correct={exercise ? correctAnswerText(exercise.step, lang) : ""}
         codeAnswer={exercise ? exercise.step.kind !== "choice" : false}
@@ -539,6 +540,7 @@ function Footer({
   ready,
   phrase,
   hearts,
+  combo,
   homeworkPassed,
   correct,
   codeAnswer,
@@ -551,6 +553,7 @@ function Footer({
   ready: boolean;
   phrase: string;
   hearts: number;
+  combo: number;
   homeworkPassed: boolean;
   correct: string;
   codeAnswer: boolean;
@@ -654,7 +657,16 @@ function Footer({
       }`}
     >
       <div className="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0 flex-1">{message}</div>
+        <div className="flex min-w-0 flex-1 items-center gap-4">
+          {tone !== "none" && (
+            <Mascot
+              mood={tone === "bad" ? "sad" : combo >= 3 ? "cheer" : "happy"}
+              size={72}
+              className="vy-pop hidden sm:block"
+            />
+          )}
+          <div className="min-w-0 flex-1">{message}</div>
+        </div>
         <div className="shrink-0">{button}</div>
       </div>
     </footer>
@@ -724,7 +736,12 @@ function Complete(
       <Confetti />
       <main className="flex flex-1 items-center justify-center px-4 py-10">
         <div className="w-full max-w-lg space-y-7 text-center">
-          <Mascot mood="cheer" size={150} className="vy-pop mx-auto" title="Vy" />
+          <Mascot
+            mood={props.hadPractice && props.mistakes === 0 ? "love" : "cheer"}
+            size={150}
+            className="vy-pop mx-auto"
+            title="Vy"
+          />
           <div className="space-y-2">
             <h1 className="ep-mark text-[34px] leading-tight font-extrabold tracking-tight md:text-[40px]">
               {headline}
