@@ -1,22 +1,22 @@
 <div align="center">
 
-# Vyce LuaUtility
+# Vyce Parser
 
-### AST-Powered Runtime Diagnostics for Roblox Studio (Luau)
+### Roblox Studio (Luau) Error Analysis & Learning Platform
 
-Offline runtime error analysis with semantic understanding, root cause detection, and actionable debugging guidance.
+Understand your errors, learn Roblox scripting, practice writing code, and improve as a developer.
 
-**Built exclusively for Roblox Studio (Luau).**
+**Built for Roblox Studio (Luau).**
 
 <img src="images/görsel_2026-07-22_045124401.png" width="1920"/>
 
 <p>
   <a href="https://parser.vyce.studio"><strong>🌐 Website</strong></a> •
   <a href="#features"><strong>✨ Features</strong></a> •
-  <a href="#architecture"><strong>🏗 Architecture</strong></a> •
-  <a href="#example"><strong>📖 Example</strong></a> •
-  <a href="#installation"><strong>💻 Installation</strong></a> •
-  <a href="#roadmap"><strong>🛣 Roadmap</strong></a>
+  <a href="#error-analysis"><strong>🔍 Error Analysis</strong></a> •
+  <a href="#learning-system"><strong>📚 Learning</strong></a> •
+  <a href="#tests--tasks"><strong>🧪 Tests & Tasks</strong></a> •
+  <a href="#profile--progress"><strong>👤 Profile</strong></a>
 </p>
 
 </div>
@@ -25,185 +25,269 @@ Offline runtime error analysis with semantic understanding, root cause detection
 
 # About
 
-Vyce LuaUtility is an open-source runtime diagnostics engine built specifically for **Roblox Studio (Luau)**.
+Vyce Parser is a platform built for Roblox Studio and Luau developers.
 
-Unlike traditional analyzers that rely primarily on regex matching, Vyce LuaUtility parses Luau source code into a lightweight Abstract Syntax Tree (AST), extracts semantic information, and combines it with runtime error data to determine the most likely root cause.
+Its goal is not only to answer:
 
-Everything runs locally.
+> **"Why did this error happen?"**
 
-No AI.
-
-No API keys.
-
-No cloud services.
-
-No internet connection required.
-
-Its purpose is not only to tell you **where** an error occurred—but to explain **why** it happened and how to fix it.
+Vyce Parser is designed to help you learn Roblox scripting from the beginning, understand the code you write, solve errors yourself, practice through real code, and improve over time.
 
 ---
 
-# Precise Diagnosis & Learn Page
+# Error Analysis
 
-- **Exact message recognition** — 50+ real Roblox/Luau error messages (index/call/math on nil, "is not a valid member", infinite yield, script timeout, syntax errors, RemoteEvents, DataStores, HttpService, tweens, animations…) are parsed with their captured names.
-- **Code tracing** — finds the failing line, the exact nil expression, and where it came from (`FindFirstChild` miss, `LocalPlayer` on the server, `player.Character` before spawn, `GetAsync` for new players, typos, functions used before their definition…).
-- **Explainable confidence** — the score only increases for evidence the analyzer verified; the "Why?" button lists every step. Unrecognized messages are reported honestly instead of guessed.
-- **Only real documentation links** — links come from an allowlist of official create.roblox.com pages (`src/lib/analyzer/precise/docs.ts`); nothing is generated from API names and no forum links are shown.
-- **Beginner explanations** — every diagnosis adds an everyday analogy ("In plain words"), a step-by-step walk through the failing expression (`hit` ✓ → `.Parent` ✓ → `.Humanoid` ✗), a mini glossary of the words used, and **your whole script with the fix applied** (only shown when the patched script still parses).
-- **Real syntax check** — pasted code is parsed by a real Luau parser, so missing `end`s, `=` instead of `==`, `!=` and similar mistakes are reported with Studio-style messages and the exact line.
-- **Only real documentation links** — links come from an allowlist of official create.roblox.com pages (`src/lib/analyzer/precise/docs.ts`); nothing is generated from API names and no forum links are shown.
+Vyce Parser analyzes Roblox and Luau errors and explains what went wrong in a way that is easier to understand.
 
-Engine: `src/lib/analyzer/precise/` · Ground-truth tests: `src/lib/analyzer/precise/diagnose.test.ts`
+## 🔍 Precise Diagnosis
 
-# Learn, Homework & Playground
+- Supports analysis for **50+ real Roblox/Luau error messages**.
+- Covers errors such as `attempt to index nil`, `attempt to call nil`, `is not a valid member`, infinite yield, script timeout, syntax errors, RemoteEvents, DataStores, HttpService, tweens, animations, and more.
+- Finds the line where the error occurred and analyzes the problematic expression.
+- Detects common causes such as failed `FindFirstChild` calls, using `LocalPlayer` on the server, accessing `player.Character` before it exists, typos, and similar issues.
+- Explains the cause of the error step by step.
+- Shows why a suggested fix solves the problem.
+- Reports when an error cannot be properly recognized instead of presenting an uncertain explanation as a fact.
+- Provides links to official Roblox documentation where relevant.
+- Includes beginner-friendly explanations of technical terms.
+- Can show the corrected version of the script when applicable.
 
-- **Learn (`/learn`)** — a free 26-lesson course that teaches Roblox Studio scripting from zero, in English and Turkish, built like a language-learning app: a path of units and lesson circles, bite-sized cards with a one-line memory hook, quick exercises (multiple choice, fill in the blank, put the lines in order, "what does Output show?"), 5 hearts per lesson, missed questions coming back at the end, combos, motivational messages from the mascot "Vy", confetti, stars, a daily XP goal, streaks and mixed reviews. Sounds are generated with the Web Audio API and everything respects reduced motion. The full long-form lesson (illustrations, examples inspired by popular games, common mistakes openable in the analyzer) stays available as notes. Chapter 6 covers advanced topics: CollectionService tags, RunService/Heartbeat, raycasting, classes with metatables, Tools and a round-based game loop. Lesson content: `src/lib/learn/path/` — every "what does Output show?" answer is checked by running the code in the simulator (`path.test.ts`).
-- **Runnable examples** — every code sample in a lesson has a "Run in simulator" button. The sample is placed where its Explorer path says, a player joins, the relevant action (touch, click, prompt, tool use) is simulated, and the Output plus a "What changed" list (e.g. `Humanoid.Health: 100 → 0`) are shown inline.
-- **Homework after every lesson** — the learner writes real code in an editor. It runs in a simulated Roblox server in the browser and is graded by concrete checks ("Output shows 42", "the Lava kills a player", "leaderstats has Coins = 0"…). Failing checks say exactly what the checker saw, runtime errors are explained by the analyzer, and the code is re-run with different starting values so hard-coded answers don't pass. Hints and a solution (after a few tries) are available.
-- **Challenges (`/challenges`)** — 31 Codewars-style Luau challenges (easy → hard, from string and table puzzles to game math and real Roblox scripts). Each submission runs against visible and hidden test cases; expected values come from running the reference solution through the same simulator.
-- **Profile (`/profile`)** — XP and levels, a daily streak with an activity heatmap, 16 achievements, a downloadable completion certificate (drawn on a canvas in the browser) and progress export/import. Everything is stored only in the browser (localStorage).
-- **Code editor** — autocomplete for Luau keywords, locals, Roblox services, classes, enums, library functions and methods; auto-closing brackets and quotes; Studio-style automatic `end`; Ctrl+/ to comment.
-- **Playground (`/playground`)** — a tiny Roblox server in the browser: write a Script and a LocalScript, press Run, then make players join/leave, touch parts, press keys or click GUI buttons. Live mode advances the simulation in real time; Explorer items show their properties; a top-down view draws parts and players; code autosaves and can be shared as a link.
-- **Error library (`/errors`)** — searchable list of ~60 common Roblox errors with the usual cause and a link to the full explanation.
-- **Themes & languages** — dark, light or system theme and an English/Turkish switch.
+## 🧠 Learn From Your Errors
 
-### Offline Luau simulator
+Vyce Parser focuses on understanding the problem instead of simply replacing your code.
 
-`src/lib/luau/` contains a small Luau interpreter written for this site — lexer, parser (with type annotations skipped), and a tree-walking evaluator with coroutines, `task` scheduling on a virtual clock and Roblox-exact error messages. `src/lib/luau/roblox/` simulates the parts of the engine beginners use: Instances and ~100 classes, properties with type checking, events (`Touched`, `PlayerAdded`, `Changed`…), players and characters, RemoteEvents/Functions with client/server rules, TweenService, DataStores (in memory), CollectionService, Debris, raycasts and ModuleScripts. Physics, rendering and networking lag are not simulated.
+For example:
 
-Homework exercises and graders: `src/lib/learn/homework/`, challenges: `src/lib/challenges/` (both graded in a Web Worker).
-
----
-
-# Features
-
-- 🌳 Lightweight Luau AST parser
-- 🧠 Semantic runtime analysis
-- 🔍 Context-aware root cause detection
-- 💡 Practical debugging suggestions
-- 📚 Human-readable explanations
-- ⚡ Fully offline execution
-- 🛡 Roblox-specific diagnostics
-- 📈 Confidence-based hypothesis ranking
-- 🔒 No AI or external services
-- 🧩 Extensible diagnostics pipeline
-
----
-
-# Architecture
-
+```text
+hit ✓
+  ↓
+.Parent ✓
+  ↓
+.Humanoid ✗
 ```
-Console Error
+
+This makes it easier to see exactly where an expression stops working.
+
+---
+
+# Learning System
+
+## 📚 Lessons
+
+Vyce Parser includes a structured learning system for learning Roblox Studio scripting.
+
+- Lessons designed for beginners.
+- English and Turkish language support.
+- Step-by-step learning path.
+- Short explanations and examples.
+- Multiple-choice questions.
+- Fill-in-the-blank exercises.
+- Code ordering exercises.
+- "What does Output show?" questions.
+- Practical coding exercises.
+- Review of incorrect answers.
+- XP and progression system.
+- Daily streak system.
+
+Lesson examples can also be run in the browser simulator where supported.
+
+---
+
+# 🧪 Tests & Tasks
+
+Vyce Parser lets you practice what you learn by actually writing and testing code.
+
+## Test System
+
+Write and test your code directly inside Vyce Parser.
+
+- Write Luau code.
+- Run it.
+- See the result.
+- Inspect errors.
+- Change your code and test it again.
+
+## 🎯 Tasks
+
+The task system gives you coding exercises with different difficulty levels.
+
+Your code is executed and checked against the requirements of the task.
+
+For example:
+
+```text
+Output shows 42
+Lava kills the player
+leaderstats contains Coins = 0
+```
+
+This lets you practice writing code instead of only reading explanations.
+
+---
+
+# 📖 Error Dictionary
+
+The **Error Dictionary** is a searchable collection of common Roblox/Luau errors.
+
+For each error, you can find information such as:
+
+- What the error means
+- Common causes
+- How it can be fixed
+- A more detailed explanation
+
+The goal is to give you a place to quickly understand an error when you encounter it.
+
+---
+
+# 🧩 Code Editor
+
+Vyce Parser includes a Luau code editor with features that make writing code easier.
+
+- Luau keyword autocomplete
+- Local variable autocomplete
+- Roblox services, classes and enums
+- Library functions and methods
+- Automatic brackets and quote closing
+- Studio-style automatic `end`
+- `Ctrl + /` for comments
+
+---
+
+# 🖥️ Playground
+
+The Playground is an interactive environment for experimenting with Luau code in the browser.
+
+- Write Scripts and LocalScripts
+- Run your code
+- Simulate players joining and leaving
+- Simulate touching parts
+- Press keys
+- Click GUI buttons
+- Inspect objects through Explorer
+- View object properties
+- Follow simulation output
+- Automatically save code
+- Share your work with a link
+
+---
+
+# 👤 Profile & Progress
+
+Vyce Parser includes a profile system for tracking your progress.
+
+## ⭐ XP & Levels
+
+Earn XP through lessons, tasks, and other activities and progress through levels.
+
+## 🔥 Daily Streak
+
+Keep your daily learning streak going by continuing to learn and practice.
+
+## 🏆 Achievements
+
+Complete different goals throughout the platform and collect achievements.
+
+## 📊 Progress
+
+Track your learning progress, XP, achievements, and other activity from your profile.
+
+## 🎓 Vyce Parser License
+
+Users who complete all lessons can receive a special **Vyce Parser License**.
+
+---
+
+# 🎨 Themes & Languages
+
+## 🌙 Themes
+
+- 🌙 Dark
+- ☀️ Light
+- System theme
+
+## 🌍 Languages
+
+- 🇹🇷 Turkish
+- 🇬🇧 English
+
+---
+
+# ⚙️ How It Works
+
+Vyce Parser analyzes Luau code and runtime errors to determine what went wrong and explain the problem.
+
+The general analysis flow is:
+
+```text
+Roblox Studio Error
         │
         ▼
-Normalization
+Error Normalization
         │
         ▼
 Error Classification
         │
         ▼
-Lexer
+Luau Lexer / Parser
         │
         ▼
-Tokenizer
-        │
-        ▼
-Parser
-        │
-        ▼
-Luau AST
+AST
         │
         ▼
 Semantic Analysis
         │
         ▼
-Evidence Engine
+Evidence Analysis
         │
         ▼
-Hypothesis Engine
+Root Cause Detection
         │
         ▼
-Confidence Scoring
+Explanation
         │
         ▼
-Explanation Generator
-        │
-        ▼
-Fix Generator
+Fix
 ```
 
-The runtime analysis pipeline is fully deterministic and executes locally without external dependencies.
+The analysis system combines the error message with the surrounding Luau code to explain the likely cause and provide a practical solution.
 
 ---
 
-# Supported Analysis
+# 🔒 Privacy & Local Processing
 
-Examples include:
+Vyce Parser is designed to keep its core learning and analysis features local and browser-based where possible.
 
-- attempt to index nil
-- attempt to call nil
-- arithmetic on nil
-- invalid argument
-- infinite yield
-- stack overflow
-- table index is nil
-- invalid service
-- invalid class
-- coroutine errors
-- module loading issues
-
-...and many more.
+- No API key required.
+- No external AI service required for error analysis.
+- Learning progress and profile data can be stored in the browser.
 
 ---
 
-# Example
+# ✨ Features
 
-### Input
-
-```text
-attempt to index nil with 'Health'
-
-Script: EnemyController.lua
-Line: 42
-```
-
-### Output
-
-```text
-Root Cause
-
-FindFirstChild() returned nil, therefore the "enemy" reference was never assigned.
-
-Evidence
-
-The analyzer detected an object lookup without a successful assignment before property access.
-
-Suggestion
-
-Verify the object exists before accessing enemy.Health.
-
-Confidence
-
-94%
-```
+- 🔍 Roblox/Luau error analysis
+- 🧠 Root cause explanations
+- 💡 Error solutions
+- 📚 Beginner-friendly explanations
+- 📖 Error Dictionary
+- 🎓 Roblox scripting lessons
+- 🎯 Task system
+- 🧪 Code testing system
+- 🖥️ Luau Playground
+- 🧩 Luau code editor
+- 👤 Profile system
+- 🔥 Daily Streak
+- ⭐ XP & Level system
+- 🏆 Achievement system
+- 🎓 Vyce Parser License
+- 🌙 Dark / ☀️ Light theme
+- 🇹🇷 Turkish / 🇬🇧 English
+- 📈 Learning progress tracking
 
 ---
 
-# Why Vyce LuaUtility?
-
-Most runtime analyzers stop after recognizing an error message.
-
-Vyce LuaUtility goes further by understanding the surrounding Luau code structure through semantic analysis, allowing it to generate more accurate explanations and practical debugging guidance.
-
-The project is designed around three principles:
-
-- Deterministic diagnostics
-- Roblox-first development
-- 100% offline execution
-
----
-
-# Tech Stack
+# 🛠️ Tech Stack
 
 - TypeScript
 - React
@@ -213,7 +297,7 @@ The project is designed around three principles:
 
 ---
 
-# Installation
+# 💻 Installation
 
 ```bash
 git clone https://github.com/YusufVyce/Vyce-Luau-ErrorAnalyzer.git
@@ -227,19 +311,29 @@ bun run dev
 
 ---
 
-# Roadmap
+# 🗺️ Roadmap
 
 ## Completed
 
-- ✅ Lightweight Luau parser
+- ✅ Luau parser
 - ✅ AST generation
-- ✅ Semantic analysis engine
-- ✅ Evidence engine
-- ✅ Hypothesis engine
-- ✅ Confidence scoring
+- ✅ Semantic analysis
+- ✅ Error diagnosis
+- ✅ Root cause detection
 - ✅ Human-readable explanations
 - ✅ Roblox-specific diagnostics
-- ✅ Fully offline runtime analysis
+- ✅ Learning system
+- ✅ Task / homework system
+- ✅ Code challenges
+- ✅ Error Dictionary
+- ✅ Playground
+- ✅ Profile system
+- ✅ XP & Level system
+- ✅ Daily Streak
+- ✅ Achievement system
+- ✅ Themes
+- ✅ Turkish / English language support
+- ✅ Code testing system
 
 ## Planned
 
@@ -247,12 +341,12 @@ bun run dev
 - Additional Roblox API semantics
 - Expanded diagnostics database
 - Roblox Studio plugin
-- Performance optimizations
+- Performance improvements
 - Community-contributed diagnostics
 
 ---
 
-# Contributing
+# 🤝 Contributing
 
 Contributions are welcome.
 
@@ -263,10 +357,11 @@ You can help by:
 - Adding new diagnostics
 - Improving semantic analysis
 - Expanding Roblox API support
+- Improving lessons and exercises
 - Opening pull requests
 
 ---
 
-# License
+# 📄 License
 
 Licensed under the GNU General Public License v3.0.
