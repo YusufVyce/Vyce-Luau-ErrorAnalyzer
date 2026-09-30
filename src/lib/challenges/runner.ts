@@ -4,6 +4,7 @@
  * arguments and prints a canonical text form of each result; the reference
  * solution goes through the exact same footer to produce the expected values.
  */
+import { localizeCode } from "@/lib/learn/codeTr";
 import {
   runHomework,
   type Exercise,
@@ -181,7 +182,7 @@ export function challengeExercise(ch: Challenge, lang: "en" | "tr"): Exercise {
     steps: [],
     scriptKind: "Script",
     location: "ServerScriptService › Challenge",
-    starter: ch.starter,
+    starter: localizeCode(ch.starter, lang),
     hints: ch.hints[lang],
     solution: ch.solution,
     testFooter: ch.kind === "function" ? footerFor(ch) : undefined,

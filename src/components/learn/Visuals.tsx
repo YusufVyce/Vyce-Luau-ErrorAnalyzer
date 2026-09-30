@@ -3,6 +3,7 @@
  * layout and concepts without using any Roblox artwork or logos.
  */
 import type { ReactNode } from "react";
+import { useLang } from "@/lib/prefs";
 
 export type VisualId =
   | "studio"
@@ -22,6 +23,12 @@ export type VisualId =
   | "module"
   | "output"
   | "obby";
+
+/** Picks the English or Turkish label (Roblox names stay the same in both). */
+function useTx() {
+  const lang = useLang();
+  return (en: string, tr: string) => (lang === "tr" ? tr : en);
+}
 
 const C = {
   bg: "#0b0f13",
@@ -142,10 +149,14 @@ function Arrow({
 }
 
 function Studio() {
+  const tx = useTx();
   return (
     <Frame
       viewBox="0 0 640 380"
-      label="Roblox Studio window: viewport in the middle, Explorer and Properties on the right, Output at the bottom"
+      label={tx(
+        "Roblox Studio window: viewport in the middle, Explorer and Properties on the right, Output at the bottom",
+        "Roblox Studio penceresi: ortada viewport, sağda Explorer ve Properties, altta Output",
+      )}
     >
       <rect width="640" height="380" rx="12" fill={C.bg} />
       {/* ribbon */}
@@ -186,10 +197,10 @@ function Studio() {
         strokeDasharray="4 3"
       />
       <T x="298" y="170" size={9} fill={C.blue}>
-        Part (selected)
+        {tx("Part (selected)", "Part (seçili)")}
       </T>
       <T x="20" y="70" size={10} fill={C.dim}>
-        3D viewport — build your world here
+        {tx("3D viewport — build your world here", "3D viewport — dünyanı burada kur")}
       </T>
       {/* explorer */}
       <rect x="450" y="52" width="180" height="150" rx="6" fill={C.panel} />
@@ -245,7 +256,7 @@ function Studio() {
         Output
       </T>
       <T x="20" y="320" size={9}>
-        Hello world!
+        {tx("Hello world!", "Merhaba dünya!")}
       </T>
       <T x="20" y="336" size={9} fill={C.amber}>
         Infinite yield possible on 'Players.You:WaitForChild("leaderstats")'
@@ -261,21 +272,64 @@ function Studio() {
 }
 
 function Explorer() {
+  const tx = useTx();
   const rows: Array<[string, string, string, number, string?]> = [
-    ["Workspace", C.blue, "W", 0, "Parts & models players can see"],
-    ["Players", C.blue, "P", 0, "One Player object per person"],
-    ["ReplicatedStorage", C.blue, "R", 0, "Shared: server AND clients"],
+    [
+      "Workspace",
+      C.blue,
+      "W",
+      0,
+      tx("Parts & models players can see", "Oyuncuların gördüğü parçalar ve modeller"),
+    ],
+    [
+      "Players",
+      C.blue,
+      "P",
+      0,
+      tx("One Player object per person", "Her kişi için bir Player objesi"),
+    ],
+    [
+      "ReplicatedStorage",
+      C.blue,
+      "R",
+      0,
+      tx("Shared: server AND clients", "Ortak: sunucu VE istemciler"),
+    ],
     ["RemoteEvent", C.amber, "E", 1],
     ["ModuleScript", C.violet, "M", 1],
-    ["ServerScriptService", C.blue, "S", 0, "Server-only scripts"],
+    ["ServerScriptService", C.blue, "S", 0, tx("Server-only scripts", "Sadece sunucu scriptleri")],
     ["Script", C.green, "S", 1],
-    ["ServerStorage", C.blue, "S", 0, "Server-only storage (clients can't see)"],
-    ["StarterGui", C.blue, "G", 0, "UI copied to each player"],
-    ["StarterPlayer › StarterPlayerScripts", C.blue, "P", 0, "Client scripts"],
+    [
+      "ServerStorage",
+      C.blue,
+      "S",
+      0,
+      tx("Server-only storage (clients can't see)", "Sadece sunucu deposu (istemciler göremez)"),
+    ],
+    [
+      "StarterGui",
+      C.blue,
+      "G",
+      0,
+      tx("UI copied to each player", "Her oyuncuya kopyalanan arayüz"),
+    ],
+    [
+      "StarterPlayer › StarterPlayerScripts",
+      C.blue,
+      "P",
+      0,
+      tx("Client scripts", "İstemci scriptleri"),
+    ],
     ["LocalScript", C.pink, "L", 1],
   ];
   return (
-    <Frame viewBox="0 0 640 300" label="Explorer tree showing where each kind of script goes">
+    <Frame
+      viewBox="0 0 640 300"
+      label={tx(
+        "Explorer tree showing where each kind of script goes",
+        "Her script türünün nereye konduğunu gösteren Explorer ağacı",
+      )}
+    >
       <rect width="640" height="300" rx="12" fill={C.bg} />
       <rect x="14" y="14" width="300" height="272" rx="8" fill={C.panel} />
       <T x="28" y="36" size={12} fill={C.green} weight={700}>
@@ -305,59 +359,70 @@ function Explorer() {
 }
 
 function ClientServer() {
+  const tx = useTx();
   return (
     <Frame
       viewBox="0 0 640 280"
-      label="One server, many clients. The server runs Scripts, each player's computer runs LocalScripts."
+      label={tx(
+        "One server, many clients. The server runs Scripts, each player's computer runs LocalScripts.",
+        "Bir sunucu, birçok istemci. Sunucu Script'leri, her oyuncunun cihazı LocalScript'leri çalıştırır.",
+      )}
     >
       <rect width="640" height="280" rx="12" fill={C.bg} />
       <rect x="230" y="20" width="180" height="96" rx="10" fill="#0f2a1f" stroke={C.green} />
       <T x="320" y="44" size={13} anchor="middle" fill={C.green} weight={700}>
-        SERVER
+        {tx("SERVER", "SUNUCU")}
       </T>
       <T x="320" y="64" size={10} anchor="middle">
-        Roblox's computer
+        {tx("Roblox's computer", "Roblox'un bilgisayarı")}
       </T>
       <T x="320" y="82" size={10} anchor="middle" fill={C.dim}>
-        runs Script
+        {tx("runs Script", "Script çalıştırır")}
       </T>
       <T x="320" y="100" size={10} anchor="middle" fill={C.dim}>
-        owns coins, damage, saving
+        {tx("owns coins, damage, saving", "coin, hasar, kayıt onda")}
       </T>
       {[60, 250, 440].map((x, i) => (
         <g key={x}>
           <rect x={x} y={176} width={140} height={84} rx={10} fill="#2a0f22" stroke={C.pink} />
           <T x={x + 70} y={198} size={12} anchor="middle" fill={C.pink} weight={700}>
-            CLIENT {i + 1}
+            {tx("CLIENT", "İSTEMCİ")} {i + 1}
           </T>
           <T x={x + 70} y={216} size={10} anchor="middle">
-            a player's device
+            {tx("a player's device", "bir oyuncunun cihazı")}
           </T>
           <T x={x + 70} y={234} size={10} anchor="middle" fill={C.dim}>
-            runs LocalScript
+            {tx("runs LocalScript", "LocalScript çalıştırır")}
           </T>
           <T x={x + 70} y={250} size={10} anchor="middle" fill={C.dim}>
-            UI, input, camera
+            {tx("UI, input, camera", "arayüz, girdi, kamera")}
           </T>
           <Arrow x1={x + 70} y1={174} x2={300 + (i - 1) * 20} y2={122} color={C.amber} />
         </g>
       ))}
       <T x="320" y="150" size={10} anchor="middle" fill={C.amber}>
-        talk through RemoteEvents
+        {tx("talk through RemoteEvents", "RemoteEvent'lerle konuşurlar")}
       </T>
     </Frame>
   );
 }
 
 function Variables() {
+  const tx = useTx();
   const boxes: Array<[string, string, string, string]> = [
     ["coins", "100", "number", C.amber],
     ["playerName", '"Builderman"', "string", C.green],
     ["isAlive", "true", "boolean", C.blue],
-    ["target", "nil", "nothing!", C.red],
+    ["target", "nil", tx("nothing!", "hiçbir şey!"), C.red],
   ];
   return (
-    <Frame viewBox="0 0 640 170" label="Variables are labeled boxes that hold one value">
+    <Frame
+      viewBox="0 0 640 170"
+      label={tx(
+        "Variables are labeled boxes that hold one value",
+        "Değişkenler tek bir değer tutan etiketli kutulardır",
+      )}
+    >
       <rect width="640" height="170" rx="12" fill={C.bg} />
       {boxes.map(([name, value, type, color], i) => {
         const x = 20 + i * 155;
@@ -398,12 +463,16 @@ function Variables() {
 }
 
 function IfFlow() {
+  const tx = useTx();
   return (
-    <Frame viewBox="0 0 640 230" label="An if statement chooses one of two paths">
+    <Frame
+      viewBox="0 0 640 230"
+      label={tx("An if statement chooses one of two paths", "if ifadesi iki yoldan birini seçer")}
+    >
       <rect width="640" height="230" rx="12" fill={C.bg} />
       <rect x="240" y="16" width="160" height="34" rx="8" fill={C.panel} stroke={C.line} />
       <T x="320" y="38" size={11} anchor="middle">
-        player touches top
+        {tx("player touches top", "oyuncu zirveye dokunur")}
       </T>
       <Arrow x1={320} y1={50} x2={320} y2={72} color={C.dim} />
       <polygon points="320,74 420,114 320,154 220,114" fill="#1e1b4b" stroke={C.violet} />
@@ -427,18 +496,28 @@ function IfFlow() {
       </T>
       <rect x="14" y="94" width="124" height="40" rx="8" fill="#2a1111" stroke={C.red} />
       <T x="76" y="118" size={11} anchor="middle" fill={C.red}>
-        keep climbing
+        {tx("keep climbing", "tırmanmaya devam")}
       </T>
       <T x="320" y="200" size={10} anchor="middle" fill={C.dim}>
-        Only one branch runs. The condition is either true or false.
+        {tx(
+          "Only one branch runs. The condition is either true or false.",
+          "Sadece bir dal çalışır. Koşul ya true ya da false olur.",
+        )}
       </T>
     </Frame>
   );
 }
 
 function Loop() {
+  const tx = useTx();
   return (
-    <Frame viewBox="0 0 640 220" label="A loop repeats code; task.wait lets the game keep running">
+    <Frame
+      viewBox="0 0 640 220"
+      label={tx(
+        "A loop repeats code; task.wait lets the game keep running",
+        "Döngü kodu tekrarlar; task.wait oyunun çalışmaya devam etmesini sağlar",
+      )}
+    >
       <rect width="640" height="220" rx="12" fill={C.bg} />
       <circle
         cx="170"
@@ -453,13 +532,16 @@ function Loop() {
         while true do
       </T>
       <T x="170" y="118" size={11} anchor="middle">
-        spawn lava
+        {tx("spawn lava", "lav oluştur")}
       </T>
       <T x="170" y="136" size={11} anchor="middle" fill={C.green}>
         task.wait(5)
       </T>
       <T x="170" y="202" size={10} anchor="middle" fill={C.dim}>
-        repeats forever, pauses 5 s each time
+        {tx(
+          "repeats forever, pauses 5 s each time",
+          "sonsuza dek tekrarlar, her seferinde 5 sn bekler",
+        )}
       </T>
       <rect x="340" y="40" width="280" height="140" rx="10" fill={C.panel} stroke={C.line} />
       <T x="356" y="64" size={11} fill={C.amber} weight={700}>
@@ -482,21 +564,28 @@ function Loop() {
         </g>
       ))}
       <T x="356" y="146" size={10} fill={C.dim}>
-        counts down: a round timer
+        {tx("counts down: a round timer", "geri sayar: bir tur sayacı")}
       </T>
       <T x="356" y="164" size={10} fill={C.dim}>
-        runs exactly 10 times, then stops
+        {tx("runs exactly 10 times, then stops", "tam 10 kez çalışır, sonra durur")}
       </T>
     </Frame>
   );
 }
 
 function Tables() {
+  const tx = useTx();
   return (
-    <Frame viewBox="0 0 640 220" label="Arrays are numbered lists, dictionaries use named keys">
+    <Frame
+      viewBox="0 0 640 220"
+      label={tx(
+        "Arrays are numbered lists, dictionaries use named keys",
+        "Diziler numaralı listelerdir, sözlükler isimli anahtarlar kullanır",
+      )}
+    >
       <rect width="640" height="220" rx="12" fill={C.bg} />
       <T x="20" y="30" size={12} fill={C.green} weight={700}>
-        Array (list)
+        {tx("Array (list)", "Dizi (liste)")}
       </T>
       {['"Dog"', '"Cat"', '"Dragon"', '"Unicorn"'].map((v, i) => (
         <g key={v}>
@@ -518,10 +607,13 @@ function Tables() {
         </g>
       ))}
       <T x="20" y="132" size={10} fill={C.dim}>
-        pets[3] → "Dragon" (Luau starts counting at 1!)
+        {tx(
+          'pets[3] → "Dragon" (Luau starts counting at 1!)',
+          'pets[3] → "Dragon" (Luau saymaya 1\'den başlar!)',
+        )}
       </T>
       <T x="350" y="30" size={12} fill={C.amber} weight={700}>
-        Dictionary
+        {tx("Dictionary", "Sözlük (dictionary)")}
       </T>
       {[
         ["Name", '"Shadow Dragon"'],
@@ -564,10 +656,14 @@ function Tables() {
 }
 
 function Coordinates() {
+  const tx = useTx();
   return (
     <Frame
       viewBox="0 0 640 240"
-      label="3D coordinates: X, Y (up) and Z. Position is where a part is, Size is how big it is."
+      label={tx(
+        "3D coordinates: X, Y (up) and Z. Position is where a part is, Size is how big it is.",
+        "3D koordinatlar: X, Y (yukarı) ve Z. Position parçanın yeri, Size ne kadar büyük olduğu.",
+      )}
     >
       <rect width="640" height="240" rx="12" fill={C.bg} />
       <g transform="translate(150,170)">
@@ -577,7 +673,7 @@ function Coordinates() {
         </T>
         <Arrow x1={0} y1={0} x2={0} y2={-120} color={C.green} />
         <T x={-4} y={-126} size={12} fill={C.green} weight={700}>
-          Y (up)
+          {tx("Y (up)", "Y (yukarı)")}
         </T>
         <Arrow x1={0} y1={0} x2={-70} y2={50} color={C.blue} />
         <T x={-86} y={64} size={12} fill={C.blue} weight={700}>
@@ -596,7 +692,7 @@ function Coordinates() {
         = Vector3.new(0, 10, 0)
       </T>
       <T x="356" y="102" size={10} fill={C.dim}>
-        the center point (● above)
+        {tx("the center point (● above)", "merkez noktası (yukarıdaki ●)")}
       </T>
       <T x="356" y="130" size={11} fill={C.amber}>
         part.Size
@@ -605,20 +701,24 @@ function Coordinates() {
         = Vector3.new(4, 1, 2)
       </T>
       <T x="356" y="166" size={10} fill={C.dim}>
-        width, height, depth in studs
+        {tx("width, height, depth in studs", "stud cinsinden en, boy, derinlik")}
       </T>
       <T x="356" y="188" size={10} fill={C.dim}>
-        CFrame = position + rotation
+        {tx("CFrame = position + rotation", "CFrame = konum + dönüş")}
       </T>
     </Frame>
   );
 }
 
 function Touched() {
+  const tx = useTx();
   return (
     <Frame
       viewBox="0 0 640 220"
-      label="When a character touches a kill brick, the Touched event fires and runs your function"
+      label={tx(
+        "When a character touches a kill brick, the Touched event fires and runs your function",
+        "Bir karakter öldüren bloğa dokununca Touched olayı tetiklenir ve fonksiyonun çalışır",
+      )}
     >
       <rect width="640" height="220" rx="12" fill={C.bg} />
       <rect x="40" y="150" width="200" height="26" rx="4" fill="#7f1d1d" stroke={C.red} />
@@ -640,13 +740,13 @@ function Touched() {
         part.Touched:Connect(function(hit)
       </T>
       <T x="376" y="88" size={11}>
-        hit = the part that touched
+        {tx("hit = the part that touched", "hit = dokunan parça")}
       </T>
       <T x="376" y="108" size={11} fill={C.dim}>
-        (a leg, an arm, a hat…)
+        {tx("(a leg, an arm, a hat…)", "(bir bacak, bir kol, bir şapka…)")}
       </T>
       <T x="376" y="132" size={11}>
-        hit.Parent = the character
+        {tx("hit.Parent = the character", "hit.Parent = karakter")}
       </T>
       <T x="376" y="152" size={11} fill={C.green}>
         humanoid.Health = 0
@@ -659,20 +759,24 @@ function Touched() {
 }
 
 function Leaderboard() {
+  const tx = useTx();
   const rows: Array<[string, number, number]> = [
     ["Builderman", 1250, 12],
-    ["You", 980, 9],
+    [tx("You", "Sen"), 980, 9],
     ["NoobMaster", 310, 2],
   ];
   return (
     <Frame
       viewBox="0 0 640 210"
-      label="The leaderboard in the top-right corner shows values inside each player's leaderstats folder"
+      label={tx(
+        "The leaderboard in the top-right corner shows values inside each player's leaderstats folder",
+        "Sağ üstteki liste, her oyuncunun leaderstats klasöründeki değerleri gösterir",
+      )}
     >
       <rect width="640" height="210" rx="12" fill={C.bg} />
       <rect x="340" y="20" width="280" height="130" rx="8" fill="#111827" stroke={C.line} />
       <T x="356" y="42" size={11} fill={C.dim}>
-        Player
+        {tx("Player", "Oyuncu")}
       </T>
       <T x="520" y="42" size={11} fill={C.amber} anchor="end">
         Coins
@@ -688,7 +792,7 @@ function Leaderboard() {
             width={264}
             height={26}
             rx={4}
-            fill={name === "You" ? "#14532d" : "transparent"}
+            fill={i === 1 ? "#14532d" : "transparent"}
           />
           <T x={356} y={70 + i * 30} size={11}>
             {name}
@@ -703,7 +807,7 @@ function Leaderboard() {
       ))}
       <rect x="20" y="20" width="290" height="170" rx="8" fill={C.panel} />
       <T x="34" y="42" size={11} fill={C.green} weight={700}>
-        Explorer (while playing)
+        {tx("Explorer (while playing)", "Explorer (oynarken)")}
       </T>
       <Icon x={36} y={66} color={C.blue} letter="P" />
       <T x={54} y={66} size={10}>
@@ -711,11 +815,11 @@ function Leaderboard() {
       </T>
       <Icon x={54} y={86} color={C.pink} letter="P" />
       <T x={72} y={86} size={10}>
-        You
+        {tx("You", "Sen")}
       </T>
       <Icon x={72} y={106} color={C.amber} letter="F" />
       <T x={90} y={106} size={10} fill={C.amber}>
-        leaderstats ← exact name!
+        {tx("leaderstats ← exact name!", "leaderstats ← tam bu isim!")}
       </T>
       <Icon x={90} y={126} color={C.green} letter="I" />
       <T x={108} y={126} size={10}>
@@ -731,10 +835,14 @@ function Leaderboard() {
 }
 
 function Tween() {
+  const tx = useTx();
   return (
     <Frame
       viewBox="0 0 640 230"
-      label="A tween smoothly animates a property from a start value to a goal"
+      label={tx(
+        "A tween smoothly animates a property from a start value to a goal",
+        "Tween bir özelliği başlangıç değerinden hedefe yumuşakça değiştirir",
+      )}
     >
       <rect width="640" height="230" rx="12" fill={C.bg} />
       {[0, 1, 2, 3, 4].map((i) => (
@@ -753,10 +861,10 @@ function Tween() {
       ))}
       <rect x="30" y="160" width="330" height="6" fill={C.line} />
       <T x="40" y="190" size={10} fill={C.dim}>
-        start
+        {tx("start", "başlangıç")}
       </T>
       <T x="300" y="190" size={10} fill={C.dim}>
-        goal: slides up &amp; open
+        {tx("goal: slides up & open", "hedef: yukarı kayar ve açılır")}
       </T>
       <rect x="390" y="30" width="230" height="170" rx="10" fill={C.panel} stroke={C.line} />
       <T x="404" y="52" size={11} fill={C.amber}>
@@ -766,20 +874,24 @@ function Tween() {
       <line x1="410" y1="180" x2="600" y2="180" stroke={C.line} />
       <line x1="410" y1="180" x2="410" y2="50" stroke={C.line} />
       <T x="505" y="196" size={10} anchor="middle" fill={C.dim}>
-        time →
+        {tx("time →", "zaman →")}
       </T>
       <T x="420" y="70" size={10} fill={C.dim}>
-        fast, then gently stops
+        {tx("fast, then gently stops", "önce hızlı, sonra yavaşça durur")}
       </T>
     </Frame>
   );
 }
 
 function Prompt() {
+  const tx = useTx();
   return (
     <Frame
       viewBox="0 0 640 220"
-      label="A ProximityPrompt shows a key to press when you walk close to an object"
+      label={tx(
+        "A ProximityPrompt shows a key to press when you walk close to an object",
+        "ProximityPrompt, bir objeye yaklaşınca basılacak tuşu gösterir",
+      )}
     >
       <rect width="640" height="220" rx="12" fill={C.bg} />
       <rect x="220" y="60" width="90" height="140" rx="4" fill="#3f2a14" stroke={C.amber} />
@@ -791,10 +903,10 @@ function Prompt() {
           E
         </T>
         <T x={-22} y={20} size={10} fill={C.dim}>
-          Door
+          {tx("Door", "Kapı")}
         </T>
         <T x={-22} y={34} size={12} weight={700}>
-          Open
+          {tx("Open", "Aç")}
         </T>
       </g>
       <circle
@@ -817,32 +929,36 @@ function Prompt() {
         :Connect(function(player)
       </T>
       <T x="460" y="106" size={11}>
-        open the door
+        {tx("open the door", "kapıyı aç")}
       </T>
       <T x="444" y="130" size={11} fill={C.amber}>
         end)
       </T>
       <T x="444" y="150" size={10} fill={C.dim}>
-        gives you the player!
+        {tx("gives you the player!", "sana oyuncuyu verir!")}
       </T>
     </Frame>
   );
 }
 
 function Remote() {
+  const tx = useTx();
   return (
     <Frame
       viewBox="0 0 640 250"
-      label="A button on the client fires a RemoteEvent; the server checks and gives the reward"
+      label={tx(
+        "A button on the client fires a RemoteEvent; the server checks and gives the reward",
+        "İstemcideki buton bir RemoteEvent gönderir; sunucu kontrol edip ödülü verir",
+      )}
     >
       <rect width="640" height="250" rx="12" fill={C.bg} />
       <rect x="20" y="30" width="200" height="190" rx="10" fill="#2a0f22" stroke={C.pink} />
       <T x="120" y="54" size={12} anchor="middle" fill={C.pink} weight={700}>
-        CLIENT (LocalScript)
+        {tx("CLIENT (LocalScript)", "İSTEMCİ (LocalScript)")}
       </T>
       <rect x="60" y="80" width="120" height="36" rx="8" fill={C.green} />
       <T x="120" y="103" size={12} anchor="middle" fill="#052e16" weight={700}>
-        BUY SWORD
+        {tx("BUY SWORD", "KILIÇ AL")}
       </T>
       <T x="120" y="150" size={10} anchor="middle">
         remote:FireServer(
@@ -852,7 +968,7 @@ function Remote() {
       </T>
       <rect x="420" y="30" width="200" height="190" rx="10" fill="#0f2a1f" stroke={C.green} />
       <T x="520" y="54" size={12} anchor="middle" fill={C.green} weight={700}>
-        SERVER (Script)
+        {tx("SERVER (Script)", "SUNUCU (Script)")}
       </T>
       <T x="520" y="84" size={10} anchor="middle">
         OnServerEvent(player,
@@ -861,42 +977,49 @@ function Remote() {
         itemName)
       </T>
       <T x="520" y="130" size={10} anchor="middle" fill={C.amber}>
-        ✔ has enough coins?
+        {tx("✔ has enough coins?", "✔ yeterli coin var mı?")}
       </T>
       <T x="520" y="150" size={10} anchor="middle" fill={C.amber}>
-        ✔ item exists?
+        {tx("✔ item exists?", "✔ böyle bir eşya var mı?")}
       </T>
       <T x="520" y="176" size={10} anchor="middle" fill={C.green}>
-        give sword, take coins
+        {tx("give sword, take coins", "kılıcı ver, coinleri al")}
       </T>
       <Arrow x1={225} y1={100} x2={415} y2={100} color={C.amber} />
       <T x="320" y="92" size={10} anchor="middle" fill={C.amber}>
         RemoteEvent
       </T>
       <T x="320" y="120" size={10} anchor="middle" fill={C.dim}>
-        player is added automatically
+        {tx("player is added automatically", "player otomatik eklenir")}
       </T>
       <Arrow x1={415} y1={190} x2={225} y2={190} color={C.blue} dashed />
       <T x="320" y="182" size={10} anchor="middle" fill={C.blue}>
         FireClient(player, …)
       </T>
       <T x="320" y="238" size={10} anchor="middle" fill={C.red}>
-        Never trust numbers sent by the client — exploiters can send anything.
+        {tx(
+          "Never trust numbers sent by the client — exploiters can send anything.",
+          "İstemcinin gönderdiği sayılara asla güvenme — hileciler her şeyi gönderebilir.",
+        )}
       </T>
     </Frame>
   );
 }
 
 function DataStore() {
+  const tx = useTx();
   return (
     <Frame
       viewBox="0 0 640 220"
-      label="DataStores save player data in Roblox's cloud when they leave and load it when they join"
+      label={tx(
+        "DataStores save player data in Roblox's cloud when they leave and load it when they join",
+        "DataStore, oyuncu verisini çıkınca Roblox'un bulutuna kaydeder, girince yükler",
+      )}
     >
       <rect width="640" height="220" rx="12" fill={C.bg} />
       <rect x="40" y="70" width="170" height="90" rx="10" fill="#0f2a1f" stroke={C.green} />
       <T x="125" y="100" size={12} anchor="middle" fill={C.green} weight={700}>
-        Game server
+        {tx("Game server", "Oyun sunucusu")}
       </T>
       <T x="125" y="120" size={10} anchor="middle">
         Coins = 980
@@ -913,28 +1036,35 @@ function DataStore() {
         DataStore
       </T>
       <T x="520" y="128" size={10} anchor="middle" fill={C.dim}>
-        key: "Player_1234"
+        {tx('key: "Player_1234"', 'anahtar: "Player_1234"')}
       </T>
       <Arrow x1={215} y1={95} x2={455} y2={95} color={C.amber} />
       <T x="335" y="86" size={10} anchor="middle" fill={C.amber}>
-        SetAsync when they leave
+        {tx("SetAsync when they leave", "çıkınca SetAsync")}
       </T>
       <Arrow x1={455} y1={140} x2={215} y2={140} color={C.blue} />
       <T x="335" y="158" size={10} anchor="middle" fill={C.blue}>
-        GetAsync when they join
+        {tx("GetAsync when they join", "girince GetAsync")}
       </T>
       <T x="320" y="200" size={10} anchor="middle" fill={C.dim}>
-        Wrap both in pcall — cloud requests can fail.
+        {tx(
+          "Wrap both in pcall — cloud requests can fail.",
+          "İkisini de pcall içine al — bulut istekleri başarısız olabilir.",
+        )}
       </T>
     </Frame>
   );
 }
 
 function Module() {
+  const tx = useTx();
   return (
     <Frame
       viewBox="0 0 640 200"
-      label="A ModuleScript is shared code that other scripts load with require"
+      label={tx(
+        "A ModuleScript is shared code that other scripts load with require",
+        "ModuleScript, diğer scriptlerin require ile yüklediği ortak koddur",
+      )}
     >
       <rect width="640" height="200" rx="12" fill={C.bg} />
       <rect x="230" y="20" width="180" height="90" rx="10" fill="#1e1b4b" stroke={C.violet} />
@@ -945,15 +1075,15 @@ function Module() {
         PetConfig
       </T>
       <T x="320" y="82" size={10} anchor="middle" fill={C.dim}>
-        rarities, prices…
+        {tx("rarities, prices…", "nadirlikler, fiyatlar…")}
       </T>
       <T x="320" y="100" size={10} anchor="middle" fill={C.green}>
         return PetConfig
       </T>
       {[
-        [40, "Shop Script"],
-        [250, "Hatch Script"],
-        [460, "UI LocalScript"],
+        [40, tx("Shop Script", "Dükkân Script'i")],
+        [250, tx("Hatch Script", "Yumurta Script'i")],
+        [460, tx("UI LocalScript", "Arayüz LocalScript'i")],
       ].map(([x, label]) => (
         <g key={String(label)}>
           <rect
@@ -985,8 +1115,15 @@ function Module() {
 }
 
 function Output() {
+  const tx = useTx();
   return (
-    <Frame viewBox="0 0 640 200" label="How to read an error in the Output window">
+    <Frame
+      viewBox="0 0 640 200"
+      label={tx(
+        "How to read an error in the Output window",
+        "Output penceresindeki bir hata nasıl okunur",
+      )}
+    >
       <rect width="640" height="200" rx="12" fill={C.bg} />
       <rect x="20" y="20" width="600" height="60" rx="8" fill={C.panel} />
       <T x="34" y="56" size={12} fill={C.red}>
@@ -996,46 +1133,52 @@ function Output() {
       <line x1="250" y1="64" x2="266" y2="64" stroke={C.amber} strokeWidth={2} />
       <line x1="276" y1="64" x2="560" y2="64" stroke={C.green} strokeWidth={2} />
       <T x="34" y="110" size={11} fill={C.blue}>
-        ① which script
+        {tx("① which script", "① hangi script")}
       </T>
       <T x="34" y="128" size={10} fill={C.dim}>
         ServerScriptService › Shop
       </T>
       <T x="250" y="110" size={11} fill={C.amber}>
-        ② line
+        {tx("② line", "② satır")}
       </T>
       <T x="250" y="128" size={10} fill={C.dim}>
-        line 14
+        {tx("line 14", "14. satır")}
       </T>
       <T x="380" y="110" size={11} fill={C.green}>
-        ③ what went wrong
+        {tx("③ what went wrong", "③ ne ters gitti")}
       </T>
       <T x="380" y="128" size={10} fill={C.dim}>
-        something before .Coins is nil
+        {tx("something before .Coins is nil", ".Coins'ten önceki şey nil")}
       </T>
       <T x="34" y="170" size={10} fill={C.dim}>
-        Click the red line in Output to jump straight to it. Blue = info, orange = warning, red =
-        error.
+        {tx(
+          "Click the red line in Output to jump straight to it. Blue = info, orange = warning, red = error.",
+          "Doğrudan oraya gitmek için Output'taki kırmızı satıra tıkla. Mavi = bilgi, turuncu = uyarı, kırmızı = hata.",
+        )}
       </T>
     </Frame>
   );
 }
 
 function Obby() {
+  const tx = useTx();
   return (
     <Frame
       viewBox="0 0 640 220"
-      label="Mini project: an obby with checkpoints, kill bricks and coins"
+      label={tx(
+        "Mini project: an obby with checkpoints, kill bricks and coins",
+        "Mini proje: checkpoint'ler, öldüren bloklar ve coinlerle bir obby",
+      )}
     >
       <rect width="640" height="220" rx="12" fill={C.bg} />
       <rect x="20" y="170" width="90" height="16" fill="#16a34a" />
       <T x="65" y="204" size={10} anchor="middle" fill={C.dim}>
-        Spawn
+        {tx("Spawn", "Doğma yeri")}
       </T>
       <rect x="140" y="150" width="60" height="12" fill="#64748b" />
       <rect x="230" y="130" width="60" height="12" fill="#7f1d1d" stroke={C.red} />
       <T x="260" y="120" size={9} anchor="middle" fill={C.red}>
-        kill brick
+        {tx("kill brick", "öldüren blok")}
       </T>
       <rect x="320" y="110" width="60" height="12" fill="#64748b" />
       <circle cx="350" cy="92" r="8" fill={C.amber} />
@@ -1048,7 +1191,7 @@ function Obby() {
       </T>
       <rect x="500" y="60" width="110" height="14" fill="#a16207" />
       <T x="555" y="50" size={11} anchor="middle" fill={C.amber}>
-        🏆 finish
+        {tx("🏆 finish", "🏆 bitiş")}
       </T>
       <path
         d="M65 165 Q 120 120 170 145 T 260 125 T 350 105 T 440 85 T 540 55"

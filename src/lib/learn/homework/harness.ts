@@ -60,6 +60,9 @@ export interface Exercise {
 
 export const TEST_TAG = "__TEST__";
 
+/** Text the student prints or shows: one string, or English and Turkish versions. */
+export type Say = string | { en: string; tr: string };
+
 export class Harness {
   worlds: World[] = [];
   checks: HomeworkCheck[] = [];
@@ -157,18 +160,29 @@ export class Harness {
     );
   }
 
+  /** Picks the text a student is asked to print or show, in the current language. */
+  say(text: Say): string {
+    return typeof text === "string" ? text : this.t(text.en, text.tr);
+  }
+
+  /** True when `value` is the expected text in either language (old English answers still pass). */
+  said(value: unknown, text: Say): boolean {
+    return typeof text === "string" ? value === text : value === text.en || value === text.tr;
+  }
+
   /** Checks that `expected` was printed (exact line), with a helpful message if not. */
-  expectPrinted(expected: string, label?: string, world: World = this.main!): boolean {
-    label ??= this.t(`Output shows "${expected}"`, `Output'ta "${expected}" yazıyor`);
+  expectPrinted(expected: Say, label?: string, world: World = this.main!): boolean {
+    const shown = this.say(expected);
+    label ??= this.t(`Output shows "${shown}"`, `Output'ta "${shown}" yazıyor`);
     const lines = this.prints(world);
-    if (lines.includes(expected)) return this.check(label, true);
+    if (lines.some((l) => this.said(l, expected))) return this.check(label, true);
     const loose = (s: string) => s.toLowerCase().replace(/[\s!.,:]/g, "");
-    const near = lines.find((l) => loose(l) === loose(expected));
+    const near = lines.find((l) => loose(l) === loose(shown));
     let detail: string;
     if (near)
       detail = this.t(
-        `Almost! You printed "${near}" — compare capital letters, spaces and punctuation with "${expected}".`,
-        `Az kaldı! "${near}" yazdırdın — büyük/küçük harfleri, boşlukları ve noktalamayı "${expected}" ile karşılaştır.`,
+        `Almost! You printed "${near}" — compare capital letters, spaces and punctuation with "${shown}".`,
+        `Az kaldı! "${near}" yazdırdın — büyük/küçük harfleri, boşlukları ve noktalamayı "${shown}" ile karşılaştır.`,
       );
     else if (lines.length === 0)
       detail = this.t(

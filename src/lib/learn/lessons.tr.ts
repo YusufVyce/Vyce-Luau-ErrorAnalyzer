@@ -2,6 +2,7 @@
  * Turkish text for the course. Sections are matched by index; code samples,
  * Roblox names and error messages stay as they are in lessons.ts.
  */
+import { localizeCode } from "./codeTr";
 import type { Lesson } from "./lessons";
 
 interface SectionTr {
@@ -103,10 +104,10 @@ const TR: Record<string, LessonTr> = {
     ],
     mistake: "Büyük P ile Print diye bir şey yok, bu yüzden nil'dir — nil de çağrılamaz.",
     quiz: {
-      q: 'print("Hi") ne yapar?',
+      q: 'print("Selam") ne yapar?',
       o: [
-        "Her oyuncunun ekranında Hi gösterir",
-        "Output penceresine Hi yazar",
+        "Her oyuncunun ekranında Selam gösterir",
+        "Output penceresine Selam yazar",
         "Kâğıda yazdırır",
         "Bir TextLabel oluşturur",
       ],
@@ -276,9 +277,9 @@ const TR: Record<string, LessonTr> = {
         tip: "local fonksiyonları onları çağıran kodun ÜSTÜNDE tanımla. Bir local sadece kendi satırından aşağıda vardır.",
       },
       {
-        h: "Event dinleyicisi olarak fonksiyonlar",
+        h: "Olay dinleyicisi olarak fonksiyonlar",
         t: [
-          "Çoğu zaman bir fonksiyonu Roblox'a verirsin ve o da onu daha sonra senin için çağırır — event'ler böyle çalışır (sonraki bölüm).",
+          "Çoğu zaman bir fonksiyonu Roblox'a verirsin ve o da onu daha sonra senin için çağırır — olaylar böyle çalışır (sonraki bölüm).",
         ],
       },
     ],
@@ -335,7 +336,7 @@ const TR: Record<string, LessonTr> = {
     ],
     game: {
       name: "Tower of Hell tarzı engeller",
-      text: "Obby oyunları hareket eden ve dönen platformlarla doludur: CFrame'i her karede biraz değiştirilen (ya da tween'lenen, Tween dersine bak) sabitlenmiş bir parça. Neon kırmızı parçalar tek bir Touched event'iyle öldüren bloklara dönüşür.",
+      text: "Obby oyunları hareket eden ve dönen platformlarla doludur: CFrame'i her karede biraz değiştirilen (ya da tween'lenen, Tween dersine bak) sabitlenmiş bir parça. Neon kırmızı parçalar tek bir Touched olayıyla öldüren bloklara dönüşür.",
     },
     mistake:
       "Position bir Vector3 ister. Vector3.new(0, 10, 0) kullan ya da CFrame'i part.CFrame'e ata.",
@@ -351,7 +352,7 @@ const TR: Record<string, LessonTr> = {
     },
   },
   events: {
-    title: "Event'ler: Touched ve öldüren bloklar",
+    title: "Olaylar: Touched ve öldüren bloklar",
     summary: "Oyunda olan şeylere tepki ver — ilk öldüren bloğunu ve coinini yap.",
     sections: [
       null,
@@ -477,9 +478,9 @@ const TR: Record<string, LessonTr> = {
     ],
     game: {
       name: "Brookhaven tarzı rol yapma",
-      text: "Rol yapma kasabaları prompt'larla doludur: evin kapısını aç, arabaya bin, bir eşya al, zili çal. Her biri, Triggered event'i sana basan oyuncuyu veren bir ProximityPrompt'tur.",
+      text: "Rol yapma kasabaları prompt'larla doludur: evin kapısını aç, arabaya bin, bir eşya al, zili çal. Her biri, Triggered olayı sana basan oyuncuyu veren bir ProximityPrompt'tur.",
     },
-    mistake: "Triggered, kapı parçasının değil, kapının içindeki ProximityPrompt'un event'idir.",
+    mistake: "Triggered, kapı parçasının değil, kapının içindeki ProximityPrompt'un olayıdır.",
     quiz: {
       q: "prompt.Triggered fonksiyonuna ne verir?",
       o: ["Parçayı", "Basan oyuncuyu", "Basılan tuşu", "Hiçbir şey"],
@@ -650,7 +651,7 @@ const TR: Record<string, LessonTr> = {
       text: "Yüzlerce öldüren bloğu, yürüyen bandı ve zıplama pedi olan obby'ler her birine script kopyalamaz. Her parça etiketlenir (KillBrick, Conveyor, JumpPad) ve ServerScriptService'teki birkaç script hepsini yönetir — bir hatayı bir kez düzeltirsin, bütün parçalar düzelir.",
     },
     mistake:
-      "GetTagged tek bir parça değil, bir parça listesi döndürür. Listenin Touched event'i yoktur, bu yüzden bricks.Touched nil'dir. Listede dön ve her parçayı ayrı bağla.",
+      "GetTagged tek bir parça değil, bir parça listesi döndürür. Listenin Touched olayı yoktur, bu yüzden bricks.Touched nil'dir. Listede dön ve her parçayı ayrı bağla.",
     quiz: {
       q: 'CollectionService:GetTagged("Coin") ne döndürür?',
       o: [
@@ -778,7 +779,7 @@ const TR: Record<string, LessonTr> = {
     ],
     game: {
       name: "Kılıç dövüşü ve BedWars tarzı eşyalar",
-      text: "Dövüş oyunlarındaki kılıçlar, kazmalar, yaylar ve iksirler hep Tool'dur. Activated event'i saldırıyı başlatır ve hasarı her zaman bir sunucu Script'i verir — asla oyuncunun kendi cihazı değil.",
+      text: "Dövüş oyunlarındaki kılıçlar, kazmalar, yaylar ve iksirler hep Tool'dur. Activated olayı saldırıyı başlatır ve hasarı her zaman bir sunucu Script'i verir — asla oyuncunun kendi cihazı değil.",
     },
     mistake:
       "Bu Script Handle'ın içine konmuş, bu yüzden script.Parent Tool değil Handle parçası. Script'i doğrudan Tool'un içine koy.",
@@ -835,7 +836,8 @@ export function localizeLesson(lesson: Lesson, lang: "en" | "tr"): Lesson {
     summary: t.summary,
     sections: lesson.sections.map((s, i) => {
       const st = t.sections?.[i];
-      if (!st) return s;
+      if (!st)
+        return s.code ? { ...s, code: { ...s.code, code: localizeCode(s.code.code, lang) } } : s;
       return {
         ...s,
         heading: st.h ?? s.heading,
@@ -843,12 +845,20 @@ export function localizeLesson(lesson: Lesson, lang: "en" | "tr"): Lesson {
         list: st.l ?? s.list,
         tip: st.tip ?? s.tip,
         visual: s.visual && { ...s.visual, caption: st.cap ?? s.visual.caption },
-        code: s.code && { ...s.code, where: st.w ?? s.code.where },
+        code: s.code && {
+          ...s.code,
+          code: localizeCode(s.code.code, lang),
+          where: st.w ?? s.code.where,
+        },
       };
     }),
     game: lesson.game && t.game ? t.game : lesson.game,
     tryIt: t.tryIt ?? lesson.tryIt,
-    mistake: lesson.mistake && { ...lesson.mistake, explain: t.mistake ?? lesson.mistake.explain },
+    mistake: lesson.mistake && {
+      ...lesson.mistake,
+      code: localizeCode(lesson.mistake.code, lang),
+      explain: t.mistake ?? lesson.mistake.explain,
+    },
     quiz:
       lesson.quiz && t.quiz
         ? { ...lesson.quiz, question: t.quiz.q, options: t.quiz.o, why: t.quiz.why }
