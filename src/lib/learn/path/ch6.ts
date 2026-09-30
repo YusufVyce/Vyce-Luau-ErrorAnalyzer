@@ -72,12 +72,12 @@ print(#CollectionService:GetTagged("Coin"))
           ),
           t("Tagged parts can't be touched", "Etiketli parçalara dokunulamaz"),
           t("It needs WaitForChild", "WaitForChild gerekiyor"),
-          t("Touched only works on the client", "Touched sadece client'ta çalışır"),
+          t("Touched only works on the client", "Touched sadece istemcide çalışır"),
         ],
         0,
         t(
           "A list has no Touched event. Each part in it does.",
-          "Bir listenin Touched event'i yoktur. İçindeki her parçanın vardır.",
+          "Bir listenin Touched olayı yoktur. İçindeki her parçanın vardır.",
         ),
       ),
       choice(
@@ -378,7 +378,7 @@ print(dog.Name, dog.Level)
     emoji: "🗡️",
     takeaway: t(
       "Tool + Handle in StarterPack. Activated = click. Damage happens on the server.",
-      "StarterPack'te Tool + Handle. Activated = tıklama. Hasar server'da verilir.",
+      "StarterPack'te Tool + Handle. Activated = tıklama. Hasar sunucuda verilir.",
     ),
     steps: [
       learn(
@@ -462,7 +462,7 @@ print(health)
     emoji: "🚦",
     takeaway: t(
       "The server runs the loop, a StringValue shares it, the UI listens with .Changed.",
-      "Döngüyü server çalıştırır, StringValue paylaşır, arayüz .Changed ile dinler.",
+      "Döngüyü sunucu çalıştırır, StringValue paylaşır, arayüz .Changed ile dinler.",
     ),
     steps: [
       learn(
@@ -495,7 +495,7 @@ print(health)
         t("One source of truth", "Tek doğru kaynağı"),
         t(
           "The server keeps the state in a StringValue in ReplicatedStorage. Every player's UI just shows it, using `.Changed`.",
-          "Server durumu ReplicatedStorage'daki bir StringValue'da tutar. Her oyuncunun arayüzü `.Changed` ile onu gösterir.",
+          "Sunucu durumu ReplicatedStorage'daki bir StringValue'da tutar. Her oyuncunun arayüzü `.Changed` ile onu gösterir.",
         ),
       ),
       predict(
@@ -527,7 +527,7 @@ end)
         0,
         t(
           "A value object's Changed event gives you the new value.",
-          "Bir değer nesnesinin Changed event'i yeni değeri verir.",
+          "Bir değer nesnesinin Changed olayı yeni değeri verir.",
         ),
       ),
       choice(
@@ -541,7 +541,7 @@ end)
             "yine task.wait(): her yolda bekleme olmalı",
           ),
           t("skip waiting to save time", "zaman kazanmak için beklemeyi atla"),
-          t("stop the whole server", "bütün server'ı durdur"),
+          t("stop the whole server", "bütün sunucuyu durdur"),
           t("call error()", "error() çağır"),
         ],
         0,

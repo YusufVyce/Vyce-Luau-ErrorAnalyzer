@@ -1,4 +1,5 @@
 /** Turkish text for the homework (the graders produce Turkish checks via Harness.t). */
+import { localizeCode } from "../codeTr";
 import type { Exercise } from "./harness";
 
 type ExerciseText = Pick<Exercise, "title" | "goal" | "steps" | "hints">;
@@ -20,7 +21,7 @@ const TR: Record<string, ExerciseText> = {
     title: "Merhaba de",
     goal: "Output'a yazı yazdıran iki satır kod yaz.",
     steps: [
-      "Tam olarak şunu yazdır: Hello Roblox!",
+      "Tam olarak şunu yazdır: Merhaba Roblox!",
       "7 * 6'nın sonucunu yazdır — hesabı Luau yapsın, 42'yi kendin yazma.",
     ],
     hints: [
@@ -32,7 +33,7 @@ const TR: Record<string, ExerciseText> = {
     title: "Her oyuncuya hoş geldin de",
     goal: "Bu sunucu Script'i çöküyor. Giren her oyuncuya hoş geldin diyecek şekilde düzelt.",
     steps: [
-      "Şunu yazdırmalı: Welcome, <oyuncu adı>!  (örneğin Welcome, Builderman!)",
+      "Şunu yazdırmalı: Hoş geldin, <oyuncu adı>!  (örneğin Hoş geldin, Builderman!)",
       "Sadece bir oyuncu için değil, her oyuncu için çalışmalı.",
       "İpucu: bu sunucudaki bir Script — orada LocalPlayer'ın ne olduğunu düşün.",
     ],
@@ -49,12 +50,12 @@ const TR: Record<string, ExerciseText> = {
       "level adında, içinde 5 sayısı olan bir değişken oluştur",
       "isVip adında, değeri true olan bir değişken oluştur",
       "Seviye atla: level'a 1 ekle (değişkeni değiştir, 6 yazma)",
-      "Şunu yazdır: Builderman is level 6 — değişkenleri .. ile birleştir",
+      "Şunu yazdır: Builderman seviye 6 — değişkenleri .. ile birleştir",
     ],
     hints: [
       'local playerName = "Builderman" bir metin değişkeni oluşturur.',
       "level = level + 1 (ya da level += 1) bir ekler.",
-      'print(playerName .. " is level " .. level)',
+      'print(playerName .. " seviye " .. level)',
     ],
   },
   "math-strings": {
@@ -63,21 +64,21 @@ const TR: Record<string, ExerciseText> = {
     steps: [
       "amountText oyuncunun yazdığı bir metin — tonumber ile sayıya çevir",
       "Kalan coini hesapla: coins eksi (amount × eggPrice)",
-      "Şunu yazdır: Coins left: 250",
+      "Şunu yazdır: Kalan coin: 250",
     ],
     hints: [
       "local amount = tonumber(amountText)",
       "local left = coins - amount * eggPrice",
-      'print("Coins left: " .. left)',
+      'print("Kalan coin: " .. left)',
     ],
   },
   "if-statements": {
     title: "Tower of Hell bitiş çizgisi",
     goal: "Aşamaya (stage) göre farklı bir mesaj yazdır.",
     steps: [
-      'stage 10 ise: "Winner!" yazdır',
-      'Değilse, stage 7 veya daha fazlaysa: "Almost there" yazdır',
-      'Hiçbiri değilse: "Keep climbing" yazdır',
+      'stage 10 ise: "Kazandın!" yazdır',
+      'Değilse, stage 7 veya daha fazlaysa: "Az kaldı" yazdır',
+      'Hiçbiri değilse: "Tırmanmaya devam" yazdır',
       "Her aşama için SADECE BİR mesaj yazdırılabilir.",
     ],
     hints: [
@@ -91,7 +92,7 @@ const TR: Record<string, ExerciseText> = {
     goal: "Tur tabanlı bir oyun gibi geri say, sonra oyuncuları listele.",
     steps: [
       "5, 4, 3, 2, 1 yazdır — her saniye bir sayı (for döngüsü ve task.wait(1) kullan)",
-      'Sonra "Go!" yazdır',
+      'Sonra "Başla!" yazdır',
       "Sonra players listesindeki her ismi for … in döngüsüyle yazdır",
     ],
     hints: [
@@ -180,12 +181,12 @@ const TR: Record<string, ExerciseText> = {
     goal: "ShopButton, ShopFrame'i açıp kapatsın.",
     steps: [
       "ShopButton'a tıklamak ShopFrame gizliyse gösterir, görünüyorsa gizler",
-      'Dükkân açıkken butonda "Close", kapalıyken "Shop" yazar',
+      'Dükkân açıkken butonda "Kapat", kapalıyken "Dükkân" yazar',
     ],
     hints: [
       "button.MouseButton1Click:Connect(function() ... end)",
       "shopFrame.Visible = not shopFrame.Visible",
-      'button.Text = if shopFrame.Visible then "Close" else "Shop"',
+      'button.Text = if shopFrame.Visible then "Kapat" else "Dükkân"',
     ],
   },
   tweens: {
@@ -194,24 +195,24 @@ const TR: Record<string, ExerciseText> = {
     steps: [
       "workspace.Door'u TweenService ile 8 stud yukarı taşı (Y 5'ten Y 13'e)",
       "Tween 1 saniye sürsün",
-      'Tween bitince "Door open" yazdır',
+      'Tween bitince "Kapı açık" yazdır',
     ],
     hints: [
       "local info = TweenInfo.new(1)",
       "local tween = TweenService:Create(door, info, { Position = door.Position + Vector3.new(0, 8, 0) })",
-      'tween:Play() sonra tween.Completed:Wait() sonra print("Door open")',
+      'tween:Play() sonra tween.Completed:Wait() sonra print("Kapı açık")',
     ],
   },
   prompts: {
     title: "Brookhaven kapısı",
     goal: "Bir ev kapısını açıp kapatan \"E'ye bas\" prompt'u ekle.",
     steps: [
-      'workspace.HouseDoor içinde ActionText değeri "Open" olan bir ProximityPrompt oluştur',
-      'Tetiklenince: Transparency 0.8, CanCollide false, ActionText "Close"',
-      'Tekrar tetiklenince: Transparency 0, CanCollide true, ActionText "Open"',
+      'workspace.HouseDoor içinde ActionText değeri "Aç" olan bir ProximityPrompt oluştur',
+      'Tetiklenince: Transparency 0.8, CanCollide false, ActionText "Kapat"',
+      'Tekrar tetiklenince: Transparency 0, CanCollide true, ActionText "Aç"',
     ],
     hints: [
-      'local prompt = Instance.new("ProximityPrompt")\nprompt.ActionText = "Open"\nprompt.Parent = door',
+      'local prompt = Instance.new("ProximityPrompt")\nprompt.ActionText = "Aç"\nprompt.Parent = door',
       "prompt.Triggered:Connect(function(player) ... end)",
       "isOpen = false diye bir değişken tut ve isOpen = not isOpen ile tersine çevir",
     ],
@@ -281,7 +282,7 @@ const TR: Record<string, ExerciseText> = {
     goal: "Bu scriptte 3 hata var. Düzeltmek için Output'taki hataları (istersen analizciyi de) kullan.",
     steps: [
       "Builderman girince 50 coin almalı",
-      "Şunu yazdırmalı: Builderman got 50 coins",
+      "Şunu yazdırmalı: Builderman 50 coin kazandı",
       "Output'ta hata olmamalı",
     ],
     hints: [
@@ -364,8 +365,8 @@ const TR: Record<string, ExerciseText> = {
     goal: "Tur tabanlı bir oyunun döngüsünü yap ve durumunu ReplicatedStorage.Status'ta göster.",
     steps: [
       "ReplicatedStorage içinde Status adında bir StringValue oluştur",
-      'Sunucuda kimse yokken: Status = "Waiting for players" (her saniye tekrar kontrol et)',
-      'En az bir oyuncu varken: 5 saniye "Intermission", sonra 10 saniye "Round", sonra tekrar',
+      'Sunucuda kimse yokken: Status = "Oyuncular bekleniyor" (her saniye tekrar kontrol et)',
+      'En az bir oyuncu varken: 5 saniye "Ara", sonra 10 saniye "Tur", sonra tekrar',
     ],
     hints: [
       'local status = Instance.new("StringValue") … status.Parent = ReplicatedStorage',
@@ -379,5 +380,10 @@ const TR: Record<string, ExerciseText> = {
 export function localizeExercise(ex: Exercise, lang: "en" | "tr"): Exercise {
   if (lang !== "tr") return ex;
   const t = TR[ex.lessonId];
-  return t ? { ...ex, ...t } : ex;
+  return {
+    ...ex,
+    ...t,
+    starter: localizeCode(ex.starter, lang),
+    solution: localizeCode(ex.solution, lang),
+  };
 }

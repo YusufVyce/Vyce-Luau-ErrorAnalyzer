@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ArrowLeft, BookOpen, Brain, Clock, PenLine, Play } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
 import { PageHeader } from "@/components/PageHeader";
@@ -17,19 +17,16 @@ import { PATH, choice, t as text, type ChoiceStep } from "@/lib/learn/path";
 import { lessonItems, practiceXp, reviewItems } from "@/lib/learn/path/session";
 import {
   doneLessonIds,
-  EMPTY_PROGRESS,
   gainXp,
   homeworkXp,
   lessonComplete,
   lessonUnlocked,
-  loadProgress,
-  saveProgress,
   starsFor,
   streakOf,
   todayXp,
-  withToday,
   type Progress,
 } from "@/lib/learn/progress";
+import { useProgressState, type ProgressUpdate } from "@/lib/learn/useProgress";
 import { useLang, useT, type TFunction } from "@/lib/prefs";
 
 type LearnSearch = { lesson?: string; view?: "notes"; review?: boolean };
@@ -53,7 +50,7 @@ export const Route = createFileRoute("/learn")({
   component: LearnPage,
 });
 
-type Update = (fn: (p: Progress) => Progress, active?: boolean) => void;
+type Update = ProgressUpdate;
 
 /** The lesson's graded quick check, as a bilingual choice step. */
 function quizStep(lesson: Lesson): ChoiceStep | undefined {
@@ -73,21 +70,7 @@ function LearnPage() {
   const lang = useLang();
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/learn" });
-  const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    setProgress(loadProgress());
-    setLoaded(true);
-  }, []);
-
-  const update: Update = useCallback((fn, active = true) => {
-    setProgress((p) => {
-      const n = active ? withToday(fn(p)) : fn(p);
-      saveProgress(n);
-      return n;
-    });
-  }, []);
+  const { progress, loaded, update } = useProgressState();
 
   const toPath = () => navigate({ search: {} });
   const go = (id: string, view?: "notes") => navigate({ search: { lesson: id, view } });

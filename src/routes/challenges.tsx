@@ -22,15 +22,8 @@ import {
 } from "@/lib/challenges/challenges";
 import { challengeExercise, examplesFor } from "@/lib/challenges/runner";
 import { checkChallenge } from "@/lib/learn/homework/client";
-import {
-  EMPTY_PROGRESS,
-  gainXp,
-  loadProgress,
-  saveProgress,
-  streakOf,
-  withToday,
-  type Progress,
-} from "@/lib/learn/progress";
+import { gainXp, streakOf, withToday, type Progress } from "@/lib/learn/progress";
+import { useProgressState } from "@/lib/learn/useProgress";
 import { useLang, useT } from "@/lib/prefs";
 import type { UiKey } from "@/lib/i18n/ui";
 
@@ -118,22 +111,14 @@ function ChallengesPage() {
   const lang = useLang();
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/challenges" });
-  const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
+  const { progress, update: updateProgress } = useProgressState();
   const [query, setQuery] = useState("");
   const [diff, setDiff] = useState<Difficulty | "all">("all");
   const [tag, setTag] = useState<Tag | "all">("all");
   const [status, setStatus] = useState<"all" | "todo" | "done">("all");
   const [toast, setToast] = useState<string | null>(null);
 
-  useEffect(() => setProgress(loadProgress()), []);
-
-  function update(fn: (p: Progress) => Progress) {
-    setProgress((p) => {
-      const n = fn(p);
-      saveProgress(n);
-      return n;
-    });
-  }
+  const update = (fn: (p: Progress) => Progress) => updateProgress(fn, false);
 
   const current = CHALLENGES.find((c) => c.id === search.c) ?? CHALLENGES[0];
   const exercise = useMemo(() => challengeExercise(current, lang), [current, lang]);

@@ -5,6 +5,8 @@ import { LESSON_ICONS, UNIT_ICONS } from "@/components/learn/duo/icons";
 import { runSample } from "../runSample";
 import { MOTIVATION_POOLS, motivate } from "../motivation";
 import { PATH, choice, reviewExercises, rng, shuffled, t, type L, type Opt, type Step } from ".";
+import { untranslatedComments } from "../codeTr";
+import { localizeStep } from "./localize";
 import {
   EMPTY_ANSWER,
   isCorrect,
@@ -110,6 +112,42 @@ describe("Duolingo-style path content", () => {
               expectParses(step.lines.join("\n"), where);
               break;
           }
+        });
+
+        it(`${where}: Turkish code runs and gives the Turkish answer`, () => {
+          const tr = localizeStep(step, "tr");
+          const code: string[] = [];
+          switch (tr.kind) {
+            case "learn":
+              if (tr.code) code.push(tr.code);
+              break;
+            case "choice":
+              if (tr.code) code.push(tr.code);
+              for (const o of tr.options) if (typeof o === "string") code.push(o);
+              break;
+            case "fill":
+              code.push(tr.code.replace("___", tr.options[tr.answer]));
+              expectParses(code[0], where);
+              break;
+            case "order":
+              expect(new Set(tr.lines.map((l) => l.trim())).size, `${where} unique`).toBe(
+                tr.lines.length,
+              );
+              code.push(tr.lines.join("\n"));
+              expectParses(code[0], where);
+              break;
+            case "predict": {
+              code.push(tr.code);
+              expect(new Set(tr.options.map((o) => (typeof o === "string" ? o : o.tr))).size).toBe(
+                tr.options.length,
+              );
+              const r = printed(tr.code);
+              expect(r.problems, where).toEqual([]);
+              expect(r.out, where).toBe(tr.options[tr.answer]);
+              break;
+            }
+          }
+          for (const c of code) expect(untranslatedComments(c), where).toEqual([]);
         });
       });
     });

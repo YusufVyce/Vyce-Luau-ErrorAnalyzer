@@ -117,7 +117,7 @@ print(2 + 3)
         ),
       ),
       fill(
-        t("Make it print Hi", "Hi yazdır"),
+        t("Make it print Hi", "Selam yazdır"),
         '___("Hi")',
         ["print", "Print", "say", "PRINT"],
         0,
@@ -152,12 +152,12 @@ print("B") -- print("C")
         ),
       ),
       choice(
-        t("Where do you add your first server Script?", "İlk server Script'ini nereye eklersin?"),
+        t("Where do you add your first server Script?", "İlk sunucu Script'ini nereye eklersin?"),
         ["ServerScriptService", "Lighting", "SoundService", "Teams"],
         0,
         t(
           "ServerScriptService is the home of server scripts. Hover it and click ⊕.",
-          "ServerScriptService, server scriptlerinin evidir. Üstüne gel ve ⊕'ye tıkla.",
+          "ServerScriptService, sunucu scriptlerinin evidir. Üstüne gel ve ⊕'ye tıkla.",
         ),
       ),
     ],
@@ -167,20 +167,20 @@ print("B") -- print("C")
     emoji: "🖥️",
     takeaway: t(
       "Script = server (the boss). LocalScript = one player's device. ModuleScript = shared code.",
-      "Script = server (patron). LocalScript = bir oyuncunun cihazı. ModuleScript = ortak kod.",
+      "Script = sunucu (patron). LocalScript = bir oyuncunun cihazı. ModuleScript = ortak kod.",
     ),
     steps: [
       learn(
-        t("One server, many devices", "Tek server, çok cihaz"),
+        t("One server, many devices", "Tek sunucu, çok cihaz"),
         t(
           "A game runs on Roblox's server AND on every player's device (the client). The server is the boss.",
-          "Oyun hem Roblox'un server'ında hem de her oyuncunun cihazında (client) çalışır. Patron server'dır.",
+          "Oyun hem Roblox'un sunucusunda hem de her oyuncunun cihazında (istemci) çalışır. Patron sunucudur.",
         ),
         {
           visual: "clientServer",
           hook: t(
             "The server is the referee 🧑‍⚖️, clients are the players. Players can't change the score themselves.",
-            "Server hakemdir 🧑‍⚖️, client'lar oyuncular. Oyuncu skoru kendisi değiştiremez.",
+            "Sunucu hakemdir 🧑‍⚖️, istemciler oyuncular. Oyuncu skoru kendisi değiştiremez.",
           ),
         },
       ),
@@ -188,7 +188,7 @@ print("B") -- print("C")
         t("3 kinds of scripts", "3 çeşit script"),
         t(
           "Script → runs on the server. LocalScript → runs on one player's device. ModuleScript → shared code that others load with `require()`.",
-          "Script → server'da çalışır. LocalScript → bir oyuncunun cihazında çalışır. ModuleScript → başkalarının `require()` ile yüklediği ortak kod.",
+          "Script → sunucuda çalışır. LocalScript → bir oyuncunun cihazında çalışır. ModuleScript → başkalarının `require()` ile yüklediği ortak kod.",
         ),
       ),
       choice(
@@ -197,7 +197,7 @@ print("B") -- print("C")
         1,
         t(
           "LocalScripts run on the client: UI, camera, keyboard and mouse.",
-          "LocalScript'ler client'ta çalışır: arayüz, kamera, klavye ve fare.",
+          "LocalScript'ler istemcide çalışır: arayüz, kamera, klavye ve fare.",
         ),
       ),
       choice(
@@ -207,7 +207,7 @@ print("B") -- print("C")
         ),
         [
           "LocalScript",
-          t("Script on the server", "Server'daki Script"),
+          t("Script on the server", "Sunucudaki Script"),
           t("DataStore", "DataStore"),
           "ModuleScript",
         ],
@@ -221,14 +221,14 @@ print("B") -- print("C")
         t("LocalPlayer = me", "LocalPlayer = ben"),
         t(
           '`Players.LocalPlayer` means "the player on this device". It only exists in LocalScripts. On the server it\'s nil.',
-          "`Players.LocalPlayer` \"bu cihazdaki oyuncu\" demektir. Sadece LocalScript'lerde vardır. Server'da nil'dir.",
+          "`Players.LocalPlayer` \"bu cihazdaki oyuncu\" demektir. Sadece LocalScript'lerde vardır. Sunucuda nil'dir.",
         ),
         { code: "local player = game.Players.LocalPlayer" },
       ),
       choice(
         t(
           "In a server Script, what is game.Players.LocalPlayer?",
-          "Server Script'inde game.Players.LocalPlayer nedir?",
+          "Sunucu Script'inde game.Players.LocalPlayer nedir?",
         ),
         [
           t("The first player", "İlk oyuncu"),
@@ -239,7 +239,7 @@ print("B") -- print("C")
         1,
         t(
           'The server has many players, so there is no single "me". Use PlayerAdded instead.',
-          'Server\'da çok oyuncu var, tek bir "ben" yok. Onun yerine PlayerAdded kullan.',
+          'Sunucu\'da çok oyuncu var, tek bir "ben" yok. Onun yerine PlayerAdded kullan.',
         ),
       ),
       choice(

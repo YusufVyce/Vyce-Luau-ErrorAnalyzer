@@ -10,6 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 import { SpeedInsightsWrapper } from "@/lib/speed-insights";
 import { PrefsProvider, THEME_BOOT_SCRIPT } from "@/lib/prefs";
+import { AccountProvider } from "@/lib/account/client";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -153,7 +154,9 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <PrefsProvider>
-        <Outlet />
+        <AccountProvider>
+          <Outlet />
+        </AccountProvider>
       </PrefsProvider>
     </QueryClientProvider>
   );

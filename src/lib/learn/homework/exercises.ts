@@ -7,7 +7,7 @@
 import { Color3, Vector3 } from "@/lib/luau/roblox/datatypes";
 import type { Instance } from "@/lib/luau/roblox/instance";
 import type { World } from "@/lib/luau/roblox/world";
-import { fmtValue, type Exercise, type Harness } from "./harness";
+import { fmtValue, type Exercise, type Harness, type Say } from "./harness";
 
 const approx = (a: unknown, b: number, eps = 0.02) =>
   typeof a === "number" && Math.abs(a - b) <= eps;
@@ -115,10 +115,7 @@ export const EXERCISES: Exercise[] = [
       const w = h.newWorld();
       h.addStudentScript(w, w.service("ServerScriptService"));
       w.run(1);
-      h.expectPrinted(
-        "Hello Roblox!",
-        h.t('Output shows "Hello Roblox!"', 'Output\'ta "Hello Roblox!" yazıyor'),
-      );
+      h.expectPrinted({ en: "Hello Roblox!", tr: "Merhaba Roblox!" });
       h.expectPrinted("42", h.t("Output shows 42", "Output'ta 42 yazıyor"));
       h.check(
         h.t("42 comes from the math 7 * 6", "42, 7 * 6 işleminden geliyor"),
@@ -159,12 +156,12 @@ export const EXERCISES: Exercise[] = [
       w.run(0.5);
       w.addPlayer("Noob");
       w.run(1);
-      h.expectPrinted("Welcome, Builderman!");
+      h.expectPrinted({ en: "Welcome, Builderman!", tr: "Hoş geldin, Builderman!" });
       h.expectPrinted(
-        "Welcome, Noob!",
+        { en: "Welcome, Noob!", tr: "Hoş geldin, Noob!" },
         h.t(
           'Also works for a second player ("Welcome, Noob!")',
-          'İkinci bir oyuncu için de çalışıyor ("Welcome, Noob!")',
+          'İkinci bir oyuncu için de çalışıyor ("Hoş geldin, Noob!")',
         ),
       );
       h.check(
@@ -214,7 +211,7 @@ export const EXERCISES: Exercise[] = [
       const w = h.newWorld();
       h.addStudentScript(w, w.service("ServerScriptService"));
       w.run(1);
-      h.expectPrinted("Builderman is level 6");
+      h.expectPrinted({ en: "Builderman is level 6", tr: "Builderman seviye 6" });
       const tv = h.testValues(w)[0];
       h.check(
         h.t("isVip is true", "isVip true"),
@@ -244,7 +241,7 @@ export const EXERCISES: Exercise[] = [
         h.addStudentScript(w2, w2.service("ServerScriptService"), { code: v });
         w2.run(1);
         h.expectPrinted(
-          "Guest is level 10",
+          { en: "Guest is level 10", tr: "Guest seviye 10" },
           h.t(
             "The message is built from the variables (not typed by hand)",
             "Mesaj değişkenlerden oluşuyor (elle yazılmamış)",
@@ -293,7 +290,7 @@ export const EXERCISES: Exercise[] = [
       const w = h.newWorld();
       h.addStudentScript(w, w.service("ServerScriptService"));
       w.run(1);
-      h.expectPrinted("Coins left: 250");
+      h.expectPrinted({ en: "Coins left: 250", tr: "Kalan coin: 250" });
       h.check(
         h.t("Uses tonumber", "tonumber kullanılıyor"),
         h.codeHas(/tonumber\s*\(/),
@@ -312,7 +309,7 @@ export const EXERCISES: Exercise[] = [
         h.addStudentScript(w2, w2.service("ServerScriptService"), { code: v });
         w2.run(1);
         h.expectPrinted(
-          "Coins left: 1000",
+          { en: "Coins left: 1000", tr: "Kalan coin: 1000" },
           h.t(
             "Works for other numbers too (2000 coins, 4 eggs → 1000)",
             "Başka sayılarla da çalışıyor (2000 coin, 4 yumurta → 1000)",
@@ -356,14 +353,18 @@ export const EXERCISES: Exercise[] = [
     solution:
       'local stage = 7 -- the checker will try other numbers too\n\nif stage == 10 then\n\tprint("Winner!")\nelseif stage >= 7 then\n\tprint("Almost there")\nelse\n\tprint("Keep climbing")\nend\n',
     grade(h) {
-      const cases: Array<[number, string]> = [
-        [10, "Winner!"],
-        [8, "Almost there"],
-        [7, "Almost there"],
-        [3, "Keep climbing"],
+      const winner = { en: "Winner!", tr: "Kazandın!" };
+      const almost = { en: "Almost there", tr: "Az kaldı" };
+      const keep = { en: "Keep climbing", tr: "Tırmanmaya devam" };
+      const cases: Array<[number, Say]> = [
+        [10, winner],
+        [8, almost],
+        [7, almost],
+        [3, keep],
       ];
-      const all = ["Winner!", "Almost there", "Keep climbing"];
-      for (const [stage, expected] of cases) {
+      const all = [winner, almost, keep];
+      for (const [stage, want] of cases) {
+        const expected = h.say(want);
         const code = variant(h.code, /local\s+stage\s*=\s*\d+/, `local stage = ${stage}`);
         if (!code) {
           h.check(
@@ -379,8 +380,8 @@ export const EXERCISES: Exercise[] = [
         const w = h.newWorld();
         h.addStudentScript(w, w.service("ServerScriptService"), { code });
         w.run(1);
-        const printed = h.prints(w).filter((l) => all.includes(l));
-        const ok = printed.length === 1 && printed[0] === expected;
+        const printed = h.prints(w).filter((l) => all.some((a) => h.said(l, a)));
+        const ok = printed.length === 1 && h.said(printed[0], want);
         h.check(
           h.t(
             `stage = ${stage} prints "${expected}"`,
@@ -438,7 +439,8 @@ export const EXERCISES: Exercise[] = [
       h.addStudentScript(w, w.service("ServerScriptService"));
       w.run(8);
       const lines = h.prints(w);
-      const expected = ["5", "4", "3", "2", "1", "Go!", "Ann", "Bob", "Cid"];
+      const go = lines.includes("Başla!") ? "Başla!" : "Go!";
+      const expected = ["5", "4", "3", "2", "1", go, "Ann", "Bob", "Cid"];
       const positions = expected.map((e) => lines.indexOf(e));
       h.check(
         h.t("Prints 5, 4, 3, 2, 1", "5, 4, 3, 2, 1 yazdırılıyor"),
@@ -454,7 +456,7 @@ export const EXERCISES: Exercise[] = [
         inOrder,
         h.t(
           "Order should be 5, 4, 3, 2, 1, Go!, Ann, Bob, Cid.",
-          "Sıra şöyle olmalı: 5, 4, 3, 2, 1, Go!, Ann, Bob, Cid.",
+          "Sıra şöyle olmalı: 5, 4, 3, 2, 1, Başla!, Ann, Bob, Cid.",
         ),
       );
       const entries = h.printEntries(w);
@@ -934,7 +936,9 @@ export const EXERCISES: Exercise[] = [
     grade(h) {
       const w = h.newWorld();
       const gui = w.create("ScreenGui", { Name: "ShopGui" }, w.service("StarterGui"));
-      const btn = w.create("TextButton", { Name: "ShopButton", Text: "Shop" }, gui);
+      const shop = { en: "Shop", tr: "Dükkân" };
+      const close = { en: "Close", tr: "Kapat" };
+      const btn = w.create("TextButton", { Name: "ShopButton", Text: h.say(shop) }, gui);
       w.create("Frame", { Name: "ShopFrame", Visible: false }, gui);
       h.addStudentScript(w, btn, { kind: "LocalScript" });
       const p = w.addPlayer("Builderman");
@@ -961,8 +965,8 @@ export const EXERCISES: Exercise[] = [
         ),
       );
       h.check(
-        h.t('Button says "Close" while open', 'Açıkken butonda "Close" yazıyor'),
-        myBtn.props.get("Text") === "Close",
+        h.t('Button says "Close" while open', 'Açıkken butonda "Kapat" yazıyor'),
+        h.said(myBtn.props.get("Text"), close),
         h.t(
           `Button text is ${fmtValue(myBtn.props.get("Text"))}.`,
           `Buton yazısı şu an ${fmtValue(myBtn.props.get("Text"))}.`,
@@ -979,8 +983,8 @@ export const EXERCISES: Exercise[] = [
         ),
       );
       h.check(
-        h.t('Button says "Shop" when closed', 'Kapalıyken butonda "Shop" yazıyor'),
-        myBtn.props.get("Text") === "Shop",
+        h.t('Button says "Shop" when closed', 'Kapalıyken butonda "Dükkân" yazıyor'),
+        h.said(myBtn.props.get("Text"), shop),
         h.t(
           `Button text is ${fmtValue(myBtn.props.get("Text"))}.`,
           `Buton yazısı şu an ${fmtValue(myBtn.props.get("Text"))}.`,
@@ -1052,11 +1056,12 @@ export const EXERCISES: Exercise[] = [
         approx(end.x, 0) && approx(end.z, -10),
         h.t(`The door ended at ${fmtValue(end)}.`, `Kapı ${fmtValue(end)} konumunda durdu.`),
       );
-      const entry = h.printEntries(w).find((e) => e.text === "Door open");
+      const doorOpen = { en: "Door open", tr: "Kapı açık" };
+      const entry = h.printEntries(w).find((e) => h.said(e.text, doorOpen));
       h.check(
         h.t(
           'Prints "Door open" after the tween finishes',
-          'Tween bitince "Door open" yazdırılıyor',
+          'Tween bitince "Kapı açık" yazdırılıyor',
         ),
         Boolean(entry) && entry!.time >= 0.95,
         entry
@@ -1064,7 +1069,7 @@ export const EXERCISES: Exercise[] = [
               "It printed before the tween finished — wait with tween.Completed:Wait().",
               "Tween bitmeden yazdırdı — tween.Completed:Wait() ile bekle.",
             )
-          : h.t('Print "Door open".', '"Door open" yazdır.'),
+          : h.t('Print "Door open".', '"Kapı açık" yazdır.'),
       );
       h.check(
         h.t("Uses TweenService:Create", "TweenService:Create kullanılıyor"),
@@ -1125,9 +1130,11 @@ export const EXERCISES: Exercise[] = [
         )
       )
         return;
+      const open = { en: "Open", tr: "Aç" };
+      const close = { en: "Close", tr: "Kapat" };
       h.check(
-        h.t('It starts as "Open"', 'Başta "Open" yazıyor'),
-        prompt!.props.get("ActionText") === "Open",
+        h.t('It starts as "Open"', 'Başta "Aç" yazıyor'),
+        h.said(prompt!.props.get("ActionText"), open),
         h.t(
           `ActionText is ${fmtValue(prompt!.props.get("ActionText"))}.`,
           `ActionText şu an ${fmtValue(prompt!.props.get("ActionText"))}.`,
@@ -1141,8 +1148,8 @@ export const EXERCISES: Exercise[] = [
         `Transparency ${fmtValue(door.props.get("Transparency"))}, CanCollide ${fmtValue(door.props.get("CanCollide"))}.`,
       );
       h.check(
-        h.t('The prompt then says "Close"', 'Sonra prompt\'ta "Close" yazıyor'),
-        prompt!.props.get("ActionText") === "Close",
+        h.t('The prompt then says "Close"', 'Sonra prompt\'ta "Kapat" yazıyor'),
+        h.said(prompt!.props.get("ActionText"), close),
         h.t(
           `ActionText is ${fmtValue(prompt!.props.get("ActionText"))}.`,
           `ActionText şu an ${fmtValue(prompt!.props.get("ActionText"))}.`,
@@ -1156,8 +1163,8 @@ export const EXERCISES: Exercise[] = [
         `Transparency ${fmtValue(door.props.get("Transparency"))}, CanCollide ${fmtValue(door.props.get("CanCollide"))}.`,
       );
       h.check(
-        h.t('…and the prompt says "Open" again', '…ve prompt\'ta yine "Open" yazıyor'),
-        prompt!.props.get("ActionText") === "Open",
+        h.t('…and the prompt says "Open" again', '…ve prompt\'ta yine "Aç" yazıyor'),
+        h.said(prompt!.props.get("ActionText"), open),
         h.t(
           `ActionText is ${fmtValue(prompt!.props.get("ActionText"))}.`,
           `ActionText şu an ${fmtValue(prompt!.props.get("ActionText"))}.`,
@@ -1582,7 +1589,7 @@ end`,
         leaderstat(p, "Coins")?.props.get("Value") === 50,
         `Coins = ${fmtValue(leaderstat(p, "Coins")?.props.get("Value"))}.`,
       );
-      h.expectPrinted("Builderman got 50 coins");
+      h.expectPrinted({ en: "Builderman got 50 coins", tr: "Builderman 50 coin kazandı" });
       h.check(
         h.t("No errors in the Output", "Output'ta hata yok"),
         h.studentErrors(w).length === 0,
@@ -2070,27 +2077,27 @@ if not __ok then print("__TEST__", "error", tostring(__err)) end`,
       )
         return;
       h.check(
-        h.t('No players → "Waiting for players"', 'Oyuncu yok → "Waiting for players"'),
-        /waiting for players/i.test(value()),
+        h.t('No players → "Waiting for players"', 'Oyuncu yok → "Oyuncular bekleniyor"'),
+        /waiting for players|oyuncular bekleniyor/i.test(value()),
         `Status = "${value()}"`,
       );
       w.addPlayer("Ann");
       w.run(1.5);
       h.check(
-        h.t("A player joins → Intermission", "Bir oyuncu girer → Intermission"),
-        /intermission/i.test(value()),
+        h.t("A player joins → Intermission", "Bir oyuncu girer → Ara"),
+        /intermission|^ara\b/i.test(value()),
         `Status = "${value()}"`,
       );
       w.run(5.5);
       h.check(
-        h.t("After 5 seconds → Round", "5 saniye sonra → Round"),
-        /round/i.test(value()) && !/intermission/i.test(value()),
+        h.t("After 5 seconds → Round", "5 saniye sonra → Tur"),
+        /round|^tur\b/i.test(value()) && !/intermission|^ara\b/i.test(value()),
         `Status = "${value()}"`,
       );
       w.run(10.5);
       h.check(
-        h.t("After the round → Intermission again", "Tur bitince → yine Intermission"),
-        /intermission/i.test(value()),
+        h.t("After the round → Intermission again", "Tur bitince → yine Ara"),
+        /intermission|^ara\b/i.test(value()),
         `Status = "${value()}"`,
       );
     },

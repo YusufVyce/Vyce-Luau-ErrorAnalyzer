@@ -6,46 +6,46 @@ export const CH4: Record<string, PathLesson> = {
     emoji: "📡",
     takeaway: t(
       "Client: FireServer(what I want). Server: OnServerEvent(player, …) checks everything.",
-      "Client: FireServer(ne istiyorum). Server: OnServerEvent(player, …) her şeyi kontrol eder.",
+      "İstemci: FireServer(ne istiyorum). Sunucu: OnServerEvent(player, …) her şeyi kontrol eder.",
     ),
     steps: [
       learn(
-        t("The client asks, the server decides", "Client ister, server karar verir"),
+        t("The client asks, the server decides", "İstemci ister, sunucu karar verir"),
         t(
           "A RemoteEvent is a walkie-talkie between a player's device and the server. The client sends with `FireServer`, the server listens with `OnServerEvent`.",
-          "RemoteEvent, oyuncunun cihazı ile server arasında bir telsizdir. Client `FireServer` ile gönderir, server `OnServerEvent` ile dinler.",
+          "RemoteEvent, oyuncunun cihazı ile sunucu arasında bir telsizdir. İstemci `FireServer` ile gönderir, sunucu `OnServerEvent` ile dinler.",
         ),
         {
           visual: "remote",
           hook: t(
             "The client orders 🍔, the server is the kitchen: it checks the money before cooking.",
-            "Client sipariş verir 🍔, server mutfaktır: pişirmeden önce parayı kontrol eder.",
+            "İstemci sipariş verir 🍔, sunucu mutfaktır: pişirmeden önce parayı kontrol eder.",
           ),
         },
       ),
       choice(
         t("Which side calls FireServer?", "FireServer'ı hangi taraf çağırır?"),
         [
-          t("The client (a LocalScript)", "Client (bir LocalScript)"),
-          t("The server (a Script)", "Server (bir Script)"),
+          t("The client (a LocalScript)", "İstemci (bir LocalScript)"),
+          t("The server (a Script)", "Sunucu (bir Script)"),
           t("Both of them", "İkisi de"),
           "ModuleScript",
         ],
         0,
         t(
           "FireServer = send TO the server, so the client calls it.",
-          "FireServer = server'a gönder; yani onu client çağırır.",
+          "FireServer = sunucuya gönder; yani onu istemci çağırır.",
         ),
       ),
       learn(
         t("The player comes first", "Önce oyuncu gelir"),
         t(
           "On the server, the first parameter is ALWAYS the player who fired. Roblox adds it for you, so it can't be faked.",
-          "Server'da ilk parametre HER ZAMAN event'i gönderen oyuncudur. Roblox onu kendisi ekler, sahtesi yapılamaz.",
+          "Sunucuda ilk parametre HER ZAMAN olayı gönderen oyuncudur. Roblox onu kendisi ekler, sahtesi yapılamaz.",
         ),
       ),
       fill(
-        t("Receive the request on the server", "İsteği server'da al"),
+        t("Receive the request on the server", "İsteği sunucuda al"),
         lua`
 buyItem.OnServerEvent:Connect(function(___, itemName)
 	print(itemName)
@@ -55,14 +55,14 @@ end)
         0,
         t(
           "First the player, then whatever the client sent.",
-          "Önce oyuncu, sonra client'ın gönderdikleri.",
+          "Önce oyuncu, sonra istemcinin gönderdikleri.",
         ),
       ),
       learn(
-        t("Never trust the client", "Client'a asla güvenme"),
+        t("Never trust the client", "İstemciye asla güvenme"),
         t(
           'Send what the player WANTS ("buy Sword"), never the numbers ("give me 999 coins"). The server checks prices and coins itself.',
-          'Oyuncunun ne İSTEDİĞİNİ gönder ("Sword al"), asla sayıları değil ("bana 999 coin ver"). Fiyatı ve parayı server kendisi kontrol eder.',
+          'Oyuncunun ne İSTEDİĞİNİ gönder ("Sword al"), asla sayıları değil ("bana 999 coin ver"). Fiyatı ve parayı sunucu kendisi kontrol eder.',
         ),
       ),
       choice(
@@ -76,13 +76,13 @@ end)
         0,
         t(
           "Only the wish (which item). The server decides the price, the damage and the wins.",
-          "Sadece istek (hangi eşya). Fiyata, hasara ve galibiyete server karar verir.",
+          "Sadece istek (hangi eşya). Fiyata, hasara ve galibiyete sunucu karar verir.",
         ),
       ),
       choice(
         t(
           "The server wants to tell ONE player something. It uses…",
-          "Server TEK bir oyuncuya bir şey söylemek istiyor. Ne kullanır?",
+          "Sunucu TEK bir oyuncuya bir şey söylemek istiyor. Ne kullanır?",
         ),
         [
           "remote:FireClient(player, ...)",
@@ -179,7 +179,7 @@ print(ok)
         [
           t(
             "When the player leaves (and when the server closes)",
-            "Oyuncu çıkınca (ve server kapanınca)",
+            "Oyuncu çıkınca (ve sunucu kapanınca)",
           ),
           t("Every frame", "Her karede"),
           t("Only when they join", "Sadece girince"),
@@ -272,7 +272,7 @@ print(Config.multiplier("Rock"))
       choice(
         t(
           "Secret, server-only logic should live in…",
-          "Gizli, sadece server'a ait kod nerede durmalı?",
+          "Gizli, sadece sunucuya ait kod nerede durmalı?",
         ),
         [
           t("ServerScriptService or ServerStorage", "ServerScriptService ya da ServerStorage"),
@@ -283,7 +283,7 @@ print(Config.multiplier("Rock"))
         0,
         t(
           "Players' devices can see ReplicatedStorage. They can't see server storage.",
-          "Oyuncu cihazları ReplicatedStorage'ı görebilir, server tarafını göremez.",
+          "Oyuncu cihazları ReplicatedStorage'ı görebilir, sunucu tarafını göremez.",
         ),
       ),
     ],
@@ -393,7 +393,7 @@ print(wins)
         0,
         t(
           "Studio can start a server and several players on your own PC.",
-          "Studio kendi bilgisayarında bir server ve birkaç oyuncu başlatabilir.",
+          "Studio kendi bilgisayarında bir sunucu ve birkaç oyuncu başlatabilir.",
         ),
       ),
     ],

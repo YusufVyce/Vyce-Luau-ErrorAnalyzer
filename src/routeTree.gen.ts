@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PlaygroundRouteImport } from './routes/playground'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as LearnRouteImport } from './routes/learn'
+import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as ErrorsRouteImport } from './routes/errors'
 import { Route as ChallengesRouteImport } from './routes/challenges'
 import { Route as IndexRouteImport } from './routes/index'
@@ -26,9 +28,19 @@ const PlaygroundRoute = PlaygroundRouteImport.update({
   path: '/playground',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LearnRoute = LearnRouteImport.update({
   id: '/learn',
   path: '/learn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeaderboardRoute = LeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ErrorsRoute = ErrorsRouteImport.update({
@@ -51,7 +63,9 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/challenges': typeof ChallengesRoute
   '/errors': typeof ErrorsRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/learn': typeof LearnRoute
+  '/login': typeof LoginRoute
   '/playground': typeof PlaygroundRoute
   '/profile': typeof ProfileRoute
 }
@@ -59,7 +73,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/challenges': typeof ChallengesRoute
   '/errors': typeof ErrorsRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/learn': typeof LearnRoute
+  '/login': typeof LoginRoute
   '/playground': typeof PlaygroundRoute
   '/profile': typeof ProfileRoute
 }
@@ -68,7 +84,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/challenges': typeof ChallengesRoute
   '/errors': typeof ErrorsRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/learn': typeof LearnRoute
+  '/login': typeof LoginRoute
   '/playground': typeof PlaygroundRoute
   '/profile': typeof ProfileRoute
 }
@@ -78,17 +96,29 @@ export interface FileRouteTypes {
     | '/'
     | '/challenges'
     | '/errors'
+    | '/leaderboard'
     | '/learn'
+    | '/login'
     | '/playground'
     | '/profile'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/challenges' | '/errors' | '/learn' | '/playground' | '/profile'
+  to:
+    | '/'
+    | '/challenges'
+    | '/errors'
+    | '/leaderboard'
+    | '/learn'
+    | '/login'
+    | '/playground'
+    | '/profile'
   id:
     | '__root__'
     | '/'
     | '/challenges'
     | '/errors'
+    | '/leaderboard'
     | '/learn'
+    | '/login'
     | '/playground'
     | '/profile'
   fileRoutesById: FileRoutesById
@@ -97,7 +127,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ChallengesRoute: typeof ChallengesRoute
   ErrorsRoute: typeof ErrorsRoute
+  LeaderboardRoute: typeof LeaderboardRoute
   LearnRoute: typeof LearnRoute
+  LoginRoute: typeof LoginRoute
   PlaygroundRoute: typeof PlaygroundRoute
   ProfileRoute: typeof ProfileRoute
 }
@@ -118,11 +150,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlaygroundRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/learn': {
       id: '/learn'
       path: '/learn'
       fullPath: '/learn'
       preLoaderRoute: typeof LearnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/leaderboard': {
+      id: '/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof LeaderboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/errors': {
@@ -153,7 +199,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChallengesRoute: ChallengesRoute,
   ErrorsRoute: ErrorsRoute,
+  LeaderboardRoute: LeaderboardRoute,
   LearnRoute: LearnRoute,
+  LoginRoute: LoginRoute,
   PlaygroundRoute: PlaygroundRoute,
   ProfileRoute: ProfileRoute,
 }

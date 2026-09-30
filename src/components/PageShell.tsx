@@ -43,6 +43,7 @@ export function PageShell({
                 ["/errors", "nav.errors"],
                 ["/learn", "nav.learn"],
                 ["/challenges", "nav.challenges"],
+                ["/leaderboard", "nav.leaderboard"],
                 ["/profile", "nav.profile"],
                 ["/playground", "nav.playground"],
               ] as const

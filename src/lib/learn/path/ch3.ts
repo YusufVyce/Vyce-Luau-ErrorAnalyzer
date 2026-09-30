@@ -111,14 +111,14 @@ print(part.Name, part.Parent.Name)
     emoji: "⚡",
     takeaway: t(
       "event:Connect(function). Touched gives a body part: hit.Parent is the character.",
-      "event:Connect(function). Touched bir vücut parçası verir: hit.Parent karakterdir.",
+      "olay:Connect(function). Touched bir vücut parçası verir: hit.Parent karakterdir.",
     ),
     steps: [
       learn(
-        t('Events mean "when this happens…"', 'Event "bu olunca…" demektir'),
+        t('Events mean "when this happens…"', 'Olay "bu olunca…" demektir'),
         t(
           "An event fires when something happens: a touch, a click, a player joining. `:Connect(function)` tells Roblox what to do then.",
-          "Bir şey olunca event tetiklenir: dokunma, tıklama, oyuncunun girmesi. `:Connect(function)` Roblox'a o an ne yapacağını söyler.",
+          "Bir şey olunca olay tetiklenir: dokunma, tıklama, oyuncunun girmesi. `:Connect(function)` Roblox'a o an ne yapacağını söyler.",
         ),
         {
           visual: "touched",
@@ -138,7 +138,7 @@ end)
 `,
         ["Connect", "Fire", "Wait", "On"],
         0,
-        t("Connect links your function to the event.", "Connect, fonksiyonunu event'e bağlar."),
+        t("Connect links your function to the event.", "Connect, fonksiyonunu olaya bağlar."),
       ),
       learn(
         t("hit is a body part", "hit bir vücut parçasıdır"),
@@ -337,11 +337,11 @@ print(coins.Value)
         1,
         t(
           "Buttons (TextButton, ImageButton) have click events. Labels don't.",
-          "Butonların (TextButton, ImageButton) tıklama event'i var. Label'ların yok.",
+          "Butonların (TextButton, ImageButton) tıklama olayı var. Label'ların yok.",
         ),
       ),
       learn(
-        t("Clicks are events", "Tıklama bir event'tir"),
+        t("Clicks are events", "Tıklama bir olaydır"),
         t(
           "`MouseButton1Click` fires when the player clicks. `not` flips a frame open or closed.",
           "`MouseButton1Click` oyuncu tıklayınca tetiklenir. `not` bir çerçeveyi açıp kapatır.",
@@ -551,7 +551,7 @@ end)
 `,
         ["Triggered", "Touched", "Activated", "Pressed"],
         0,
-        t("ProximityPrompt's event is Triggered.", "ProximityPrompt'un event'i Triggered'dır."),
+        t("ProximityPrompt's event is Triggered.", "ProximityPrompt'un olayı Triggered'dır."),
       ),
       predict(
         lua`
@@ -563,7 +563,7 @@ print(if isOpen then "Close" else "Open")
         0,
         t(
           "The door is now open, so the button should offer to Close it.",
-          "Kapı artık açık, bu yüzden buton kapatmayı (Close) önermeli.",
+          "Kapı artık açık, bu yüzden buton kapatmayı (Kapat) önermeli.",
         ),
       ),
       choice(
