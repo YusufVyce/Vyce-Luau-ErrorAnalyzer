@@ -15,7 +15,7 @@ import {
   Zap,
 } from "lucide-react";
 import { newlyEarned, type Achievement } from "@/lib/learn/achievements";
-import { levelFor, loadProgress, type Progress } from "@/lib/learn/progress";
+import { isQuietProgressEvent, levelFor, loadProgress, type Progress } from "@/lib/learn/progress";
 import { useLang, useT } from "@/lib/prefs";
 
 export const ACHIEVEMENT_ICONS = {
@@ -77,7 +77,7 @@ export function AchievementToaster() {
     last.current = loadProgress();
     const on = (e: Event) => {
       const next = (e as CustomEvent<Progress>).detail;
-      if (last.current) {
+      if (last.current && !isQuietProgressEvent(e)) {
         const fresh = newlyEarned(last.current, next);
         if (fresh.length) setQueue((q) => [...q, ...fresh]);
       }

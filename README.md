@@ -192,6 +192,18 @@ Complete different goals throughout the platform and collect achievements.
 
 Track your learning progress, XP, achievements, and other activity from your profile.
 
+## 🔑 Accounts
+
+Sign up with a username and password (no email needed) to keep your progress on the server and continue on any device.
+
+- Progress is still saved in the browser first, then synced to your account a few seconds later.
+- Guest progress can be added to a new account when you sign up.
+- A one-time recovery code is shown at sign-up; it resets a forgotten password.
+
+## 🏅 Leaderboard
+
+Daily, weekly and all-time XP rankings, plus a board for the longest daily streaks. Days and weeks follow UTC.
+
 ## 🎓 Vyce Parser License
 
 Users who complete all lessons can receive a special **Vyce Parser License**.
@@ -260,7 +272,8 @@ Vyce Parser is designed to keep its core learning and analysis features local an
 
 - No API key required.
 - No external AI service required for error analysis.
-- Learning progress and profile data can be stored in the browser.
+- Learning progress and profile data are stored in the browser.
+- With an account, the same progress (and your username on the leaderboard) is also stored on the server. Passwords are stored only as salted PBKDF2 hashes.
 
 ---
 
@@ -284,6 +297,8 @@ Vyce Parser is designed to keep its core learning and analysis features local an
 - 🌙 Dark / ☀️ Light theme
 - 🇹🇷 Turkish / 🇬🇧 English
 - 📈 Learning progress tracking
+- 🔑 Accounts with cross-device sync
+- 🏅 Daily / weekly / all-time leaderboard
 
 ---
 
@@ -308,6 +323,17 @@ bun install
 
 bun run dev
 ```
+
+### Accounts & leaderboard storage
+
+Accounts and leaderboards are stored in [Upstash Redis](https://upstash.com) through its REST API (works on Vercel and Cloudflare, no extra packages). Set these environment variables — on Vercel, adding an Upstash Redis database from the Storage tab sets them for you:
+
+```text
+UPSTASH_REDIS_REST_URL=...
+UPSTASH_REDIS_REST_TOKEN=...
+```
+
+`KV_REST_API_URL` / `KV_REST_API_TOKEN` are accepted too. Without them, `bun run dev` keeps accounts in memory (lost on restart) and a production build shows "accounts aren't set up" while everything else keeps working. See `.env.example`.
 
 ---
 
@@ -334,6 +360,7 @@ bun run dev
 - ✅ Themes
 - ✅ Turkish / English language support
 - ✅ Code testing system
+- ✅ Accounts & leaderboard
 
 ## Planned
 

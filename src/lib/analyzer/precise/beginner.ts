@@ -355,6 +355,38 @@ const ANALOGIES_TR: Partial<Record<DiagnosisCategory, string>> = {
 const TOUCH_ANALOGY_TR =
   "Touched herkes için çalan bir kapı zili gibidir — postacı, kedi, top. Kodun gelenin her zaman oyuncu olduğunu varsayıp Humanoid'ini istedi, ama bu sefer zili başka bir şey çaldı.";
 
+const TITLES_TR: Record<DiagnosisCategory, string> = {
+  "index-nil": "nil olan bir şeyin içine bakılmaya çalışıldı",
+  "call-nil": "Olmayan (nil) bir fonksiyon çağrıldı",
+  arithmetic: "Sayı olmayan bir şeyle matematik yapıldı",
+  concatenate: "Metne eklenemeyen bir şey .. ile birleştirildi",
+  compare: "Karşılaştırılamayan iki şey karşılaştırıldı",
+  "invalid-argument": "Bir fonksiyona yanlış türde değer verildi",
+  "invalid-member": "Böyle bir özellik ya da alt obje yok",
+  "invalid-type": "Bir özelliğe yanlış türde değer verildi",
+  wait: "Bir obje sonsuza dek beklendi",
+  timeout: "Script çok uzun süre beklemeden çalıştı",
+  "stack-overflow": "Fonksiyon kendini durmadan çağırdı",
+  table: "Tabloda bir sorun var",
+  syntax: "Kodda bir yazım (sözdizimi) hatası var",
+  module: "ModuleScript düzgün yüklenemedi",
+  remote: "RemoteEvent yanlış tarafta kullanıldı",
+  datastore: "DataStore isteği başarısız oldu",
+  http: "HttpService isteği başarısız oldu",
+  tween: "Tween oluşturulamadı",
+  animation: "Animasyon oynatılamadı",
+  asset: "Bir içerik (asset) yüklenemedi",
+  instance: "Bir obje üzerinde yapılamayan bir işlem denendi",
+  coroutine: "Coroutine ile ilgili bir sorun var",
+  "code-check": "Kodda bir sorun bulundu",
+  unknown: "Kod bir hatayla durdu",
+};
+
+/** A short Turkish headline for a diagnosis (the detailed text is English only). */
+export function titleTr(d: Pick<PreciseDiagnosis, "category">): string {
+  return TITLES_TR[d.category];
+}
+
 export function analogyTr(d: Pick<PreciseDiagnosis, "category" | "title">): string | undefined {
   if (d.title.startsWith("hit.Parent isn't a character")) return TOUCH_ANALOGY_TR;
   return ANALOGIES_TR[d.category];

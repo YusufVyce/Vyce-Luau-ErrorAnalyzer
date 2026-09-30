@@ -92,7 +92,7 @@ function StatsCards({
   const streak = streakOf(progress.days);
   const xpToday = todayXp(progress);
   const goal = progress.dailyGoal;
-  const lvl = levelFor(progress.xp);
+  const lvl = levelFor(progress.xp, lang);
   const week = useMemo(() => {
     const out: Array<{ label: string; on: boolean; isToday: boolean }> = [];
     const set = new Set(progress.days);

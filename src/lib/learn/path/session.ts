@@ -1,5 +1,6 @@
 /** Builds the list of steps for one lesson session and grades answers. */
 import { PATH, reviewExercises, rng, shuffled } from ".";
+import { localizeStep } from "./localize";
 import { pick, type ChoiceStep, type Exercise, type Lang, type LearnStep } from "./types";
 
 export type SessionItem =
@@ -98,7 +99,8 @@ export function practiceXp(opts: { firstTime: boolean; mistakes: number; review?
 }
 
 /** The right answer as text, for the red feedback sheet. */
-export function correctAnswerText(step: Exercise, lang: Lang): string {
+export function correctAnswerText(base: Exercise, lang: Lang): string {
+  const step = localizeStep(base, lang);
   switch (step.kind) {
     case "order":
       return step.lines.join("\n");

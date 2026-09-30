@@ -7,11 +7,14 @@ import {
   FlaskConical,
   Languages,
   Library,
+  LogIn,
   Monitor,
   Moon,
   Sun,
   Swords,
+  Trophy,
 } from "lucide-react";
+import { useAccount } from "@/lib/account/client";
 import { usePrefs, useT, type Lang, type Theme } from "@/lib/prefs";
 import { XpChip } from "@/components/ProgressBits";
 
@@ -20,6 +23,7 @@ const ITEMS = [
   { to: "/errors", key: "nav.errors", icon: Library, exact: false },
   { to: "/learn", key: "nav.learn", icon: BookOpen, exact: false },
   { to: "/challenges", key: "nav.challenges", icon: Swords, exact: false },
+  { to: "/leaderboard", key: "nav.leaderboard", icon: Trophy, exact: false },
   { to: "/playground", key: "nav.playground", icon: FlaskConical, exact: false },
 ] as const;
 
@@ -115,8 +119,42 @@ const TAB_FILES = {
   "/errors": "errors.md",
   "/learn": "learn/",
   "/challenges": "challenges/",
+  "/leaderboard": "leaderboard.json",
   "/playground": "playground.luau",
 } as const;
+
+/** "Log in" for guests; the account's initial (→ profile) when signed in. */
+function AccountButton() {
+  const t = useT();
+  const { status, user } = useAccount();
+  if (status === "loading" || status === "unavailable") return null;
+  if (user) {
+    return (
+      <Link
+        to="/profile"
+        title={t("acc.signedInAs", { name: user.name })}
+        aria-label={t("acc.signedInAs", { name: user.name })}
+        className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-surface/70 transition-colors hover:border-brand-line"
+      >
+        <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-[linear-gradient(135deg,var(--syn-purple),var(--brand))] font-mono text-[12px] font-bold text-white">
+          {user.name[0]?.toUpperCase()}
+        </span>
+      </Link>
+    );
+  }
+  return (
+    <Link
+      to="/login"
+      aria-label={t("nav.login")}
+      title={t("nav.login")}
+      className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-brand-line bg-brand-soft px-2.5 text-[13px] font-medium text-brand transition-colors hover:bg-brand hover:text-white"
+      activeProps={{ className: "bg-brand text-white" }}
+    >
+      <LogIn className="h-4 w-4" aria-hidden="true" />
+      <span className="hidden lg:inline">{t("nav.login")}</span>
+    </Link>
+  );
+}
 
 export function SiteNav() {
   const t = useT();
@@ -127,8 +165,9 @@ export function SiteNav() {
       aria-label="Main"
       className="sticky top-0 z-40 w-full border-b border-line bg-canvas/75 backdrop-blur-xl"
     >
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4">
-        <Link to="/" className="group flex shrink-0 items-center gap-2.5 text-ink">
+      {/* Phones: logo + controls on top, the page tabs as a full-width second row. */}
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-2 gap-y-2 px-4 py-2 md:h-14 md:flex-nowrap md:py-0">
+        <Link to="/" className="group order-1 flex shrink-0 items-center gap-2.5 text-ink">
           <Logo />
           <span className="hidden font-mono text-[14px] font-semibold tracking-tight md:inline">
             vyce<span className="text-[var(--syn-purple)]">.</span>
@@ -136,28 +175,29 @@ export function SiteNav() {
             <span className="ep-caret" aria-hidden="true" />
           </span>
         </Link>
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <div className="flex h-9 items-end gap-0.5 overflow-hidden rounded-xl border border-line bg-surface/70 px-1 pt-1">
-            {ITEMS.map(({ to, key, icon: Icon, exact }) => (
-              <Link
-                key={to}
-                to={to}
-                aria-label={t(key)}
-                title={TAB_FILES[to]}
-                activeOptions={{ exact }}
-                className="relative inline-flex h-7 items-center gap-1.5 rounded-t-lg rounded-b-md px-2 text-[13px] font-medium transition-colors sm:px-2.5"
-                activeProps={{
-                  className:
-                    "bg-surface-2 text-ink before:absolute before:inset-x-2 before:top-0 before:h-[2px] before:rounded-full before:bg-[linear-gradient(90deg,var(--brand),var(--syn-purple))]",
-                }}
-                inactiveProps={{ className: "text-ink-3 hover:bg-surface-2/60 hover:text-ink" }}
-              >
-                <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                <span className="hidden sm:inline">{t(key)}</span>
-              </Link>
-            ))}
-          </div>
+        <div className="order-3 flex h-9 w-full items-end gap-0.5 overflow-hidden rounded-xl border border-line bg-surface/70 px-1 pt-1 md:order-2 md:ml-auto md:w-auto">
+          {ITEMS.map(({ to, key, icon: Icon, exact }) => (
+            <Link
+              key={to}
+              to={to}
+              aria-label={t(key)}
+              title={TAB_FILES[to]}
+              activeOptions={{ exact }}
+              className="relative inline-flex h-7 flex-1 items-center justify-center gap-1.5 rounded-t-lg rounded-b-md px-2 text-[13px] font-medium transition-colors md:flex-none xl:px-2.5"
+              activeProps={{
+                className:
+                  "bg-surface-2 text-ink before:absolute before:inset-x-2 before:top-0 before:h-[2px] before:rounded-full before:bg-[linear-gradient(90deg,var(--brand),var(--syn-purple))]",
+              }}
+              inactiveProps={{ className: "text-ink-3 hover:bg-surface-2/60 hover:text-ink" }}
+            >
+              <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="hidden sm:inline md:hidden xl:inline">{t(key)}</span>
+            </Link>
+          ))}
+        </div>
+        <div className="order-2 ml-auto flex items-center gap-1.5 md:order-3 md:ml-0 md:gap-2">
           <XpChip />
+          <AccountButton />
           <Menu<Lang>
             label={t("nav.language")}
             icon={

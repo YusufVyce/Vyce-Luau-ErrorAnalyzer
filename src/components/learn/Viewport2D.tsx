@@ -1,6 +1,7 @@
 import type { Color3, Vector3 } from "@/lib/luau/roblox/datatypes";
 import type { Instance } from "@/lib/luau/roblox/instance";
 import type { World } from "@/lib/luau/roblox/world";
+import { useLang } from "@/lib/prefs";
 
 export interface ViewShape {
   name: string;
@@ -74,6 +75,7 @@ export function Viewport2D({
   onSelect?: (path: string) => void;
   emptyText: string;
 }) {
+  const lang = useLang();
   if (shapes.length === 0) return <p className="p-3 text-xs text-zinc-500">{emptyText}</p>;
   let minX = -30;
   let maxX = 30;
@@ -117,7 +119,7 @@ export function Viewport2D({
       viewBox={`${minX} ${minZ} ${w} ${h}`}
       className="block h-64 w-full"
       role="img"
-      aria-label="Top-down view of Workspace"
+      aria-label={lang === "tr" ? "Workspace'in yukarıdan görünümü" : "Top-down view of Workspace"}
     >
       <rect x={minX} y={minZ} width={w} height={h} fill="#0a0e14" />
       {grid}

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Download, Flame, Lock, RotateCcw, Upload, UserRound } from "lucide-react";
+import { Download, Flame, Lock, UserRound } from "lucide-react";
+import { AccountPanel } from "@/components/account/AccountPanel";
 import { PageShell } from "@/components/PageShell";
 import { PageHeader } from "@/components/PageHeader";
 import { ACHIEVEMENT_ICONS } from "@/components/ProgressBits";
@@ -13,10 +14,9 @@ import {
   EMPTY_PROGRESS,
   lessonComplete,
   levelFor,
+  levelTitle,
   LEVELS,
   loadProgress,
-  normalizeProgress,
-  saveProgress,
   streakOf,
   today,
   type Progress,
@@ -114,9 +114,7 @@ function ProfilePage() {
   const lang = useLang();
   const [p, setP] = useState<Progress>(EMPTY_PROGRESS);
   const [name, setName] = useState("");
-  const [msg, setMsg] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setP(loadProgress());
@@ -130,7 +128,7 @@ function ProfilePage() {
     return () => window.removeEventListener("vyce-progress", on);
   }, []);
 
-  const lvl = levelFor(p.xp);
+  const lvl = levelFor(p.xp, lang);
   const lessonsDone = LESSONS.filter((l) => lessonComplete(p, l)).length;
   const complete = lessonsDone === LESSONS.length;
   const got = earned(p);
@@ -172,38 +170,12 @@ function ProfilePage() {
     a.click();
   }
 
-  function exportData() {
-    const blob = new Blob(
-      [JSON.stringify({ app: "vyce-luautility", version: 2, progress: p }, null, 2)],
-      {
-        type: "application/json",
-      },
-    );
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `vyce-progress-${today()}.json`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-  }
-
-  async function importData(file: File) {
-    try {
-      const raw = JSON.parse(await file.text());
-      const next = normalizeProgress(raw?.progress ?? raw);
-      if (!window.confirm(t("prof.importConfirm", { xp: next.xp }))) return;
-      saveProgress(next);
-      setP(next);
-      setMsg(t("prof.imported"));
-    } catch {
-      setMsg(t("prof.importBad"));
-    }
-  }
-
+  /** Guests only: signed-in progress lives in the account (delete the account instead). */
   function reset() {
     if (!window.confirm(t("prof.resetConfirm"))) return;
     clearProgress();
     setP({ ...EMPTY_PROGRESS });
-    setMsg(t("prof.resetDone"));
+    window.alert(t("prof.resetDone"));
   }
 
   const stats: Array<[string, string]> = [
@@ -229,6 +201,10 @@ function ProfilePage() {
       >
         {t("prof.lead")}
       </PageHeader>
+
+      <section className="relative z-10 mb-5">
+        <AccountPanel onReset={reset} />
+      </section>
 
       <div className="relative z-10 grid gap-5 lg:grid-cols-[1.1fr_1fr]">
         <section className="ep-card ep-card-accent flex flex-col gap-6 p-6 sm:flex-row sm:items-center">
@@ -259,7 +235,7 @@ function ProfilePage() {
                         : "bg-surface-2 text-ink-3"
                   }`}
                 >
-                  {l.title}
+                  {levelTitle(l, lang)}
                 </li>
               ))}
             </ol>
@@ -397,50 +373,6 @@ function ProfilePage() {
             <p className="text-[12px] leading-relaxed text-ink-3">{t("prof.certNote")}</p>
           </div>
         </div>
-      </section>
-
-      <section className="relative z-10 mt-10 space-y-4">
-        <div className="ep-label">
-          <b>//</b> {t("prof.data")}
-        </div>
-        <div className="ep-card flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="max-w-xl text-[13px] leading-relaxed text-ink-3">{t("prof.dataNote")}</p>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={exportData}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-surface px-3 py-2 text-[13px] text-ink-2 hover:border-brand-line hover:text-ink"
-            >
-              <Download className="h-4 w-4" aria-hidden="true" /> {t("prof.export")}
-            </button>
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-surface px-3 py-2 text-[13px] text-ink-2 hover:border-brand-line hover:text-ink"
-            >
-              <Upload className="h-4 w-4" aria-hidden="true" /> {t("prof.import")}
-            </button>
-            <button
-              type="button"
-              onClick={reset}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-red-500/30 px-3 py-2 text-[13px] text-red-400 hover:bg-red-500/10"
-            >
-              <RotateCcw className="h-4 w-4" aria-hidden="true" /> {t("prof.reset")}
-            </button>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="application/json,.json"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) importData(f);
-                e.target.value = "";
-              }}
-            />
-          </div>
-        </div>
-        {msg && <p className="text-[13px] text-brand">{msg}</p>}
       </section>
     </PageShell>
   );

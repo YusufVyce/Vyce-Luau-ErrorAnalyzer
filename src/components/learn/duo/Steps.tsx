@@ -3,6 +3,7 @@ import { Sparkles, Terminal } from "lucide-react";
 import { CodeBlock, highlightLuau } from "@/components/CodeBlock";
 import { Rich } from "@/components/learn/LessonNotes";
 import { Visual } from "@/components/learn/Visuals";
+import { localizeStep } from "@/lib/learn/path/localize";
 import { pick, type Exercise, type Lang, type LearnStep, type Opt } from "@/lib/learn/path/types";
 import type { AnswerState } from "@/lib/learn/path/session";
 import type { TFunction } from "@/lib/prefs";
@@ -32,7 +33,8 @@ function CodePanel({ children, label = "Script" }: { children: ReactNode; label?
 
 const isCode = (o: Opt) => typeof o === "string";
 
-export function LearnCard({ step, lang, t }: { step: LearnStep; lang: Lang; t: TFunction }) {
+export function LearnCard({ step: base, lang, t }: { step: LearnStep; lang: Lang; t: TFunction }) {
+  const step = localizeStep(base, lang);
   return (
     <div className="space-y-6">
       <span className="inline-flex items-center gap-1.5 rounded-full bg-[color-mix(in_srgb,var(--syn-purple)_16%,transparent)] px-3 py-1 text-[12px] font-bold tracking-[0.12em] text-[var(--syn-purple)] uppercase">
@@ -101,7 +103,7 @@ function OptionButton({
 }
 
 export function ExerciseView({
-  step,
+  step: base,
   perm,
   answer,
   onAnswer,
@@ -119,6 +121,7 @@ export function ExerciseView({
   lang: Lang;
   t: TFunction;
 }) {
+  const step = localizeStep(base, lang);
   const locked = phase !== "answer";
   const shake = phase === "wrong" ? "vy-shake" : "";
 
