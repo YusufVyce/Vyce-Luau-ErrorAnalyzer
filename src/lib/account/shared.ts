@@ -168,8 +168,6 @@ const RESERVED = new Set([
   "support",
   "system",
   "root",
-  "vyce",
-  "yusufvyce",
   "roblox",
   "null",
   "undefined",
