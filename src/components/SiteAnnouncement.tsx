@@ -29,13 +29,13 @@ export function SiteAnnouncement() {
       role="status"
       className={`relative z-30 border-b ${
         warn
-          ? "border-amber-400/30 bg-amber-400/10 text-[var(--warn-ink)]"
+          ? "border-amber-400/30 bg-amber-400/10 text-[var(--tint-warn)]"
           : "border-brand-line bg-brand-soft text-ink"
       }`}
     >
       <div className="mx-auto flex max-w-6xl items-start gap-2.5 px-4 py-2 text-[13px] leading-relaxed">
         <Icon
-          className={`mt-0.5 h-4 w-4 shrink-0 ${warn ? "text-[var(--warn-ink)]" : "text-brand"}`}
+          className={`mt-0.5 h-4 w-4 shrink-0 ${warn ? "text-[var(--tint-warn)]" : "text-brand"}`}
           aria-hidden="true"
         />
         <p className="min-w-0 flex-1 break-words">{text}</p>

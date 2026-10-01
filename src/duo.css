@@ -7,10 +7,15 @@
 :root[data-theme="dark"] {
   --ok: #4ade80;
   --ok-dark: #1f9d55;
-  --ok-ink: #04210f;
+  --ok-ink: #ffffff;
   --bad: #ff6b81;
   --bad-dark: #c43d56;
-  --bad-ink: #2b0710;
+  --bad-ink: #ffffff;
+  /* Fills behind white text (buttons, badges): a little deeper than the text greens/reds. */
+  --ok-fill: #22b35e;
+  --ok-fill-dark: #13843f;
+  --bad-fill: #e5455f;
+  --bad-fill-dark: #b3203d;
   --gold: #ffcb6b;
   --gold-dark: #c7922e;
   --node-ink: #0b1020;
@@ -22,6 +27,10 @@
   --bad: #ec3f5f;
   --bad-dark: #b3203d;
   --bad-ink: #ffffff;
+  --ok-fill: #22b35e;
+  --ok-fill-dark: #13843f;
+  --bad-fill: #ec3f5f;
+  --bad-fill-dark: #b3203d;
   --gold: #ffc233;
   --gold-dark: #d09112;
   --node-ink: #ffffff;
@@ -117,14 +126,16 @@
     cursor: not-allowed;
   }
   .vy-btn-ok {
-    --b: var(--ok);
-    --b-dark: var(--ok-dark);
+    --b: var(--ok-fill);
+    --b-dark: var(--ok-fill-dark);
     --b-ink: var(--ok-ink);
+    text-shadow: 0 1px 0 rgb(0 0 0 / 0.2);
   }
   .vy-btn-bad {
-    --b: var(--bad);
-    --b-dark: var(--bad-dark);
+    --b: var(--bad-fill);
+    --b-dark: var(--bad-fill-dark);
     --b-ink: var(--bad-ink);
+    text-shadow: 0 1px 0 rgb(0 0 0 / 0.2);
   }
   .vy-btn-gold {
     --b: var(--gold);

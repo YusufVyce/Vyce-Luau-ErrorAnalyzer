@@ -417,7 +417,7 @@ export function PathMap({
                           <LessonIcon id={l.id} className="h-8 w-8" strokeWidth={2.4} />
                         </span>
                         {state === "done" && (
-                          <span className="absolute -right-1 -bottom-1 inline-flex h-6 w-6 items-center justify-center rounded-full border-2 border-canvas bg-[var(--ok)] text-[var(--ok-ink)]">
+                          <span className="absolute -right-1 -bottom-1 inline-flex h-6 w-6 items-center justify-center rounded-full border-2 border-canvas bg-[var(--ok-fill)] text-[var(--ok-ink)]">
                             <Check className="h-3.5 w-3.5" strokeWidth={4} aria-hidden="true" />
                           </span>
                         )}

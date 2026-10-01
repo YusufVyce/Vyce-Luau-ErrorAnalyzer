@@ -65,7 +65,7 @@ export function NameBans() {
     <div className="space-y-4">
       <Panel
         title={t("adm.nameBansTitle")}
-        icon={<UserX className="h-4 w-4 text-[var(--bad-ink)]" />}
+        icon={<UserX className="h-4 w-4 text-[var(--tint-bad)]" />}
       >
         <p className="text-[13px] text-ink-2">{t("adm.nameBansNote")}</p>
         <form onSubmit={add} className="flex flex-wrap items-center gap-2">
@@ -125,7 +125,7 @@ export function NameBans() {
                     <Trash2 className="h-3.5 w-3.5" aria-hidden="true" /> {t("adm.remove")}
                   </Btn>
                   {taken.length > 0 && (
-                    <p className="w-full text-[12px] text-[var(--warn-ink)]">
+                    <p className="w-full text-[12px] text-[var(--tint-warn)]">
                       {t("adm.nameTaken")}{" "}
                       {taken.slice(0, 12).map((name, i) => (
                         <span key={name}>

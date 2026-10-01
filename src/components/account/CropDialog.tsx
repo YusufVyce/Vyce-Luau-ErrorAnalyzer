@@ -265,7 +265,7 @@ export function CropDialog({
           {isGif(file) ? ` ${t("img.gifHint")}` : ""}
         </p>
         {error && (
-          <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-[13px] text-[var(--bad-ink)]">
+          <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-[13px] text-[var(--tint-bad)]">
             {error}
           </p>
         )}

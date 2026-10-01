@@ -40,7 +40,7 @@ const TONES: Record<Tone, string> = {
   default: "border border-line bg-surface text-ink-2 hover:border-brand-line hover:text-ink",
   primary: "ep-cta font-semibold",
   danger:
-    "border border-red-500/40 bg-red-500/10 text-[var(--bad-ink)] hover:bg-red-500/20 font-medium",
+    "border border-red-500/40 bg-red-500/10 text-[var(--tint-bad)] hover:bg-red-500/20 font-medium",
   ghost: "text-ink-3 hover:bg-surface-2 hover:text-ink",
 };
 
@@ -118,8 +118,8 @@ export function Notice({ kind, children }: { kind: "ok" | "error"; children: Rea
       role={kind === "error" ? "alert" : "status"}
       className={`rounded-lg border px-3 py-2 text-[13px] ${
         kind === "ok"
-          ? "border-emerald-500/30 bg-emerald-500/10 text-[var(--ok-ink)]"
-          : "border-red-500/30 bg-red-500/10 text-[var(--bad-ink)]"
+          ? "border-emerald-500/30 bg-emerald-500/10 text-[var(--tint-ok)]"
+          : "border-red-500/30 bg-red-500/10 text-[var(--tint-bad)]"
       }`}
     >
       {children}
@@ -136,10 +136,10 @@ export function Pill({
 }) {
   const cls = {
     muted: "border-line text-ink-3",
-    bad: "border-red-500/40 bg-red-500/10 text-[var(--bad-ink)]",
-    ok: "border-emerald-500/40 bg-emerald-500/10 text-[var(--ok-ink)]",
-    warn: "border-amber-400/40 bg-amber-400/10 text-[var(--warn-ink)]",
-    info: "border-sky-400/40 bg-sky-400/10 text-[var(--info-ink)]",
+    bad: "border-red-500/40 bg-red-500/10 text-[var(--tint-bad)]",
+    ok: "border-emerald-500/40 bg-emerald-500/10 text-[var(--tint-ok)]",
+    warn: "border-amber-400/40 bg-amber-400/10 text-[var(--tint-warn)]",
+    info: "border-sky-400/40 bg-sky-400/10 text-[var(--tint-info)]",
   }[tone];
   return (
     <span

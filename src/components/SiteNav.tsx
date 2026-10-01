@@ -144,7 +144,7 @@ function AdminButton() {
       to="/admin"
       aria-label={t("adm.title")}
       title={t("adm.title")}
-      className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-sky-400/40 bg-sky-400/10 text-[var(--info-ink)] transition-colors hover:bg-sky-400/20"
+      className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-sky-400/40 bg-sky-400/10 text-[var(--tint-info)] transition-colors hover:bg-sky-400/20"
       activeProps={{ className: "ring-2 ring-sky-400/50" }}
     >
       <ShieldCheck className="h-4 w-4" aria-hidden="true" />

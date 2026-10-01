@@ -71,7 +71,7 @@ function NewThreadPage() {
         </Link>
         <h1 className="text-3xl font-bold tracking-tight text-ink">{t("fo.newTitle")}</h1>
         {closed && (
-          <p className="ep-card border-amber-400/40 p-4 text-sm text-[var(--warn-ink)]">
+          <p className="ep-card border-amber-400/40 p-4 text-sm text-[var(--tint-warn)]">
             {t("acc.err.forum_closed")}
           </p>
         )}

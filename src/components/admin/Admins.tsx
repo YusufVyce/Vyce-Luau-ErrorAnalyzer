@@ -59,7 +59,7 @@ export function Admins({ onOpen }: { onOpen: (id: string) => void }) {
     <div className="space-y-4">
       <Panel
         title={t("adm.adminsTitle")}
-        icon={<ShieldCheck className="h-4 w-4 text-[var(--info-ink)]" />}
+        icon={<ShieldCheck className="h-4 w-4 text-[var(--tint-info)]" />}
       >
         <p className="text-[13px] text-ink-2">{t("adm.adminsNote")}</p>
         <form onSubmit={add} className="flex flex-wrap gap-2">
@@ -95,7 +95,7 @@ export function Admins({ onOpen }: { onOpen: (id: string) => void }) {
                 </button>
                 <RoleBadge role={u.role} />
                 {u.role === "owner" ? (
-                  <Crown className="ml-auto h-4 w-4 text-[var(--warn-ink)]" aria-hidden="true" />
+                  <Crown className="ml-auto h-4 w-4 text-[var(--tint-warn)]" aria-hidden="true" />
                 ) : (
                   <Btn
                     small

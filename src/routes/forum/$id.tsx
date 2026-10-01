@@ -85,7 +85,7 @@ function ReportForm({ threadId, n, onDone }: { threadId: number; n: number; onDo
 
   if (state === "sent") {
     return (
-      <p className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[13px] text-[var(--ok-ink)]">
+      <p className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[13px] text-[var(--tint-ok)]">
         <Check className="h-4 w-4" aria-hidden="true" /> {t("fo.reported")}
       </p>
     );
@@ -491,7 +491,7 @@ function ThreadPage() {
             <Lock className="h-4 w-4" aria-hidden="true" /> {t("fo.lockedNote")}
           </p>
         ) : closed && me ? (
-          <p className="ep-card flex items-center gap-2 p-4 text-sm text-[var(--warn-ink)]">
+          <p className="ep-card flex items-center gap-2 p-4 text-sm text-[var(--tint-warn)]">
             <Lock className="h-4 w-4" aria-hidden="true" /> {t("acc.err.forum_closed")}
           </p>
         ) : canReply ? (

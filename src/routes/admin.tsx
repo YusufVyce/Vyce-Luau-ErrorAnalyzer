@@ -88,7 +88,7 @@ function AdminPage() {
     <PageShell>
       <div className="relative z-10 space-y-5 pt-10 md:pt-12">
         <header className="flex flex-wrap items-center gap-3">
-          <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-sky-400/40 bg-sky-400/10 text-[var(--info-ink)]">
+          <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-sky-400/40 bg-sky-400/10 text-[var(--tint-info)]">
             <ShieldCheck className="h-6 w-6" aria-hidden="true" />
           </span>
           <div className="min-w-0 flex-1">
