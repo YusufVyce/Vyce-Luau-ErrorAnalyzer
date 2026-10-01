@@ -123,11 +123,19 @@ const TAB_FILES = {
   "/playground": "playground.luau",
 } as const;
 
-/** "Log in" for guests; the account's initial (→ profile) when signed in. */
+/** The XP chip belongs to the account, so it only shows when signed in. */
+function SignedInXp() {
+  const { user } = useAccount();
+  return user ? <XpChip /> : null;
+}
+
+/** "Log in" when signed out; the account's initial (→ profile) when signed in. */
 function AccountButton() {
   const t = useT();
   const { status, user } = useAccount();
-  if (status === "loading" || status === "unavailable") return null;
+  if (status === "loading") {
+    return <span className="h-9 w-9 animate-pulse rounded-xl border border-line bg-surface/70" />;
+  }
   if (user) {
     return (
       <Link
@@ -196,7 +204,7 @@ export function SiteNav() {
           ))}
         </div>
         <div className="order-2 ml-auto flex items-center gap-1.5 md:order-3 md:ml-0 md:gap-2">
-          <XpChip />
+          <SignedInXp />
           <AccountButton />
           <Menu<Lang>
             label={t("nav.language")}

@@ -18,7 +18,7 @@ import { z } from "zod";
 import { getKV } from "./server/kv";
 import { AccountService, SESSION_TTL } from "./server/service";
 import type { Progress } from "@/lib/learn/progress";
-import type { AccountError, Board, PublicUser, Result } from "./shared";
+import type { AccountError, Board, Claim, PublicUser, Result } from "./shared";
 
 const COOKIE = "vyce_session";
 
@@ -133,7 +133,7 @@ export const recoverAccount = createServerFn({ method: "POST" })
   );
 
 export const syncProgress = createServerFn({ method: "POST" })
-  .validator(z.object({ progress: progressObject, baseXp: z.number() }))
+  .validator(z.object({ progress: progressObject }))
   .handler(async ({ data }) =>
     withService(async (svc) => {
       const r = await svc.sync(getCookie(COOKIE), data);
@@ -171,3 +171,73 @@ export const getLeaderboard = createServerFn({ method: "GET" })
       ...(await svc.leaderboard(data.board as Board, getCookie(COOKIE))),
     })),
   );
+
+const day = z.string().max(10).optional();
+const solved = z.object({
+  lessonId: z.string().max(80),
+  step: z.number().int(),
+  pick: z.number().int().nullable().optional(),
+  seq: z.array(z.number().int()).max(40).optional(),
+});
+const claimSchema: z.ZodType<Claim> = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("quiz"),
+    lessonId: z.string().max(80),
+    answer: z.number().int(),
+    day,
+  }),
+  z.object({
+    kind: z.literal("homework"),
+    lessonId: z.string().max(80),
+    code: z.string().max(20_000),
+    hints: z.number(),
+    solution: z.boolean(),
+    day,
+  }),
+  z.object({
+    kind: z.literal("challenge"),
+    id: z.string().max(80),
+    code: z.string().max(20_000),
+    hints: z.number(),
+    solution: z.boolean(),
+    day,
+  }),
+  z.object({
+    kind: z.literal("practice"),
+    lessonId: z.string().max(80).optional(),
+    mistakes: z.number(),
+    answers: z.array(solved).max(60),
+    day,
+  }),
+]);
+
+/** Reports finished work; the server checks it and pays the XP. */
+export const claimXp = createServerFn({ method: "POST" })
+  .validator(claimSchema)
+  .handler(async ({ data }) =>
+    withService(async (svc) => {
+      const r = await svc.claim(getCookie(COOKIE), data);
+      if (!r.ok && r.error === "unauthorized") clearSession();
+      return r;
+    }),
+  );
+
+export const getLeague = createServerFn({ method: "GET" }).handler(async () =>
+  withService((svc) => svc.league(getCookie(COOKIE))),
+);
+
+export const getFriends = createServerFn({ method: "GET" }).handler(async () =>
+  withService((svc) => svc.friends(getCookie(COOKIE))),
+);
+
+export const followUser = createServerFn({ method: "POST" })
+  .validator(z.object({ name: username }))
+  .handler(async ({ data }) => withService((svc) => svc.follow(getCookie(COOKIE), data.name)));
+
+export const unfollowUser = createServerFn({ method: "POST" })
+  .validator(z.object({ id: z.string().max(40) }))
+  .handler(async ({ data }) => withService((svc) => svc.unfollow(getCookie(COOKIE), data.id)));
+
+export const getProfile = createServerFn({ method: "GET" })
+  .validator(z.object({ name: username }))
+  .handler(async ({ data }) => withService((svc) => svc.profile(data.name, getCookie(COOKIE))));

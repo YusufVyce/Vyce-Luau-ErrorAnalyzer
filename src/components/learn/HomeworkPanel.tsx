@@ -15,7 +15,6 @@ import { CodeBlock } from "@/components/CodeBlock";
 import { CodeEditor } from "@/components/CodeEditor";
 import { ExplorerTree, OutputConsole } from "@/components/learn/SimPanels";
 import { analyzerLink } from "@/lib/learn/lessons";
-import { analogyTr, titleTr } from "@/lib/analyzer/precise/beginner";
 import { checkHomework } from "@/lib/learn/homework/client";
 import type { Exercise, HomeworkResult } from "@/lib/learn/homework/harness";
 import { useLang, useT } from "@/lib/prefs";
@@ -79,7 +78,8 @@ export function HomeworkPanel({
   passed: boolean;
   attempts: number;
   hintsUsed: number;
-  onChecked: (passed: boolean) => void;
+  /** `code` is exactly what was checked (the server checks it again before paying XP). */
+  onChecked: (passed: boolean, code: string) => void;
   onHint: () => void;
   onSolution: () => void;
 }) {
@@ -107,10 +107,10 @@ export function HomeworkPanel({
         : await checkHomework(exercise.lessonId, code, lang);
       setResult(r);
       setTab("checks");
-      onChecked(r.passed);
+      onChecked(r.passed, code);
     } catch (e) {
       setRunError((e as Error).message);
-      onChecked(false);
+      onChecked(false, code);
     } finally {
       setRunning(false);
     }
@@ -361,29 +361,13 @@ export function HomeworkPanel({
           {result.diagnosis && (result.runtimeError || result.syntaxError) && (
             <div className="space-y-3 rounded-xl border border-red-500/25 bg-red-500/[0.05] p-4">
               <div className="text-[15px] font-semibold text-red-300">{t("hw.crashed")}</div>
-              {lang === "tr" ? (
-                // The analyzer's detailed text is English only: show the Turkish
-                // headline and analogy here, the full analysis is one click away.
-                <>
-                  <div className="font-semibold text-zinc-100">{titleTr(result.diagnosis)}</div>
-                  <p className="font-mono text-[12px] break-words text-red-300/90">
-                    {(result.runtimeError ?? result.syntaxError)?.message}
-                  </p>
-                  {analogyTr(result.diagnosis) && (
-                    <p className="text-sm text-zinc-300">{analogyTr(result.diagnosis)}</p>
-                  )}
-                </>
-              ) : (
-                <>
-                  <div className="font-semibold text-zinc-100">
-                    <Rich text={result.diagnosis.title} />
-                  </div>
-                  <p className="text-sm text-zinc-300">
-                    <Rich text={result.diagnosis.summary} />
-                  </p>
-                </>
-              )}
-              {lang !== "tr" && result.diagnosis.causes[0] && (
+              <div className="font-semibold text-zinc-100">
+                <Rich text={result.diagnosis.title} />
+              </div>
+              <p className="text-sm text-zinc-300">
+                <Rich text={result.diagnosis.summary} />
+              </p>
+              {result.diagnosis.causes[0] && (
                 <div className="rounded-xl border border-line bg-surface p-3 text-sm">
                   <div className="font-medium text-zinc-100">
                     <Rich text={result.diagnosis.causes[0].text} />

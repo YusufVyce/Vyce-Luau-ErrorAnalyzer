@@ -7,12 +7,13 @@ import { Field, FormError, PasswordField } from "@/components/account/fields";
 import { Mascot } from "@/components/learn/duo/Mascot";
 import { useAccount } from "@/lib/account/client";
 import { PASSWORD_MIN, USERNAME_MAX, USERNAME_MIN, accountErrorKey } from "@/lib/account/shared";
-import { loadProgress } from "@/lib/learn/progress";
 import { useT } from "@/lib/prefs";
 
 type Mode = "login" | "signup" | "recover";
 const NEXT = ["/profile", "/leaderboard", "/learn", "/challenges"] as const;
 type Next = (typeof NEXT)[number];
+/** Pages the login page may send people back to. */
+export type LoginNext = Next;
 type LoginSearch = { mode?: Mode; next?: Next };
 
 export const Route = createFileRoute("/login")({
@@ -79,7 +80,10 @@ function LoginPage() {
           {code ? (
             <RecoveryCode code={code} onDone={() => navigate({ to: next })} />
           ) : acc.status === "unavailable" ? (
-            <p className="text-sm text-ink-2">{t("acc.unavailable")}</p>
+            <div className="space-y-2 text-sm text-ink-2">
+              <p className="font-semibold text-ink">{t("acc.downTitle")}</p>
+              <p>{t("acc.downBody")}</p>
+            </div>
           ) : (
             <>
               <div
@@ -142,17 +146,15 @@ function AuthForm({
   const acc = useAccount();
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [importGuest, setImportGuest] = useState(true);
+  const [importLocal, setImportGuest] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [guestXp, setGuestXp] = useState(0);
-  useEffect(() => setGuestXp(loadProgress().xp), []);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const withGuest = acc.canImport && importGuest;
+    const withGuest = acc.canImport && importLocal;
     if (mode === "signup") {
       const r = await acc.signUp(name.trim(), password, withGuest);
       setBusy(false);
@@ -196,13 +198,13 @@ function AuthForm({
         <label className="flex items-start gap-2.5 rounded-xl border border-line bg-surface-2/50 p-3 text-[13px] text-ink-2">
           <input
             type="checkbox"
-            checked={importGuest}
+            checked={importLocal}
             onChange={(e) => setImportGuest(e.target.checked)}
             className="mt-0.5 h-4 w-4 accent-[var(--brand)]"
           />
           <span>
-            {t("acc.importGuest", { xp: guestXp })}
-            {!importGuest && <span className="mt-1 block text-ink-3">{t("acc.importNote")}</span>}
+            {t("acc.importGuest")}
+            <span className="mt-1 block text-ink-3">{t("acc.importNote")}</span>
           </span>
         </label>
       )}

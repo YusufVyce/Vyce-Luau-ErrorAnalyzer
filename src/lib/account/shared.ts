@@ -6,6 +6,106 @@
 export type Board = "day" | "week" | "all" | "streak";
 export const BOARDS: Board[] = ["day", "week", "all", "streak"];
 
+/** Weekly leagues, lowest first. Top players move up a league each week, the last ones move down. */
+export const LEAGUES = [
+  { en: "Bronze", tr: "Bronz", color: "#cd7f32" },
+  { en: "Silver", tr: "Gümüş", color: "#a8b3c2" },
+  { en: "Gold", tr: "Altın", color: "#f5b82e" },
+  { en: "Platinum", tr: "Platin", color: "#5ec8d8" },
+  { en: "Diamond", tr: "Elmas", color: "#8b7cf6" },
+] as const;
+
+/**
+ * Something the student did that earns XP. The server checks it before
+ * paying out: homework and challenge code is run again in the simulator,
+ * quiz and practice answers are compared with the real answers.
+ */
+export interface SolvedStep {
+  lessonId: string;
+  /** Index in PATH[lessonId].steps. */
+  step: number;
+  pick?: number | null;
+  seq?: number[];
+}
+
+export type Claim =
+  | { kind: "quiz"; lessonId: string; answer: number; day?: string }
+  | {
+      kind: "homework";
+      lessonId: string;
+      code: string;
+      hints: number;
+      solution: boolean;
+      day?: string;
+    }
+  | { kind: "challenge"; id: string; code: string; hints: number; solution: boolean; day?: string }
+  | {
+      kind: "practice";
+      /** The lesson's own practice; leave out for a mixed review. */
+      lessonId?: string;
+      mistakes: number;
+      answers: SolvedStep[];
+      day?: string;
+    };
+
+export interface ClaimOutcome {
+  awarded: number;
+  /** Quizzes: whether the answer was right. */
+  correct?: boolean;
+}
+
+export interface LeagueResult {
+  week: string;
+  from: number;
+  to: number;
+  rank: number;
+}
+
+export interface LeagueBoard {
+  week: string;
+  tier: number;
+  entries: LeaderboardEntry[];
+  me?: { rank: number | null; score: number };
+  /** How many places at the top move up and at the bottom move down (with the current players). */
+  promote: number;
+  demote: number;
+  players: number;
+  resetsAt: string;
+  /** Last week's result, to celebrate (or soften) a move. */
+  last?: LeagueResult;
+}
+
+export interface FriendRow {
+  id: string;
+  name: string;
+  week: number;
+  xp: number;
+  streak: number;
+  me: boolean;
+}
+
+/** What anyone can see on /u/name: stats, no saved code or settings. */
+export interface PublicProfile {
+  id: string;
+  name: string;
+  createdAt: string;
+  xp: number;
+  streak: number;
+  league: number;
+  weekXp: number;
+  quiz: string[];
+  homework: string[];
+  challenges: string[];
+  stars: Record<string, number>;
+  /** Active days (YYYY-MM-DD), the most recent ones only. */
+  days: string[];
+  /** Ids of the achievements earned. */
+  achievements: string[];
+  isMe: boolean;
+  following: boolean;
+  followers: number;
+}
+
 export interface PublicUser {
   id: string;
   name: string;
@@ -44,6 +144,9 @@ export type AccountError =
   | "bad_recovery"
   | "rate_limited"
   | "unauthorized"
+  | "rejected"
+  | "not_found"
+  | "too_many_friends"
   | "server_error";
 
 export type Result<T> = ({ ok: true } & T) | { ok: false; error: AccountError };

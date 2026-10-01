@@ -1,4 +1,5 @@
 import { escapeRegExp, locateLine, sanitizeCode, splitLines, type LocatedLine } from "./codeTools";
+import { tx } from "./lang";
 import type { DiagnoseContext, DiagnosisCause, PreciseDiagnosis, SignatureResult } from "./types";
 
 export function ev(points: number, reason: string) {
@@ -16,11 +17,37 @@ export function locationOf(
 /** Evidence entries for how the failing line was found. */
 export function locationEvidence(located: LocatedLine | undefined, ctx: DiagnoseContext) {
   if (!located) {
-    return ctx.hasCode ? [ev(-4, "couldn't find the failing line in the pasted code")] : [];
+    return ctx.hasCode
+      ? [
+          ev(
+            -4,
+            tx(
+              "couldn't find the failing line in the pasted code",
+              "hatalı satır yapıştırılan kodda bulunamadı",
+            ),
+          ),
+        ]
+      : [];
   }
   return located.exact
-    ? [ev(14, `line ${located.line} of your code matches the error's line number`)]
-    : [ev(7, `found a matching line in your code (line ${located.line})`)];
+    ? [
+        ev(
+          14,
+          tx(
+            `line ${located.line} of your code matches the error's line number`,
+            `kodunun ${located.line}. satırı hatadaki satır numarasıyla aynı`,
+          ),
+        ),
+      ]
+    : [
+        ev(
+          7,
+          tx(
+            `found a matching line in your code (line ${located.line})`,
+            `kodunda uyan bir satır bulundu (${located.line}. satır)`,
+          ),
+        ),
+      ];
 }
 
 /** Finds a line that uses `.key`, `:key` or `["key"]`. */

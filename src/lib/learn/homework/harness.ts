@@ -270,7 +270,7 @@ export function runHomework(
       ],
       output: [{ kind: "error", text: log, time: 0 }],
       syntaxError: { line: parsed.error.line, message },
-      diagnosis: diagnose(log, code) ?? undefined,
+      diagnosis: diagnose(log, code, lang) ?? undefined,
       explorer: [],
     };
   }
@@ -290,7 +290,7 @@ export function runHomework(
   const firstError = errors[0];
   let diagnosis: PreciseDiagnosis | undefined;
   if (firstError) {
-    diagnosis = diagnose(firstError.message, code) ?? undefined;
+    diagnosis = diagnose(firstError.message, code, lang) ?? undefined;
     h.checks.unshift({
       label: h.t("Your code runs without errors", "Kodun hatasız çalışıyor"),
       pass: false,

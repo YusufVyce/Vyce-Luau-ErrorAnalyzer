@@ -22,7 +22,9 @@ import {
 } from "@/lib/challenges/challenges";
 import { challengeExercise, examplesFor } from "@/lib/challenges/runner";
 import { checkChallenge } from "@/lib/learn/homework/client";
-import { gainXp, streakOf, withToday, type Progress } from "@/lib/learn/progress";
+import { gainXp, streakOf, today, withToday, type Progress } from "@/lib/learn/progress";
+import { RequireAccount } from "@/components/account/RequireAccount";
+import { useAccount } from "@/lib/account/client";
 import { useProgressState } from "@/lib/learn/useProgress";
 import { useLang, useT } from "@/lib/prefs";
 import type { UiKey } from "@/lib/i18n/ui";
@@ -43,7 +45,11 @@ export const Route = createFileRoute("/challenges")({
       },
     ],
   }),
-  component: ChallengesPage,
+  component: () => (
+    <RequireAccount next="/challenges">
+      <ChallengesPage />
+    </RequireAccount>
+  ),
 });
 
 const DIFF_STYLE: Record<Difficulty, string> = {
@@ -108,6 +114,7 @@ function Examples({ ch }: { ch: Challenge }) {
 
 function ChallengesPage() {
   const t = useT();
+  const acc = useAccount();
   const lang = useLang();
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/challenges" });
@@ -143,7 +150,7 @@ function ChallengesPage() {
       );
   }
 
-  function onChecked(passed: boolean) {
+  function onChecked(passed: boolean, code: string) {
     const id = current.id;
     update((p) =>
       withToday({
@@ -159,6 +166,15 @@ function ChallengesPage() {
       update((p) => gainXp({ ...p, challenges: [...p.challenges, id] }, gain));
       setToast(t("ch.xp", { n: gain }));
       setTimeout(() => setToast(null), 2600);
+      // The server runs the code again before the XP counts.
+      void acc.claim({
+        kind: "challenge",
+        id,
+        code,
+        hints: progress.challengeHints[id] ?? 0,
+        solution: progress.challengeSolutions.includes(id),
+        day: today(),
+      });
     }
   }
 
