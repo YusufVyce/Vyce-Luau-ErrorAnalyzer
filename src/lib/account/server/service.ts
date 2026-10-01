@@ -5,7 +5,8 @@
  * Keys (all prefixed with "vyce:"):
  *   u:name:<lowercase name>  → user id (unique usernames)
  *   u:<id>                   → hash: name, pass, rec, created, xp, dayKey, dayXp, streak,
- *                              league, leagueWeek, leagueLast, lastPractice
+ *                              league, leagueWeek, leagueLast, lastPractice, av, bv
+ *                              (av / bv: version of the profile photo / banner, 0 = none)
  *   u:<id>:p                 → progress JSON (the account copy)
  *   u:<id>:s                 → set of session hashes (to sign out everywhere)
  *   u:<id>:f / u:<id>:fby    → sets: who they follow / who follows them
@@ -13,6 +14,9 @@
  *   lb:all / lb:d:<date> / lb:w:<week> / lb:streak → sorted sets of user ids
  *   lb:lg:<week>:<tier>      → sorted set: that week's XP inside one league
  *   lb:names / lb:sday       → hashes: id → display name / last active day
+ *   av                       → hash: id → profile photo version (for lists)
+ *   img:<id>:avatar|banner   → the image, base64 (PNG, JPEG or WebP)
+ *   f:…                      → the forum (see forum.ts)
  *   rl:<kind>:<key>          → rate-limit counters
  *
  * XP only comes from claims the server checked (see verify.ts): finished
@@ -32,6 +36,9 @@ import {
   type Claim,
   type ClaimOutcome,
   type FriendRow,
+  IMAGE_KINDS,
+  IMAGE_SPECS,
+  type ImageKind,
   type LeaderboardEntry,
   type LeaderboardResult,
   type LeagueBoard,
@@ -50,10 +57,12 @@ import {
   sha256Hex,
   verifyPassword,
 } from "./crypto";
+import { decodeBase64, imageType } from "./images";
 import type { Cmd, KV } from "./kv";
 import { verifyClaim, verifyImport } from "./verify";
 
-const P = "vyce:";
+/** Prefix of every key this app stores. */
+export const P = "vyce:";
 const DAY = 86_400;
 export const SESSION_TTL = 30 * DAY;
 
@@ -77,13 +86,19 @@ const LIMITS = {
   sync: { max: 60, window: 60 },
   claim: { max: 40, window: 60 },
   follow: { max: 40, window: 60 * 60 },
+  image: { max: 20, window: 60 * 60 },
+  forumThread: { max: 5, window: 60 * 60 },
+  forumPost: { max: 30, window: 60 * 60 },
+  forumBurst: { max: 3, window: 30 },
 } as const;
+
+export type LimitKind = keyof typeof LIMITS;
 
 type Session = { token: string; user: PublicUser; progress: Progress };
 type WithProgress = { user: PublicUser; progress: Progress };
 type User = { fields: Record<string, string>; progress: Progress };
 
-const fail = (error: AccountError) => ({ ok: false as const, error });
+export const fail = (error: AccountError) => ({ ok: false as const, error });
 
 /** YYYY-MM-DD in UTC. */
 export function utcDay(d: Date): string {
@@ -132,14 +147,14 @@ export function leagueZones(players: number): { promote: number; demote: number 
 }
 
 /** Flat [k, v, k, v] Redis reply → object. */
-function hash(reply: unknown): Record<string, string> {
+export function hash(reply: unknown): Record<string, string> {
   const out: Record<string, string> = {};
   if (Array.isArray(reply))
     for (let i = 0; i + 1 < reply.length; i += 2) out[reply[i]] = reply[i + 1];
   return out;
 }
 
-const num = (v: unknown) => {
+export const num = (v: unknown) => {
   const n = Number(v);
   return Number.isFinite(n) ? n : 0;
 };
@@ -178,7 +193,7 @@ export class AccountService {
   // ------------------------------------------------------------------ helpers
 
   /** Counts an attempt; true when the caller is over the limit. */
-  private async limited(kind: keyof typeof LIMITS, key: string): Promise<boolean> {
+  async limited(kind: LimitKind, key: string): Promise<boolean> {
     const { max, window } = LIMITS[kind];
     const k = `${P}rl:${kind}:${key}`;
     // SET NX starts the window with its expiry; INCR keeps that expiry.
@@ -190,7 +205,14 @@ export class AccountService {
   }
 
   private publicUser(id: string, h: Record<string, string>): PublicUser {
-    return { id, name: h.name, xp: num(h.xp), createdAt: h.created };
+    return {
+      id,
+      name: h.name,
+      xp: num(h.xp),
+      createdAt: h.created,
+      avatar: num(h.av),
+      banner: num(h.bv),
+    };
   }
 
   private async loadUser(id: string): Promise<User | null> {
@@ -427,7 +449,7 @@ export class AccountService {
       ok: true,
       token,
       recoveryCode,
-      user: { id, name, xp: progress.xp, createdAt: created },
+      user: { id, name, xp: progress.xp, createdAt: created, avatar: 0, banner: 0 },
       progress,
     };
   }
@@ -610,6 +632,8 @@ export class AccountService {
         `${P}u:${id}:f`,
         `${P}u:${id}:fby`,
         `${P}u:name:${user.fields.name.toLowerCase()}`,
+        `${P}img:${id}:avatar`,
+        `${P}img:${id}:banner`,
       ],
       ...(following ?? []).map((t): Cmd => ["SREM", `${P}u:${t}:fby`, id]),
       ...(followers ?? []).map((f): Cmd => ["SREM", `${P}u:${f}:f`, id]),
@@ -620,6 +644,7 @@ export class AccountService {
       ["ZREM", `${P}lb:lg:${isoWeek(now)}:${tierOf(user.fields.league)}`, id],
       ["HDEL", `${P}lb:names`, id],
       ["HDEL", `${P}lb:sday`, id],
+      ["HDEL", `${P}av`, id],
     ]);
     this.boardCache.clear();
     return { ok: true };
@@ -664,9 +689,10 @@ export class AccountService {
       const cmds: Cmd[] = [
         ["HMGET", `${P}lb:names`, ...ids],
         ["ZMSCORE", `${P}lb:all`, ...ids],
+        ["HMGET", `${P}av`, ...ids],
       ];
       if (streak) cmds.push(["HMGET", `${P}lb:sday`, ...ids]);
-      const [names, xps, sdays = []] = await this.kv.pipeline(cmds);
+      const [names, xps, avs, sdays = []] = await this.kv.pipeline(cmds);
       const stale: string[] = [];
       rows.forEach((r, i) => {
         const name = (names as Array<string | null>)[i];
@@ -675,7 +701,14 @@ export class AccountService {
           stale.push(r.id);
           return;
         }
-        entries.push({ rank: 0, id: r.id, name, score: r.score, xp: num((xps as unknown[])[i]) });
+        entries.push({
+          rank: 0,
+          id: r.id,
+          name,
+          score: r.score,
+          xp: num((xps as unknown[])[i]),
+          avatar: num((avs as unknown[])[i]),
+        });
       });
       if (stale.length > 0) {
         await this.kv.pipeline([
@@ -803,12 +836,13 @@ export class AccountService {
       MAX_FRIENDS,
     );
     const ids = [id, ...following.filter((f) => f !== id)];
-    const [names, week, all, streaks, sdays] = await this.kv.pipeline([
+    const [names, week, all, streaks, sdays, avs] = await this.kv.pipeline([
       ["HMGET", `${P}lb:names`, ...ids],
       ["ZMSCORE", `${P}lb:w:${isoWeek(now)}`, ...ids],
       ["ZMSCORE", `${P}lb:all`, ...ids],
       ["ZMSCORE", `${P}lb:streak`, ...ids],
       ["HMGET", `${P}lb:sday`, ...ids],
+      ["HMGET", `${P}av`, ...ids],
     ]);
     const rows: FriendRow[] = [];
     ids.forEach((fid, i) => {
@@ -818,6 +852,7 @@ export class AccountService {
       rows.push({
         id: fid,
         name,
+        avatar: num((avs as unknown[])[i]),
         week: num((week as unknown[])[i]),
         xp: num((all as unknown[])[i]),
         streak: alive ? num((streaks as unknown[])[i]) : 0,
@@ -853,6 +888,8 @@ export class AccountService {
       profile: {
         id,
         name: user.fields.name,
+        avatar: num(user.fields.av),
+        banner: num(user.fields.bv),
         createdAt: user.fields.created,
         xp: num(user.fields.xp),
         streak,
@@ -869,5 +906,97 @@ export class AccountService {
         followers: num(followers),
       },
     };
+  }
+
+  // ------------------------------------------------------------------ profile images
+
+  /** Saves a profile photo or banner (base64 PNG, JPEG or WebP, already resized by the browser). */
+  async setImage(
+    token: string | undefined,
+    kind: ImageKind,
+    data: string,
+  ): Promise<Result<{ user: PublicUser }>> {
+    const id = await this.sessionUser(token);
+    if (!id) return fail("unauthorized");
+    if (!IMAGE_KINDS.includes(kind)) return fail("bad_request");
+    if (await this.limited("image", id)) return fail("rate_limited");
+    const bytes = decodeBase64(data);
+    if (!bytes || bytes.length > IMAGE_SPECS[kind].maxBytes || !imageType(bytes)) {
+      return fail("bad_image");
+    }
+    const version = this.now().getTime();
+    const cmds: Cmd[] = [
+      ["SET", `${P}img:${id}:${kind}`, data],
+      ["HSET", `${P}u:${id}`, kind === "avatar" ? "av" : "bv", version],
+    ];
+    if (kind === "avatar") {
+      cmds.push(["HSET", `${P}av`, id, version]);
+      this.boardCache.clear();
+    }
+    await this.kv.pipeline(cmds);
+    const user = await this.loadUser(id);
+    if (!user) return fail("unauthorized");
+    return { ok: true, user: this.publicUser(id, user.fields) };
+  }
+
+  async removeImage(
+    token: string | undefined,
+    kind: ImageKind,
+  ): Promise<Result<{ user: PublicUser }>> {
+    const id = await this.sessionUser(token);
+    if (!id) return fail("unauthorized");
+    if (!IMAGE_KINDS.includes(kind)) return fail("bad_request");
+    const cmds: Cmd[] = [
+      ["DEL", `${P}img:${id}:${kind}`],
+      ["HDEL", `${P}u:${id}`, kind === "avatar" ? "av" : "bv"],
+    ];
+    if (kind === "avatar") {
+      cmds.push(["HDEL", `${P}av`, id]);
+      this.boardCache.clear();
+    }
+    await this.kv.pipeline(cmds);
+    const user = await this.loadUser(id);
+    if (!user) return fail("unauthorized");
+    return { ok: true, user: this.publicUser(id, user.fields) };
+  }
+
+  /** A stored image for the public image route, or null. */
+  async image(
+    id: string,
+    kind: string,
+  ): Promise<{ bytes: Uint8Array<ArrayBuffer>; type: string } | null> {
+    if (!/^u_[0-9a-f]{1,40}$/.test(id) || !IMAGE_KINDS.includes(kind as ImageKind)) return null;
+    const data = await this.kv.run<string | null>(["GET", `${P}img:${id}:${kind}`]);
+    const bytes = typeof data === "string" ? decodeBase64(data) : null;
+    const type = bytes && imageType(bytes);
+    return bytes && type ? { bytes, type } : null;
+  }
+
+  /** Names, photos and XP for a list of user ids (missing accounts get an empty name). */
+  async people(ids: string[]): Promise<Map<string, { name: string; avatar: number; xp: number }>> {
+    const unique = [...new Set(ids)];
+    const out = new Map<string, { name: string; avatar: number; xp: number }>();
+    if (unique.length === 0) return out;
+    const [names, avs, xps] = await this.kv.pipeline([
+      ["HMGET", `${P}lb:names`, ...unique],
+      ["HMGET", `${P}av`, ...unique],
+      ["ZMSCORE", `${P}lb:all`, ...unique],
+    ]);
+    unique.forEach((id, i) => {
+      out.set(id, {
+        name: ((names as Array<string | null>)[i] ?? "") || "",
+        avatar: num((avs as unknown[])[i]),
+        xp: num((xps as unknown[])[i]),
+      });
+    });
+    return out;
+  }
+
+  /** The signed-in user's id and name. */
+  async viewer(token: string | undefined): Promise<{ id: string; name: string } | null> {
+    const id = await this.sessionUser(token);
+    if (!id) return null;
+    const name = await this.kv.run<string | null>(["HGET", `${P}u:${id}`, "name"]);
+    return name ? { id, name } : null;
   }
 }

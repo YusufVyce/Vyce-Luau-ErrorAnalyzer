@@ -8,12 +8,14 @@ import {
   Languages,
   Library,
   LogIn,
+  MessagesSquare,
   Monitor,
   Moon,
   Sun,
   Swords,
   Trophy,
 } from "lucide-react";
+import { Avatar } from "@/components/account/Avatar";
 import { useAccount } from "@/lib/account/client";
 import { usePrefs, useT, type Lang, type Theme } from "@/lib/prefs";
 import { XpChip } from "@/components/ProgressBits";
@@ -24,6 +26,7 @@ const ITEMS = [
   { to: "/learn", key: "nav.learn", icon: BookOpen, exact: false },
   { to: "/challenges", key: "nav.challenges", icon: Swords, exact: false },
   { to: "/leaderboard", key: "nav.leaderboard", icon: Trophy, exact: false },
+  { to: "/forum", key: "nav.forum", icon: MessagesSquare, exact: false },
   { to: "/playground", key: "nav.playground", icon: FlaskConical, exact: false },
 ] as const;
 
@@ -120,6 +123,7 @@ const TAB_FILES = {
   "/learn": "learn/",
   "/challenges": "challenges/",
   "/leaderboard": "leaderboard.json",
+  "/forum": "forum/",
   "/playground": "playground.luau",
 } as const;
 
@@ -129,7 +133,7 @@ function SignedInXp() {
   return user ? <XpChip /> : null;
 }
 
-/** "Log in" when signed out; the account's initial (→ profile) when signed in. */
+/** "Log in" when signed out; the account's photo (→ public profile) when signed in. */
 function AccountButton() {
   const t = useT();
   const { status, user } = useAccount();
@@ -139,14 +143,13 @@ function AccountButton() {
   if (user) {
     return (
       <Link
-        to="/profile"
+        to="/u/$name"
+        params={{ name: user.name }}
         title={t("acc.signedInAs", { name: user.name })}
         aria-label={t("acc.signedInAs", { name: user.name })}
         className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-surface/70 transition-colors hover:border-brand-line"
       >
-        <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-[linear-gradient(135deg,var(--syn-purple),var(--brand))] font-mono text-[12px] font-bold text-white">
-          {user.name[0]?.toUpperCase()}
-        </span>
+        <Avatar id={user.id} name={user.name} avatar={user.avatar} size={24} />
       </Link>
     );
   }

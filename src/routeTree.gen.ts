@@ -17,7 +17,11 @@ import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as ErrorsRouteImport } from './routes/errors'
 import { Route as ChallengesRouteImport } from './routes/challenges'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ForumIndexRouteImport } from './routes/forum/index'
 import { Route as UNameRouteImport } from './routes/u/$name'
+import { Route as ForumNewRouteImport } from './routes/forum/new'
+import { Route as ForumIdRouteImport } from './routes/forum/$id'
+import { Route as ApiImgIdKindRouteImport } from './routes/api/img.$id.$kind'
 
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
@@ -59,9 +63,29 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForumIndexRoute = ForumIndexRouteImport.update({
+  id: '/forum/',
+  path: '/forum/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UNameRoute = UNameRouteImport.update({
   id: '/u/$name',
   path: '/u/$name',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForumNewRoute = ForumNewRouteImport.update({
+  id: '/forum/new',
+  path: '/forum/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForumIdRoute = ForumIdRouteImport.update({
+  id: '/forum/$id',
+  path: '/forum/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiImgIdKindRoute = ApiImgIdKindRouteImport.update({
+  id: '/api/img/$id/$kind',
+  path: '/api/img/$id/$kind',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -74,7 +98,11 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/playground': typeof PlaygroundRoute
   '/profile': typeof ProfileRoute
+  '/forum/$id': typeof ForumIdRoute
+  '/forum/new': typeof ForumNewRoute
   '/u/$name': typeof UNameRoute
+  '/forum/': typeof ForumIndexRoute
+  '/api/img/$id/$kind': typeof ApiImgIdKindRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -85,7 +113,11 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/playground': typeof PlaygroundRoute
   '/profile': typeof ProfileRoute
+  '/forum/$id': typeof ForumIdRoute
+  '/forum/new': typeof ForumNewRoute
   '/u/$name': typeof UNameRoute
+  '/forum': typeof ForumIndexRoute
+  '/api/img/$id/$kind': typeof ApiImgIdKindRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -97,7 +129,11 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/playground': typeof PlaygroundRoute
   '/profile': typeof ProfileRoute
+  '/forum/$id': typeof ForumIdRoute
+  '/forum/new': typeof ForumNewRoute
   '/u/$name': typeof UNameRoute
+  '/forum/': typeof ForumIndexRoute
+  '/api/img/$id/$kind': typeof ApiImgIdKindRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -110,7 +146,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/playground'
     | '/profile'
+    | '/forum/$id'
+    | '/forum/new'
     | '/u/$name'
+    | '/forum/'
+    | '/api/img/$id/$kind'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -121,7 +161,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/playground'
     | '/profile'
+    | '/forum/$id'
+    | '/forum/new'
     | '/u/$name'
+    | '/forum'
+    | '/api/img/$id/$kind'
   id:
     | '__root__'
     | '/'
@@ -132,7 +176,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/playground'
     | '/profile'
+    | '/forum/$id'
+    | '/forum/new'
     | '/u/$name'
+    | '/forum/'
+    | '/api/img/$id/$kind'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -144,7 +192,11 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PlaygroundRoute: typeof PlaygroundRoute
   ProfileRoute: typeof ProfileRoute
+  ForumIdRoute: typeof ForumIdRoute
+  ForumNewRoute: typeof ForumNewRoute
   UNameRoute: typeof UNameRoute
+  ForumIndexRoute: typeof ForumIndexRoute
+  ApiImgIdKindRoute: typeof ApiImgIdKindRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -205,11 +257,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forum/': {
+      id: '/forum/'
+      path: '/forum'
+      fullPath: '/forum/'
+      preLoaderRoute: typeof ForumIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/u/$name': {
       id: '/u/$name'
       path: '/u/$name'
       fullPath: '/u/$name'
       preLoaderRoute: typeof UNameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forum/new': {
+      id: '/forum/new'
+      path: '/forum/new'
+      fullPath: '/forum/new'
+      preLoaderRoute: typeof ForumNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forum/$id': {
+      id: '/forum/$id'
+      path: '/forum/$id'
+      fullPath: '/forum/$id'
+      preLoaderRoute: typeof ForumIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/img/$id/$kind': {
+      id: '/api/img/$id/$kind'
+      path: '/api/img/$id/$kind'
+      fullPath: '/api/img/$id/$kind'
+      preLoaderRoute: typeof ApiImgIdKindRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -224,7 +304,11 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PlaygroundRoute: PlaygroundRoute,
   ProfileRoute: ProfileRoute,
+  ForumIdRoute: ForumIdRoute,
+  ForumNewRoute: ForumNewRoute,
   UNameRoute: UNameRoute,
+  ForumIndexRoute: ForumIndexRoute,
+  ApiImgIdKindRoute: ApiImgIdKindRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

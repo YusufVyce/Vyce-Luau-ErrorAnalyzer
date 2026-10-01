@@ -89,3 +89,54 @@ export function FormError({ children }: { children?: string | null }) {
     </p>
   );
 }
+
+/** Labeled multi-line text box (forum posts). */
+export function TextArea({
+  label,
+  hint,
+  value,
+  onValue,
+  rows = 6,
+  maxLength,
+  required,
+  placeholder,
+}: {
+  label: string;
+  hint?: string;
+  value: string;
+  onValue: (v: string) => void;
+  rows?: number;
+  maxLength?: number;
+  required?: boolean;
+  placeholder?: string;
+}) {
+  const id = useId();
+  return (
+    <div className="space-y-1.5">
+      <label htmlFor={id} className="block text-[13px] font-medium text-ink">
+        {label}
+      </label>
+      <textarea
+        id={id}
+        value={value}
+        rows={rows}
+        maxLength={maxLength}
+        required={required}
+        placeholder={placeholder}
+        onChange={(e) => onValue(e.target.value)}
+        aria-describedby={hint ? `${id}-hint` : undefined}
+        className={`${INPUT} resize-y font-[inherit] leading-relaxed`}
+      />
+      {hint && (
+        <p id={`${id}-hint`} className="flex justify-between gap-3 text-[12px] text-ink-3">
+          <span>{hint}</span>
+          {maxLength ? (
+            <span className="shrink-0 font-mono">
+              {value.length}/{maxLength}
+            </span>
+          ) : null}
+        </p>
+      )}
+    </div>
+  );
+}

@@ -78,6 +78,8 @@ export interface LeagueBoard {
 export interface FriendRow {
   id: string;
   name: string;
+  /** Profile photo version (0 = none). */
+  avatar: number;
   week: number;
   xp: number;
   streak: number;
@@ -88,6 +90,9 @@ export interface FriendRow {
 export interface PublicProfile {
   id: string;
   name: string;
+  /** Profile photo and banner versions (0 = none); see imageUrl. */
+  avatar: number;
+  banner: number;
   createdAt: string;
   xp: number;
   streak: number;
@@ -112,6 +117,9 @@ export interface PublicUser {
   /** Account XP, as the server counts it. */
   xp: number;
   createdAt: string;
+  /** Profile photo and banner versions (0 = none); see imageUrl. */
+  avatar: number;
+  banner: number;
 }
 
 export interface LeaderboardEntry {
@@ -122,6 +130,8 @@ export interface LeaderboardEntry {
   score: number;
   /** All-time XP, for the level badge. */
   xp: number;
+  /** Profile photo version (0 = none). */
+  avatar: number;
 }
 
 export interface LeaderboardResult {
@@ -147,6 +157,9 @@ export type AccountError =
   | "rejected"
   | "not_found"
   | "too_many_friends"
+  | "bad_image"
+  | "forbidden"
+  | "locked"
   | "server_error";
 
 export type Result<T> = ({ ok: true } & T) | { ok: false; error: AccountError };
@@ -193,4 +206,87 @@ export function passwordError(password: string): AccountError | null {
 /** Error code → UI text key. */
 export function accountErrorKey(e: AccountError) {
   return `acc.err.${e}` as const;
+}
+
+// ------------------------------------------------------------------ profile images
+
+export type ImageKind = "avatar" | "banner";
+export const IMAGE_KINDS: ImageKind[] = ["avatar", "banner"];
+
+/** Size the browser resizes uploads to, and the largest file the server keeps. */
+export const IMAGE_SPECS: Record<ImageKind, { width: number; height: number; maxBytes: number }> = {
+  avatar: { width: 256, height: 256, maxBytes: 80_000 },
+  banner: { width: 1200, height: 400, maxBytes: 240_000 },
+};
+
+/** Where a player's photo or banner is served; the version makes each upload a new URL. */
+export function imageUrl(id: string, kind: ImageKind, version: number): string {
+  return `/api/img/${encodeURIComponent(id)}/${kind}?v=${version}`;
+}
+
+// ------------------------------------------------------------------ forum
+
+export const FORUM_CATEGORIES = [
+  { id: "general", en: "General", tr: "Genel sohbet" },
+  { id: "help", en: "Scripting help", tr: "Script yardımı" },
+  { id: "showcase", en: "Showcase", tr: "Projelerini paylaş" },
+  { id: "feedback", en: "Site feedback", tr: "Site önerileri" },
+] as const;
+
+export type ForumCategory = (typeof FORUM_CATEGORIES)[number]["id"];
+
+export const FORUM_TITLE_MIN = 4;
+export const FORUM_TITLE_MAX = 100;
+export const FORUM_BODY_MAX = 8000;
+export const FORUM_PAGE = 20;
+export const FORUM_POSTS_PAGE = 30;
+
+/** A person as the forum shows them. */
+export interface ForumAuthor {
+  id: string;
+  /** Empty when the account was deleted. */
+  name: string;
+  avatar: number;
+  xp: number;
+}
+
+export interface ForumThreadRow {
+  id: number;
+  title: string;
+  category: ForumCategory;
+  author: ForumAuthor;
+  createdAt: number;
+  lastAt: number;
+  lastBy: ForumAuthor | null;
+  replies: number;
+  pinned: boolean;
+  locked: boolean;
+}
+
+export interface ForumPost {
+  /** 1 is the opening post. */
+  n: number;
+  author: ForumAuthor;
+  body: string;
+  createdAt: number;
+  deleted: boolean;
+}
+
+export interface ForumThread extends ForumThreadRow {
+  posts: ForumPost[];
+  /** How many posts (including the opening one) the thread has. */
+  total: number;
+  page: number;
+  /** The signed-in viewer can pin, lock and delete anything. */
+  canModerate: boolean;
+}
+
+export function forumTitleError(title: string): AccountError | null {
+  const t = title.trim();
+  return t.length < FORUM_TITLE_MIN || t.length > FORUM_TITLE_MAX ? "bad_request" : null;
+}
+
+export function forumBodyError(body: string): AccountError | null {
+  const b = body.trim();
+  return b.length < 1 || b.length > FORUM_BODY_MAX ? "bad_request" : null;
 }

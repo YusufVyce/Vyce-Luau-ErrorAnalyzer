@@ -1,3 +1,4 @@
+import { Avatar } from "@/components/account/Avatar";
 import { Link } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { CloudCheck, KeyRound, LogOut, RefreshCw, Trash2, Globe2 } from "lucide-react";
@@ -35,9 +36,7 @@ export function AccountPanel() {
     <div className="ep-card space-y-5 p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
-          <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,var(--brand),var(--syn-purple))] font-mono text-lg font-bold text-white">
-            {user.name[0]?.toUpperCase()}
-          </span>
+          <Avatar id={user.id} name={user.name} avatar={user.avatar} size={48} />
           <div>
             <div className="text-lg font-semibold text-ink">{user.name}</div>
             <div className="text-[12px] text-ink-3">{t("acc.memberSince", { date: since })}</div>
