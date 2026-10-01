@@ -1,6 +1,6 @@
 /**
- * More lessons. Each one names the lesson it comes `after` in the course,
- * so it lands right where it builds on what the student already knows.
+ * More lessons, in three new units after the original course: a Luau
+ * toolbox, the world and its players, and servers & game projects.
  */
 import { CHAPTERS, type Lesson } from "./lessonBase";
 
@@ -13,14 +13,28 @@ const lua = (strings: TemplateStringsArray, ...values: unknown[]) =>
 
 const BT = "`";
 
-export type ExtraLesson = Lesson & { after: string };
+/** Order of the new lessons on the path (they're grouped into units by chapter). */
+const ORDER = [
+  "dictionaries",
+  "string-tools",
+  "pcall",
+  "task-library",
+  "attributes",
+  "instances",
+  "characters",
+  "user-input",
+  "cframes",
+  "remote-functions",
+  "bindables",
+  "project-shop",
+  "project-tycoon",
+];
 
-export const EXTRA_LESSONS: ExtraLesson[] = [
+const LESSONS_BY_ID: Lesson[] = [
   // ------------------------------------------------------------------ dictionaries
   {
-    after: "tables",
     id: "dictionaries",
-    chapter: CHAPTERS[1],
+    chapter: CHAPTERS[6],
     title: "Dictionaries: tables with names",
     minutes: 7,
     summary:
@@ -122,9 +136,8 @@ print(#playerData.Inventory)      -- 3
 
   // ------------------------------------------------------------------ string-tools
   {
-    after: "tables",
     id: "string-tools",
-    chapter: CHAPTERS[1],
+    chapter: CHAPTERS[6],
     title: "Text tricks: string functions",
     minutes: 8,
     summary:
@@ -216,9 +229,8 @@ print(string.format("%.2f", 9.5))     -- two decimals
 
   // ------------------------------------------------------------------ instances
   {
-    after: "parts",
     id: "instances",
-    chapter: CHAPTERS[2],
+    chapter: CHAPTERS[7],
     title: "Create, clone and find objects",
     minutes: 8,
     summary:
@@ -317,9 +329,8 @@ local map = workspace:WaitForChild("Map") -- waits until it exists
 
   // ------------------------------------------------------------------ task-library
   {
-    after: "events",
     id: "task-library",
-    chapter: CHAPTERS[2],
+    chapter: CHAPTERS[6],
     title: "task: waiting and running later",
     minutes: 6,
     summary: "task.wait, task.delay, task.spawn and Debris: timers that don't freeze your script.",
@@ -397,9 +408,8 @@ Debris:AddItem(spark, 2) -- destroyed after 2 seconds
 
   // ------------------------------------------------------------------ attributes
   {
-    after: "events",
     id: "attributes",
-    chapter: CHAPTERS[2],
+    chapter: CHAPTERS[6],
     title: "Attributes: your own properties",
     minutes: 6,
     summary:
@@ -481,9 +491,8 @@ door:SetAttribute("Locked", false) -- the door opens
 
   // ------------------------------------------------------------------ characters
   {
-    after: "leaderstats",
     id: "characters",
-    chapter: CHAPTERS[2],
+    chapter: CHAPTERS[7],
     title: "Characters and Humanoids",
     minutes: 8,
     summary: "Reach a player's character, change speed and jump, and react when they spawn or die.",
@@ -574,9 +583,8 @@ end)
 
   // ------------------------------------------------------------------ user-input
   {
-    after: "gui",
     id: "user-input",
-    chapter: CHAPTERS[2],
+    chapter: CHAPTERS[7],
     title: "Keyboard and mouse input",
     minutes: 7,
     summary:
@@ -668,9 +676,8 @@ end)
 
   // ------------------------------------------------------------------ remote-functions
   {
-    after: "remote-events",
     id: "remote-functions",
-    chapter: CHAPTERS[3],
+    chapter: CHAPTERS[8],
     title: "RemoteFunctions: ask and get an answer",
     minutes: 7,
     summary:
@@ -751,9 +758,8 @@ print("A sword costs", price)
 
   // ------------------------------------------------------------------ bindables
   {
-    after: "modules",
     id: "bindables",
-    chapter: CHAPTERS[3],
+    chapter: CHAPTERS[8],
     title: "BindableEvents: scripts talking to each other",
     minutes: 6,
     summary:
@@ -835,9 +841,8 @@ print(getScore:Invoke("Ann")) -- 10
 
   // ------------------------------------------------------------------ project-shop
   {
-    after: "project-obby",
     id: "project-shop",
-    chapter: CHAPTERS[4],
+    chapter: CHAPTERS[8],
     title: "Project: a coin shop",
     minutes: 15,
     summary:
@@ -945,9 +950,8 @@ end)
 
   // ------------------------------------------------------------------ project-tycoon
   {
-    after: "project-obby",
     id: "project-tycoon",
-    chapter: CHAPTERS[4],
+    chapter: CHAPTERS[8],
     title: "Project: a dropper tycoon",
     minutes: 15,
     summary:
@@ -1051,9 +1055,8 @@ end)
 
   // ------------------------------------------------------------------ pcall
   {
-    after: "debugging",
     id: "pcall",
-    chapter: CHAPTERS[4],
+    chapter: CHAPTERS[6],
     title: "pcall: code that's allowed to fail",
     minutes: 7,
     summary:
@@ -1155,9 +1158,8 @@ print(pcall(buy, 100, -5)) -- false and the message
 
   // ------------------------------------------------------------------ cframes
   {
-    after: "runservice",
     id: "cframes",
-    chapter: CHAPTERS[5],
+    chapter: CHAPTERS[7],
     title: "CFrame: position and rotation",
     minutes: 9,
     summary: "Move, turn and aim parts with CFrame: where a part is plus the direction it faces.",
@@ -1240,3 +1242,5 @@ door.CFrame = door.CFrame + Vector3.new(0, 3, 0)
     },
   },
 ];
+
+export const EXTRA_LESSONS: Lesson[] = ORDER.map((id) => LESSONS_BY_ID.find((l) => l.id === id)!);

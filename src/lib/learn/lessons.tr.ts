@@ -32,6 +32,9 @@ export const CHAPTERS_TR: Record<string, string> = {
   "4 · Multiplayer & saving": "4 · Çok oyunculu ve kayıt",
   "5 · Build a game": "5 · Oyun yap",
   "6 · Advanced scripting": "6 · İleri seviye scripting",
+  "7 · Luau toolbox": "7 · Luau araç kutusu",
+  "8 · World & players": "8 · Dünya ve oyuncular",
+  "9 · Servers & projects": "9 · Sunucu ve projeler",
 };
 
 const TR_BASE: Record<string, LessonTr> = {

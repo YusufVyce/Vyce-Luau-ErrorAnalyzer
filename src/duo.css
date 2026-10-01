@@ -61,6 +61,18 @@
   --u: #ff8cc6;
   --u-dark: #c0508a;
 }
+.vy-unit-6 {
+  --u: #ffcb6b;
+  --u-dark: #c7922e;
+}
+.vy-unit-7 {
+  --u: #5eead4;
+  --u-dark: #2a9d8f;
+}
+.vy-unit-8 {
+  --u: #ff8a80;
+  --u-dark: #c4524a;
+}
 :root[data-theme="light"] .vy-unit-0 {
   --u: #5b7fe8;
   --u-dark: #3656d8;
@@ -84,6 +96,18 @@
 :root[data-theme="light"] .vy-unit-5 {
   --u: #ec5f9e;
   --u-dark: #bd3c76;
+}
+:root[data-theme="light"] .vy-unit-6 {
+  --u: #d99a0b;
+  --u-dark: #a8740a;
+}
+:root[data-theme="light"] .vy-unit-7 {
+  --u: #14a89a;
+  --u-dark: #0d7d72;
+}
+:root[data-theme="light"] .vy-unit-8 {
+  --u: #e5534b;
+  --u-dark: #b53a33;
 }
 
 @layer components {

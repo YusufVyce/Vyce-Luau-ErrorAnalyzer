@@ -1799,14 +1799,8 @@ end)
   },
 ];
 
-/**
- * The whole course. New lessons sit right after the lesson they build on
- * (see \`after\` in lessons.extra.ts).
- */
-export const LESSONS: Lesson[] = BASE_LESSONS.flatMap((l) => [
-  l,
-  ...EXTRA_LESSONS.filter((x) => x.after === l.id).map(({ after: _after, ...x }) => x),
-]);
+/** The whole course: the original units, then the newer ones. */
+export const LESSONS: Lesson[] = [...BASE_LESSONS, ...EXTRA_LESSONS];
 
 export function analyzerLink(error: string, code: string): string {
   const params = new URLSearchParams({ error, code });

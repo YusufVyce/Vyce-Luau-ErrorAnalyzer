@@ -81,28 +81,13 @@ describe("lesson unlocking", () => {
     expect(lessonUnlocked(first, 2)).toBe(false);
   });
 
-  it("never locks lessons a student already reached when new ones are added behind them", () => {
-    // Someone who finished everything up to "modules" before the new lessons existed.
-    const old = LESSONS.slice(0, at("modules") + 1)
-      .map((l) => l.id)
-      .filter(
-        (id) =>
-          ![
-            "dictionaries",
-            "string-tools",
-            "instances",
-            "task-library",
-            "attributes",
-            "characters",
-            "user-input",
-            "remote-functions",
-          ].includes(id),
-      );
-    const p = done(old);
-    expect(lessonUnlocked(p, at("datastores"))).toBe(true);
+  it("opens the first new unit for someone who finished the original course", () => {
+    const original = LESSONS.slice(0, at("dictionaries")).map((l) => l.id);
+    const p = done(original);
+    expect(original).toContain("round-system");
+    expect(lessonUnlocked(p, at("round-system"))).toBe(true);
     expect(lessonUnlocked(p, at("dictionaries"))).toBe(true);
-    expect(lessonUnlocked(p, at("bindables"))).toBe(true);
-    expect(lessonUnlocked(p, at("project-obby"))).toBe(false);
+    expect(lessonUnlocked(p, at("string-tools"))).toBe(false);
   });
 });
 
