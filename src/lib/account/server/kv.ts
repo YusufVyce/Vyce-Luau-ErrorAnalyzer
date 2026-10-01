@@ -55,7 +55,8 @@ type Entry =
   | { type: "string"; value: string }
   | { type: "hash"; value: Map<string, string> }
   | { type: "set"; value: Set<string> }
-  | { type: "zset"; value: Map<string, number> };
+  | { type: "zset"; value: Map<string, number> }
+  | { type: "list"; value: string[] };
 
 /** Redis formats scores as the shortest round-tripping decimal. */
 const fmtScore = (n: number) => String(n);
@@ -94,7 +95,9 @@ export class MemoryKV implements KV {
           ? { type, value: new Map() }
           : type === "set"
             ? { type, value: new Set() }
-            : { type, value: new Map() }
+            : type === "list"
+              ? { type, value: [] }
+              : { type, value: new Map() }
     ) as Extract<Entry, { type: K }>;
     this.data.set(key, fresh);
     return fresh;
@@ -141,12 +144,41 @@ export class MemoryKV implements KV {
         }
         return n;
       }
-      case "INCR": {
+      case "INCR":
+      case "INCRBY": {
         const e = this.ensure(a[0], "string");
-        const n = (Number(e.value) || 0) + 1;
+        const n = (Number(e.value) || 0) + (op === "INCRBY" ? Number(a[1]) : 1);
         e.value = String(n);
         return n;
       }
+      case "MGET":
+        return a.map((k) => this.get(k, "string")?.value ?? null);
+      case "EXISTS":
+        return a.filter((k) => this.live(k)).length;
+      case "PERSIST":
+        return this.live(a[0]) && this.expires.delete(a[0]) ? 1 : 0;
+      case "HLEN":
+        return this.get(a[0], "hash")?.value.size ?? 0;
+      case "LPUSH": {
+        const l = this.ensure(a[0], "list").value;
+        l.unshift(...a.slice(1).reverse());
+        return l.length;
+      }
+      case "LRANGE": {
+        const l = this.get(a[0], "list")?.value ?? [];
+        const stop = Number(a[2]);
+        return l.slice(Number(a[1]), stop < 0 ? l.length + stop + 1 : stop + 1);
+      }
+      case "LTRIM": {
+        const e = this.get(a[0], "list");
+        if (e) {
+          const stop = Number(a[2]);
+          e.value = e.value.slice(Number(a[1]), stop < 0 ? e.value.length + stop + 1 : stop + 1);
+        }
+        return "OK";
+      }
+      case "LLEN":
+        return this.get(a[0], "list")?.value.length ?? 0;
       case "EXPIRE": {
         if (!this.live(a[0])) return 0;
         this.expires.set(a[0], this.now() + Number(a[1]) * 1000);
@@ -247,6 +279,16 @@ export class MemoryKV implements KV {
       }
       case "ZCARD":
         return this.get(a[0], "zset")?.value.size ?? 0;
+      case "ZREMRANGEBYRANK": {
+        // Ranks count from the lowest score, like Redis.
+        const z = this.get(a[0], "zset")?.value;
+        if (!z) return 0;
+        const asc = this.sortedDesc(a[0]).reverse();
+        const stop = Number(a[2]);
+        const gone = asc.slice(Number(a[1]), stop < 0 ? asc.length + stop + 1 : stop + 1);
+        for (const [m] of gone) z.delete(m);
+        return gone.length;
+      }
       case "ZREVRANGE": {
         const all = this.sortedDesc(a[0]);
         const start = Number(a[1]);

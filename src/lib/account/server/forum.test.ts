@@ -15,7 +15,7 @@ beforeEach(() => {
   now = new Date("2026-10-01T10:00:00Z");
   kv = new MemoryKV(() => now.getTime());
   svc = new AccountService(kv, () => now);
-  forum = new ForumService(kv, svc, () => now, ["vyce"]);
+  forum = new ForumService(kv, svc, () => now);
 });
 
 let ipN = 0;
@@ -67,7 +67,7 @@ describe("profile images", () => {
       ok: false,
       error: "bad_image",
     });
-    const big = btoa(String.fromCharCode(0x89, 0x50, 0x4e, 0x47) + "x".repeat(90_000));
+    const big = btoa(String.fromCharCode(0x89, 0x50, 0x4e, 0x47) + "x".repeat(130_000));
     expect(await svc.setImage(a.token, "avatar", big)).toEqual({ ok: false, error: "bad_image" });
     expect(await svc.setImage("nope", "avatar", PNG)).toEqual({
       ok: false,

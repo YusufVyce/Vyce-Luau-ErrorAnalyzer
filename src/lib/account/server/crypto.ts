@@ -96,6 +96,11 @@ export function newId(): string {
   return `u_${toHex(randomBytes(8))}`;
 }
 
+/** Id of an uploaded forum picture. */
+export function newImageId(): string {
+  return `i_${toHex(randomBytes(10))}`;
+}
+
 // No 0/O or 1/I/L, so the code survives being written down by hand.
 const CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 

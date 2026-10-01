@@ -61,7 +61,7 @@ export function XpChip() {
       <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-[linear-gradient(135deg,var(--brand),var(--syn-purple))] px-1 font-mono text-[11px] font-bold text-white">
         {lvl.level}
       </span>
-      <span className="hidden font-mono lg:inline">{p.xp} XP</span>
+      <span className="hidden font-mono 2xl:inline">{p.xp} XP</span>
     </Link>
   );
 }

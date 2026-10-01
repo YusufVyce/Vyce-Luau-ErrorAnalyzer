@@ -9,6 +9,7 @@ import {
   ImagePlus,
   Lock,
   Settings,
+  ShieldCheck,
   Trash2,
   UserMinus,
   UserPlus,
@@ -16,6 +17,8 @@ import {
 } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
 import { Avatar } from "@/components/account/Avatar";
+import { CropDialog } from "@/components/account/CropDialog";
+import { RoleBadge } from "@/components/account/RoleBadge";
 import { FormError } from "@/components/account/fields";
 import { ACHIEVEMENT_ICONS } from "@/components/ProgressBits";
 import { LeagueBadge } from "@/components/account/LeagueBadge";
@@ -23,7 +26,6 @@ import { Heatmap, LevelRing } from "@/components/account/ProgressViews";
 import { Mascot } from "@/components/learn/duo/Mascot";
 import { followUser, getProfile, removeImage, unfollowUser, uploadImage } from "@/lib/account/api";
 import { useAccount } from "@/lib/account/client";
-import { resizeForUpload } from "@/lib/account/resizeImage";
 import {
   accountErrorKey,
   imageUrl,
@@ -51,34 +53,41 @@ export const Route = createFileRoute("/u/$name")({
   component: PublicProfilePage,
 });
 
-/** Picks, resizes and uploads a profile photo or banner; removes one too. */
+/** Picks a profile photo or banner, opens the crop dialog and uploads the result; removes one too. */
 function useImageEditor(onUser: (u: PublicUser) => void) {
   const t = useT();
   const [busy, setBusy] = useState<ImageKind | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState<{ file: File; kind: ImageKind } | null>(null);
   const inputs = {
     avatar: useRef<HTMLInputElement>(null),
     banner: useRef<HTMLInputElement>(null),
   };
 
-  async function upload(kind: ImageKind, file: File | undefined) {
+  function pick(kind: ImageKind, file: File | undefined) {
     if (!file) return;
     setError(null);
-    if (!file.type.startsWith("image/") || file.type === "image/svg+xml") {
+    if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type)) {
       setError(t("img.notImage"));
       return;
     }
+    if (file.size > 20 * 1024 * 1024) {
+      setError(t("img.tooLarge"));
+      return;
+    }
+    setEditing({ file, kind });
+  }
+
+  async function save(kind: ImageKind, data: string): Promise<string | null> {
     setBusy(kind);
-    const data = await resizeForUpload(file, kind).catch(() => null);
-    if (!data) {
-      setBusy(null);
-      setError(t("img.notImage"));
-      return;
-    }
     const r = await uploadImage({ data: { kind, data } }).catch(() => null);
     setBusy(null);
-    if (r?.ok) onUser(r.user);
-    else setError(t(accountErrorKey(r ? r.error : "server_error")));
+    if (r?.ok) {
+      onUser(r.user);
+      setEditing(null);
+      return null;
+    }
+    return t(accountErrorKey(r ? r.error : "server_error"));
   }
 
   async function remove(kind: ImageKind) {
@@ -90,20 +99,34 @@ function useImageEditor(onUser: (u: PublicUser) => void) {
     else setError(t(accountErrorKey(r ? r.error : "server_error")));
   }
 
-  /** The hidden file inputs; buttons open them with inputs[kind].current.click(). */
-  const fileInputs = (["avatar", "banner"] as const).map((kind) => (
-    <input
-      key={kind}
-      ref={inputs[kind]}
-      type="file"
-      accept="image/png,image/jpeg,image/webp,image/gif"
-      className="hidden"
-      onChange={(e) => {
-        void upload(kind, e.target.files?.[0]);
-        e.target.value = "";
-      }}
-    />
-  ));
+  /** The hidden file inputs and the crop dialog; buttons open the inputs with inputs[kind].current.click(). */
+  const fileInputs = (
+    <>
+      {(["avatar", "banner"] as const).map((kind) => (
+        <input
+          key={kind}
+          ref={inputs[kind]}
+          type="file"
+          accept="image/png,image/jpeg,image/webp,image/gif"
+          className="hidden"
+          data-testid={`${kind}-input`}
+          onChange={(e) => {
+            pick(kind, e.target.files?.[0]);
+            e.target.value = "";
+          }}
+        />
+      ))}
+      {editing && (
+        <CropDialog
+          key={`${editing.kind}:${editing.file.name}:${editing.file.lastModified}`}
+          file={editing.file}
+          kind={editing.kind}
+          onCancel={() => setEditing(null)}
+          onSave={(data) => save(editing.kind, data)}
+        />
+      )}
+    </>
+  );
 
   return { busy, error, inputs, remove, fileInputs };
 }
@@ -289,7 +312,10 @@ function PublicProfilePage() {
             </div>
             <div className="min-w-0 flex-1 space-y-3 text-center sm:text-left">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-ink">{profile.name}</h1>
+                <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                  <h1 className="text-3xl font-bold tracking-tight text-ink">{profile.name}</h1>
+                  <RoleBadge role={profile.role} />
+                </div>
                 <p className="text-[13px] text-ink-3">
                   {t("acc.memberSince", { date: since })} ·{" "}
                   <span className="inline-flex items-center gap-1">
@@ -310,12 +336,12 @@ function PublicProfilePage() {
                 <LeagueBadge tier={profile.league} lang={lang} size={28} />
               </div>
               {licensed && (
-                <p className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1 text-[13px] font-semibold text-amber-300">
+                <p className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1 text-[13px] font-semibold text-[var(--warn-ink)]">
                   <Award className="h-4 w-4" aria-hidden="true" /> {t("pr.licensed")}
                 </p>
               )}
             </div>
-            <div className="flex flex-col items-stretch gap-2 sm:w-48">
+            <div className="flex flex-col items-stretch gap-2 sm:w-52">
               {profile.isMe ? (
                 <Link
                   to="/profile"
@@ -349,6 +375,16 @@ function PublicProfilePage() {
                   className="ep-cta rounded-xl px-4 py-2 text-center text-sm font-semibold"
                 >
                   {t("pr.signinToFollow")}
+                </Link>
+              )}
+              {profile.canManage && (
+                <Link
+                  to="/admin"
+                  search={{ tab: "users", user: profile.id }}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-sky-400/40 bg-sky-400/10 px-3 py-2 text-[13px] font-medium text-[var(--info-ink)] hover:bg-sky-400/20"
+                >
+                  <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+                  {t("adm.manageUser")}
                 </Link>
               )}
               <button

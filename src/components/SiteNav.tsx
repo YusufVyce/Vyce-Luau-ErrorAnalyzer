@@ -11,6 +11,7 @@ import {
   MessagesSquare,
   Monitor,
   Moon,
+  ShieldCheck,
   Sun,
   Swords,
   Trophy,
@@ -133,6 +134,24 @@ function SignedInXp() {
   return user ? <XpChip /> : null;
 }
 
+/** A shortcut to the admin panel for the owner and admins. */
+function AdminButton() {
+  const t = useT();
+  const { user } = useAccount();
+  if (!user?.role) return null;
+  return (
+    <Link
+      to="/admin"
+      aria-label={t("adm.title")}
+      title={t("adm.title")}
+      className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-sky-400/40 bg-sky-400/10 text-[var(--info-ink)] transition-colors hover:bg-sky-400/20"
+      activeProps={{ className: "ring-2 ring-sky-400/50" }}
+    >
+      <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+    </Link>
+  );
+}
+
 /** "Log in" when signed out; the account's photo (→ public profile) when signed in. */
 function AccountButton() {
   const t = useT();
@@ -206,8 +225,9 @@ export function SiteNav() {
             </Link>
           ))}
         </div>
-        <div className="order-2 ml-auto flex items-center gap-1.5 md:order-3 md:ml-0 md:gap-2">
+        <div className="order-2 ml-auto flex shrink-0 items-center gap-1.5 whitespace-nowrap md:order-3 md:ml-0 md:gap-2">
           <SignedInXp />
+          <AdminButton />
           <AccountButton />
           <Menu<Lang>
             label={t("nav.language")}

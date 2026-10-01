@@ -15,7 +15,13 @@
  *   lb:lg:<week>:<tier>      → sorted set: that week's XP inside one league
  *   lb:names / lb:sday       → hashes: id → display name / last active day
  *   av                       → hash: id → profile photo version (for lists)
- *   img:<id>:avatar|banner   → the image, base64 (PNG, JPEG or WebP)
+ *   img:<id>:avatar|banner   → the image, base64 in chunks (PNG, JPEG, WebP or GIF; see images.ts)
+ *   owner / admins           → the owner's id / set of admin ids
+ *   bans / namebans          → hashes: id → ban JSON / lowercase name → name-ban JSON
+ *   users:created            → sorted set: id by sign-up time
+ *   stats:d:<day> / stats:t  → hashes of daily / all-time counters (admin overview)
+ *   settings                 → hash: announcement, tone, signupsClosed, forumReadOnly
+ *   audit                    → list of admin actions (JSON), newest first
  *   f:…                      → the forum (see forum.ts)
  *   rl:<kind>:<key>          → rate-limit counters
  *
@@ -28,7 +34,10 @@ import { earned } from "@/lib/learn/achievements";
 import { mergeProgress, normalizeProgress, type Progress } from "@/lib/learn/progress";
 import {
   BOARDS,
+  DEFAULT_SETTINGS,
   LEAGUES,
+  nameBanned,
+  OWNER_NAME,
   passwordError,
   usernameError,
   type AccountError,
@@ -43,9 +52,13 @@ import {
   type LeaderboardResult,
   type LeagueBoard,
   type LeagueResult,
+  type BanRecord,
+  type NameBan,
   type PublicProfile,
   type PublicUser,
   type Result,
+  type Role,
+  type SiteSettings,
 } from "../shared";
 import {
   burnPasswordCheck,
@@ -57,7 +70,7 @@ import {
   sha256Hex,
   verifyPassword,
 } from "./crypto";
-import { decodeBase64, imageType } from "./images";
+import { decodeBase64, deleteBlobCmds, imageType, loadBlob, saveBlob } from "./images";
 import type { Cmd, KV } from "./kv";
 import { verifyClaim, verifyImport } from "./verify";
 
@@ -90,13 +103,19 @@ const LIMITS = {
   forumThread: { max: 5, window: 60 * 60 },
   forumPost: { max: 30, window: 60 * 60 },
   forumBurst: { max: 3, window: 30 },
+  forumImage: { max: 30, window: 60 * 60 },
+  forumReport: { max: 10, window: 60 * 60 },
 } as const;
 
 export type LimitKind = keyof typeof LIMITS;
 
 type Session = { token: string; user: PublicUser; progress: Progress };
 type WithProgress = { user: PublicUser; progress: Progress };
-type User = { fields: Record<string, string>; progress: Progress };
+export type User = { fields: Record<string, string>; progress: Progress };
+export type Person = { name: string; avatar: number; xp: number; role?: Role };
+
+/** Stats counters live this long (days). */
+const STATS_TTL = 400 * DAY;
 
 export const fail = (error: AccountError) => ({ ok: false as const, error });
 
@@ -184,6 +203,8 @@ export function withServerOwned(server: Progress, incoming: Progress): Progress 
 
 export class AccountService {
   private boardCache = new Map<string, { at: number; entries: LeaderboardEntry[] }>();
+  private roleCache: { at: number; owner: string | null; admins: Set<string> } | null = null;
+  private settingsCache: { at: number; value: SiteSettings } | null = null;
 
   constructor(
     private kv: KV,
@@ -204,7 +225,9 @@ export class AccountService {
     return num(n) > max;
   }
 
-  private publicUser(id: string, h: Record<string, string>): PublicUser {
+  /** Account details for the browser, with the role for admins. */
+  async publicUser(id: string, h: Record<string, string>): Promise<PublicUser> {
+    const role = await this.roleOf(id, h.name ?? "");
     return {
       id,
       name: h.name,
@@ -212,10 +235,122 @@ export class AccountService {
       createdAt: h.created,
       avatar: num(h.av),
       banner: num(h.bv),
+      rev: num(h.rev),
+      ...(role ? { role } : {}),
     };
   }
 
-  private async loadUser(id: string): Promise<User | null> {
+  forgetBoards() {
+    this.boardCache.clear();
+  }
+
+  // ------------------------------------------------------------------ roles, bans, settings
+
+  /** The owner's id and the admin ids (cached briefly). */
+  async roles(): Promise<{ owner: string | null; admins: Set<string> }> {
+    const now = this.now().getTime();
+    if (this.roleCache && now - this.roleCache.at < 30_000) return this.roleCache;
+    const [owner, admins] = await this.kv.pipeline([
+      ["GET", `${P}owner`],
+      ["SMEMBERS", `${P}admins`],
+    ]);
+    this.roleCache = {
+      at: now,
+      owner: typeof owner === "string" ? owner : null,
+      admins: new Set((admins as string[]) ?? []),
+    };
+    return this.roleCache;
+  }
+
+  forgetRoles() {
+    this.roleCache = null;
+  }
+
+  /**
+   * The owner is the account called "vyce"; the first time it's seen its id
+   * is pinned, so the role stays with that account even if the name changes
+   * or someone else later takes the name. Admins are added by the owner.
+   */
+  async roleOf(id: string, name: string): Promise<Role | undefined> {
+    const { owner, admins } = await this.roles();
+    if (owner) {
+      if (owner === id) return "owner";
+    } else if (name.toLowerCase() === OWNER_NAME) {
+      await this.kv.run(["SET", `${P}owner`, id, "NX"]);
+      this.forgetRoles();
+      if ((await this.roles()).owner === id) return "owner";
+    }
+    return admins.has(id) ? "admin" : undefined;
+  }
+
+  /** The account's ban if it's still running (expired bans are cleared). */
+  async banOf(id: string): Promise<BanRecord | null> {
+    const raw = await this.kv.run<string | null>(["HGET", `${P}bans`, id]);
+    if (!raw) return null;
+    try {
+      const ban = JSON.parse(raw) as BanRecord;
+      if (ban.until && ban.until <= this.now().getTime()) {
+        await this.kv.run(["HDEL", `${P}bans`, id]);
+        return null;
+      }
+      return ban;
+    } catch {
+      return null;
+    }
+  }
+
+  private banned(ban: BanRecord) {
+    return {
+      ok: false as const,
+      error: "banned" as const,
+      ban: { reason: ban.reason, until: ban.until },
+    };
+  }
+
+  async nameBans(): Promise<NameBan[]> {
+    const h = hash(await this.kv.run(["HGETALL", `${P}namebans`]));
+    const out: NameBan[] = [];
+    for (const [name, raw] of Object.entries(h)) {
+      try {
+        const b = JSON.parse(raw) as Omit<NameBan, "name">;
+        out.push({ name, mode: b.mode === "contains" ? "contains" : "exact", by: b.by, at: b.at });
+      } catch {
+        // skip a broken entry
+      }
+    }
+    return out.sort((a, b) => b.at - a.at);
+  }
+
+  /** Site settings (cached briefly; every page asks for the announcement). */
+  async settings(): Promise<SiteSettings> {
+    const now = this.now().getTime();
+    if (this.settingsCache && now - this.settingsCache.at < 30_000) return this.settingsCache.value;
+    const h = hash(await this.kv.run(["HGETALL", `${P}settings`]));
+    const value: SiteSettings = {
+      announcement: h.announcement ?? DEFAULT_SETTINGS.announcement,
+      tone: h.tone === "warn" ? "warn" : "info",
+      signupsClosed: h.signupsClosed === "1",
+      forumReadOnly: h.forumReadOnly === "1",
+    };
+    this.settingsCache = { at: now, value };
+    return value;
+  }
+
+  forgetSettings() {
+    this.settingsCache = null;
+  }
+
+  /** Adds to today's and all-time counters for the admin overview. */
+  stat(field: string, by = 1): Cmd[] {
+    const key = `${P}stats:d:${utcDay(this.now())}`;
+    return [
+      ["HINCRBY", key, field, by],
+      ["EXPIRE", key, STATS_TTL],
+      ["HINCRBY", `${P}stats:t`, field, by],
+    ];
+  }
+
+  async loadUser(id: string): Promise<User | null> {
     const [h, raw] = await this.kv.pipeline([
       ["HGETALL", `${P}u:${id}`],
       ["GET", `${P}u:${id}:p`],
@@ -234,7 +369,7 @@ export class AccountService {
     return { fields, progress };
   }
 
-  private async idForName(name: string): Promise<string | null> {
+  async idForName(name: string): Promise<string | null> {
     const lower = name.trim().toLowerCase();
     if (!lower || lower.length > 40) return null;
     return this.kv.run<string | null>(["GET", `${P}u:name:${lower}`]);
@@ -251,7 +386,7 @@ export class AccountService {
     return token;
   }
 
-  private async endAllSessions(id: string) {
+  async endAllSessions(id: string) {
     const keys = (await this.kv.run<string[]>(["SMEMBERS", `${P}u:${id}:s`])) ?? [];
     await this.kv.pipeline([
       ...keys.map((k): Cmd => ["DEL", `${P}s:${k}`]),
@@ -278,7 +413,7 @@ export class AccountService {
     return today;
   }
 
-  private async saveProgress(id: string, progress: Progress): Promise<Progress> {
+  async saveProgress(id: string, progress: Progress): Promise<Progress> {
     let json = JSON.stringify(progress);
     if (json.length > MAX_PROGRESS_BYTES) {
       // Saved code is the only part that can get big; drop it before losing anything else.
@@ -294,7 +429,7 @@ export class AccountService {
    * last week's league is settled: the top places move up, the last ones move
    * down. Done lazily per student, so no scheduled job is needed.
    */
-  private async resolveLeague(id: string, fields: Record<string, string>): Promise<number> {
+  async resolveLeague(id: string, fields: Record<string, string>): Promise<number> {
     const now = this.now();
     const week = isoWeek(now);
     if (fields.leagueWeek === week) return tierOf(fields.league);
@@ -390,6 +525,13 @@ export class AccountService {
     if (streak > 0 && latest) {
       cmds.push(["ZADD", `${P}lb:streak`, streak, id], ["HSET", `${P}lb:sday`, id, latest]);
     }
+    if (added > 0) {
+      cmds.push(...this.stat("xp", added));
+      if (scope === "every") {
+        const active = `${P}stats:a:${today}`;
+        cmds.push(["SADD", active, id], ["EXPIRE", active, 40 * DAY]);
+      }
+    }
     await this.kv.pipeline(cmds);
     Object.assign(f, { xp: String(total), dayKey: today, dayXp: String(dayXp) });
     return { progress: p, added };
@@ -413,6 +555,8 @@ export class AccountService {
     const name = input.username.trim();
     const bad = usernameError(name) ?? passwordError(input.password);
     if (bad) return fail(bad);
+    if ((await this.settings()).signupsClosed) return fail("signups_closed");
+    if (nameBanned(name, await this.nameBans())) return fail("reserved_username");
     if (await this.limited("signup", ip)) return fail("rate_limited");
 
     const id = newId();
@@ -437,6 +581,8 @@ export class AccountService {
         0,
       ],
       ["HSET", `${P}lb:names`, id, name],
+      ["ZADD", `${P}users:created`, this.now().getTime(), id],
+      ...this.stat("signups"),
     ]);
     const user = (await this.loadUser(id))!;
     await this.resolveLeague(id, user.fields);
@@ -449,7 +595,7 @@ export class AccountService {
       ok: true,
       token,
       recoveryCode,
-      user: { id, name, xp: progress.xp, createdAt: created, avatar: 0, banner: 0 },
+      user: await this.publicUser(id, { ...user.fields, xp: String(progress.xp) }),
       progress,
     };
   }
@@ -472,13 +618,16 @@ export class AccountService {
     if (!(await verifyPassword(input.password, user.fields.pass ?? ""))) {
       return fail("bad_credentials");
     }
+    const ban = await this.banOf(id);
+    if (ban) return this.banned(ban);
     let { progress } = user;
     if (input.progress !== undefined) progress = await this.importLocal(id, user, input.progress);
     const token = await this.startSession(id);
+    await this.kv.pipeline(this.stat("logins"));
     return {
       ok: true,
       token,
-      user: { ...this.publicUser(id, user.fields), xp: progress.xp },
+      user: { ...(await this.publicUser(id, user.fields)), xp: progress.xp },
       progress,
     };
   }
@@ -498,7 +647,11 @@ export class AccountService {
     if (!id) return null;
     const user = await this.loadUser(id);
     if (!user) return null;
-    return { user: this.publicUser(id, user.fields), progress: user.progress };
+    if (await this.banOf(id)) {
+      await this.endAllSessions(id);
+      return null;
+    }
+    return { user: await this.publicUser(id, user.fields), progress: user.progress };
   }
 
   /** Stores what only the browser knows (saved code, hints, daily goal). Never adds XP. */
@@ -515,7 +668,7 @@ export class AccountService {
       id,
       withServerOwned(user.progress, normalizeProgress(input.progress)),
     );
-    return { ok: true, user: this.publicUser(id, user.fields), progress };
+    return { ok: true, user: await this.publicUser(id, user.fields), progress };
   }
 
   /** Checks something the student finished and pays its XP. */
@@ -548,9 +701,13 @@ export class AccountService {
     if (claim.kind === "practice") {
       await this.kv.run(["HSET", `${P}u:${id}`, "lastPractice", nowMs]);
     }
+    if (claim.kind === "homework" && added > 0) {
+      // First time this lesson's homework passed: counts for the admin overview.
+      await this.kv.pipeline([["HINCRBY", `${P}stats:lessons`, claim.lessonId, 1]]);
+    }
     return {
       ok: true,
-      user: this.publicUser(id, user.fields),
+      user: await this.publicUser(id, user.fields),
       progress,
       outcome: { ...verdict.outcome, awarded: added },
     };
@@ -567,6 +724,8 @@ export class AccountService {
     const user = id ? await this.loadUser(id) : null;
     const given = await sha256Hex(normalizeRecoveryCode(input.code));
     if (!id || !user || !user.fields.rec || given !== user.fields.rec) return fail("bad_recovery");
+    const ban = await this.banOf(id);
+    if (ban) return this.banned(ban);
 
     // The code is single-use: a new one replaces it.
     const recoveryCode = newRecoveryCode();
@@ -584,7 +743,7 @@ export class AccountService {
       ok: true,
       token,
       recoveryCode,
-      user: this.publicUser(id, user.fields),
+      user: await this.publicUser(id, user.fields),
       progress: user.progress,
     };
   }
@@ -618,6 +777,12 @@ export class AccountService {
     if (!user || !(await verifyPassword(input.password, user.fields.pass ?? ""))) {
       return fail("bad_credentials");
     }
+    await this.purgeUser(id, user);
+    return { ok: true };
+  }
+
+  /** Removes an account and everything that points at it (forum posts stay, without a name). */
+  async purgeUser(id: string, user: User): Promise<void> {
     await this.endAllSessions(id);
     const now = this.now();
     const [following, followers] = (await this.kv.pipeline([
@@ -632,9 +797,9 @@ export class AccountService {
         `${P}u:${id}:f`,
         `${P}u:${id}:fby`,
         `${P}u:name:${user.fields.name.toLowerCase()}`,
-        `${P}img:${id}:avatar`,
-        `${P}img:${id}:banner`,
       ],
+      ...deleteBlobCmds(`${P}img:${id}:avatar`),
+      ...deleteBlobCmds(`${P}img:${id}:banner`),
       ...(following ?? []).map((t): Cmd => ["SREM", `${P}u:${t}:fby`, id]),
       ...(followers ?? []).map((f): Cmd => ["SREM", `${P}u:${f}:f`, id]),
       ["ZREM", `${P}lb:all`, id],
@@ -645,9 +810,13 @@ export class AccountService {
       ["HDEL", `${P}lb:names`, id],
       ["HDEL", `${P}lb:sday`, id],
       ["HDEL", `${P}av`, id],
+      ["HDEL", `${P}bans`, id],
+      ["SREM", `${P}admins`, id],
+      ["ZREM", `${P}users:created`, id],
+      ...this.stat("imageBytes", -(num(user.fields.avatarBytes) + num(user.fields.bannerBytes))),
     ]);
     this.boardCache.clear();
-    return { ok: true };
+    this.forgetRoles();
   }
 
   // ------------------------------------------------------------------ leaderboards
@@ -690,13 +859,15 @@ export class AccountService {
         ["HMGET", `${P}lb:names`, ...ids],
         ["ZMSCORE", `${P}lb:all`, ...ids],
         ["HMGET", `${P}av`, ...ids],
+        ["HMGET", `${P}bans`, ...ids],
       ];
       if (streak) cmds.push(["HMGET", `${P}lb:sday`, ...ids]);
-      const [names, xps, avs, sdays = []] = await this.kv.pipeline(cmds);
+      const [names, xps, avs, bans, sdays = []] = await this.kv.pipeline(cmds);
       const stale: string[] = [];
       rows.forEach((r, i) => {
         const name = (names as Array<string | null>)[i];
-        if (!name || r.score <= 0) return;
+        // Banned accounts don't show on the boards.
+        if (!name || r.score <= 0 || (bans as Array<string | null>)[i]) return;
         if (streak && !this.streakAlive((sdays as Array<string | null>)[i], now)) {
           stale.push(r.id);
           return;
@@ -872,6 +1043,7 @@ export class AccountService {
     const id = await this.idForName(name);
     const user = id ? await this.loadUser(id) : null;
     if (!id || !user) return fail("not_found");
+    if (await this.banOf(id)) return fail("banned");
     const viewer = await this.sessionUser(token);
     const tier = await this.resolveLeague(id, user.fields);
     const now = this.now();
@@ -880,6 +1052,11 @@ export class AccountService {
       viewer && viewer !== id ? ["SISMEMBER", `${P}u:${viewer}:f`, id] : ["SCARD", `${P}none`],
       ["SCARD", `${P}u:${id}:fby`],
     ]);
+    const role = await this.roleOf(id, user.fields.name);
+    const viewerName = viewer
+      ? await this.kv.run<string | null>(["HGET", `${P}u:${viewer}`, "name"])
+      : null;
+    const viewerRole = viewer ? await this.roleOf(viewer, viewerName ?? "") : undefined;
     const p = user.progress;
     const latest = p.days.filter((d) => d <= shiftDay(utcDay(now), 1)).at(-1);
     const streak = latest && this.streakAlive(latest, now) ? streakEndingAt(p.days, latest) : 0;
@@ -904,13 +1081,17 @@ export class AccountService {
         isMe: viewer === id,
         following: Boolean(viewer && viewer !== id && num(following) === 1),
         followers: num(followers),
+        ...(role ? { role } : {}),
+        ...(viewerRole === "owner" || (viewerRole === "admin" && (!role || viewer === id))
+          ? { canManage: true }
+          : {}),
       },
     };
   }
 
   // ------------------------------------------------------------------ profile images
 
-  /** Saves a profile photo or banner (base64 PNG, JPEG or WebP, already resized by the browser). */
+  /** Saves a profile photo or banner (base64 PNG, JPEG, WebP or GIF, cropped by the browser). */
   async setImage(
     token: string | undefined,
     kind: ImageKind,
@@ -921,13 +1102,23 @@ export class AccountService {
     if (!IMAGE_KINDS.includes(kind)) return fail("bad_request");
     if (await this.limited("image", id)) return fail("rate_limited");
     const bytes = decodeBase64(data);
-    if (!bytes || bytes.length > IMAGE_SPECS[kind].maxBytes || !imageType(bytes)) {
+    const type = bytes && imageType(bytes);
+    const spec = IMAGE_SPECS[kind];
+    if (
+      !bytes ||
+      !type ||
+      bytes.length > (type === "image/gif" ? spec.gifMaxBytes : spec.maxBytes)
+    ) {
       return fail("bad_image");
     }
+    const key = `${P}img:${id}:${kind}`;
+    const before = await this.kv.run<number | null>(["HGET", `${P}u:${id}`, `${kind}Bytes`]);
+    await saveBlob(this.kv, key, data);
     const version = this.now().getTime();
+    const field = kind === "avatar" ? "av" : "bv";
     const cmds: Cmd[] = [
-      ["SET", `${P}img:${id}:${kind}`, data],
-      ["HSET", `${P}u:${id}`, kind === "avatar" ? "av" : "bv", version],
+      ["HSET", `${P}u:${id}`, field, version, `${kind}Bytes`, bytes.length],
+      ...this.stat("imageBytes", bytes.length - num(before)),
     ];
     if (kind === "avatar") {
       cmds.push(["HSET", `${P}av`, id, version]);
@@ -936,7 +1127,22 @@ export class AccountService {
     await this.kv.pipeline(cmds);
     const user = await this.loadUser(id);
     if (!user) return fail("unauthorized");
-    return { ok: true, user: this.publicUser(id, user.fields) };
+    return { ok: true, user: await this.publicUser(id, user.fields) };
+  }
+
+  /** Deletes a profile photo or banner (the owner, or an admin with `id`). */
+  async dropImage(id: string, kind: ImageKind): Promise<void> {
+    const before = await this.kv.run<number | null>(["HGET", `${P}u:${id}`, `${kind}Bytes`]);
+    const cmds: Cmd[] = [
+      ...deleteBlobCmds(`${P}img:${id}:${kind}`),
+      ["HDEL", `${P}u:${id}`, kind === "avatar" ? "av" : "bv", `${kind}Bytes`],
+      ...this.stat("imageBytes", -num(before)),
+    ];
+    if (kind === "avatar") {
+      cmds.push(["HDEL", `${P}av`, id]);
+      this.boardCache.clear();
+    }
+    await this.kv.pipeline(cmds);
   }
 
   async removeImage(
@@ -946,18 +1152,10 @@ export class AccountService {
     const id = await this.sessionUser(token);
     if (!id) return fail("unauthorized");
     if (!IMAGE_KINDS.includes(kind)) return fail("bad_request");
-    const cmds: Cmd[] = [
-      ["DEL", `${P}img:${id}:${kind}`],
-      ["HDEL", `${P}u:${id}`, kind === "avatar" ? "av" : "bv"],
-    ];
-    if (kind === "avatar") {
-      cmds.push(["HDEL", `${P}av`, id]);
-      this.boardCache.clear();
-    }
-    await this.kv.pipeline(cmds);
+    await this.dropImage(id, kind);
     const user = await this.loadUser(id);
     if (!user) return fail("unauthorized");
-    return { ok: true, user: this.publicUser(id, user.fields) };
+    return { ok: true, user: await this.publicUser(id, user.fields) };
   }
 
   /** A stored image for the public image route, or null. */
@@ -966,27 +1164,32 @@ export class AccountService {
     kind: string,
   ): Promise<{ bytes: Uint8Array<ArrayBuffer>; type: string } | null> {
     if (!/^u_[0-9a-f]{1,40}$/.test(id) || !IMAGE_KINDS.includes(kind as ImageKind)) return null;
-    const data = await this.kv.run<string | null>(["GET", `${P}img:${id}:${kind}`]);
-    const bytes = typeof data === "string" ? decodeBase64(data) : null;
+    const data = await loadBlob(this.kv, `${P}img:${id}:${kind}`);
+    const bytes = data ? decodeBase64(data) : null;
     const type = bytes && imageType(bytes);
     return bytes && type ? { bytes, type } : null;
   }
 
   /** Names, photos and XP for a list of user ids (missing accounts get an empty name). */
-  async people(ids: string[]): Promise<Map<string, { name: string; avatar: number; xp: number }>> {
+  async people(ids: string[]): Promise<Map<string, Person>> {
     const unique = [...new Set(ids)];
-    const out = new Map<string, { name: string; avatar: number; xp: number }>();
+    const out = new Map<string, Person>();
     if (unique.length === 0) return out;
-    const [names, avs, xps] = await this.kv.pipeline([
-      ["HMGET", `${P}lb:names`, ...unique],
-      ["HMGET", `${P}av`, ...unique],
-      ["ZMSCORE", `${P}lb:all`, ...unique],
+    const [[names, avs, xps], { owner, admins }] = await Promise.all([
+      this.kv.pipeline([
+        ["HMGET", `${P}lb:names`, ...unique],
+        ["HMGET", `${P}av`, ...unique],
+        ["ZMSCORE", `${P}lb:all`, ...unique],
+      ]),
+      this.roles(),
     ]);
     unique.forEach((id, i) => {
+      const role: Role | undefined = id === owner ? "owner" : admins.has(id) ? "admin" : undefined;
       out.set(id, {
         name: ((names as Array<string | null>)[i] ?? "") || "",
         avatar: num((avs as unknown[])[i]),
         xp: num((xps as unknown[])[i]),
+        ...(role ? { role } : {}),
       });
     });
     return out;

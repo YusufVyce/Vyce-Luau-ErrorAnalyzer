@@ -15,19 +15,30 @@ import {
   setCookie,
 } from "@tanstack/react-start/server";
 import { z } from "zod";
+import type { Actor, AdminService } from "./server/admin";
 import type { ForumService } from "./server/forum";
-import { accountService as service, forumService as forum } from "./server/instance";
+import {
+  accountService as service,
+  adminService as admin,
+  forumService as forum,
+} from "./server/instance";
 import { SESSION_TTL, type AccountService } from "./server/service";
 import type { Progress } from "@/lib/learn/progress";
 import {
+  DEFAULT_SETTINGS,
   FORUM_BODY_MAX,
+  FORUM_IMAGE_SPEC,
+  FORUM_IMAGES_PER_POST,
+  FORUM_REPORT_MAX,
   FORUM_TITLE_MAX,
   IMAGE_SPECS,
   type AccountError,
+  type AdminAction,
   type Board,
   type Claim,
   type PublicUser,
   type Result,
+  type SiteSettings,
 } from "./shared";
 
 const COOKIE = "vyce_session";
@@ -245,7 +256,7 @@ export const getProfile = createServerFn({ method: "GET" })
 
 const imageKind = z.enum(["avatar", "banner"]);
 // base64 is 4/3 of the file size; the service checks the real limit.
-const imageData = z.string().max(Math.ceil((IMAGE_SPECS.banner.maxBytes * 4) / 3) + 8);
+const imageData = z.string().max(Math.ceil((IMAGE_SPECS.banner.gifMaxBytes * 4) / 3) + 8);
 
 export const uploadImage = createServerFn({ method: "POST" })
   .validator(z.object({ kind: imageKind, data: imageData }))
@@ -281,18 +292,21 @@ export const getThread = createServerFn({ method: "GET" })
   .validator(z.object({ id: threadId, page: z.number().int().min(-1).max(10_000) }))
   .handler(async ({ data }) => withForum((f) => f.thread(data.id, data.page, getCookie(COOKIE))));
 
+const imageIds = z.array(z.string().max(40)).max(FORUM_IMAGES_PER_POST).optional();
+
 export const createThread = createServerFn({ method: "POST" })
   .validator(
     z.object({
       title: z.string().max(FORUM_TITLE_MAX * 2),
       category: z.string().max(20),
       body: z.string().max(FORUM_BODY_MAX * 2),
+      images: imageIds,
     }),
   )
   .handler(async ({ data }) => withForum((f) => f.create(getCookie(COOKIE), data)));
 
 export const replyThread = createServerFn({ method: "POST" })
-  .validator(z.object({ id: threadId, body: z.string().max(FORUM_BODY_MAX * 2) }))
+  .validator(z.object({ id: threadId, body: z.string().max(FORUM_BODY_MAX * 2), images: imageIds }))
   .handler(async ({ data }) => withForum((f) => f.reply(getCookie(COOKIE), data)));
 
 export const deletePost = createServerFn({ method: "POST" })
@@ -302,3 +316,202 @@ export const deletePost = createServerFn({ method: "POST" })
 export const moderateThread = createServerFn({ method: "POST" })
   .validator(z.object({ id: threadId, action: z.enum(["pin", "unpin", "lock", "unlock"]) }))
   .handler(async ({ data }) => withForum((f) => f.moderate(getCookie(COOKIE), data)));
+
+export const uploadForumImage = createServerFn({ method: "POST" })
+  .validator(
+    z.object({ data: z.string().max(Math.ceil((FORUM_IMAGE_SPEC.gifMaxBytes * 4) / 3) + 8) }),
+  )
+  .handler(async ({ data }) => withForum((f) => f.uploadImage(getCookie(COOKIE), data.data)));
+
+export const reportPost = createServerFn({ method: "POST" })
+  .validator(
+    z.object({
+      id: threadId,
+      n: z.number().int().positive().max(1e6),
+      reason: z.string().max(FORUM_REPORT_MAX * 2),
+    }),
+  )
+  .handler(async ({ data }) => withForum((f) => f.report(getCookie(COOKIE), data)));
+
+/** The announcement and switches every page needs (no sign-in). */
+export const getSiteNotice = createServerFn({ method: "GET" }).handler(async () =>
+  withService<{ settings: SiteSettings }>(async (svc) => ({
+    ok: true,
+    settings: await svc.settings().catch(() => DEFAULT_SETTINGS),
+  })),
+);
+
+// ------------------------------------------------------------------ admin panel
+
+/** Runs an admin handler for the signed-in owner or admin; everyone else gets "forbidden". */
+async function withAdmin<T>(
+  fn: (a: AdminService, actor: Actor, token: string | undefined) => Promise<Result<T>>,
+): Promise<Result<T>> {
+  const a = admin();
+  if (!a) return { ok: false, error: "not_configured" };
+  try {
+    const token = getCookie(COOKIE);
+    const actor = await a.actor(token);
+    if (!actor) return { ok: false, error: "forbidden" };
+    return await fn(a, actor, token);
+  } catch (e) {
+    console.error("[admin]", e);
+    return { ok: false, error: "server_error" as AccountError };
+  }
+}
+
+const userId = z.string().regex(/^u_[0-9a-f]{1,40}$/);
+const idList = z.array(z.string().max(80)).max(200);
+const adminAction: z.ZodType<AdminAction> = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("ban"),
+    reason: z.string().max(600),
+    days: z.number().min(0).max(3650),
+    deletePosts: z.boolean(),
+  }),
+  z.object({ kind: z.literal("unban") }),
+  z.object({
+    kind: z.literal("xp"),
+    mode: z.enum(["add", "set"]),
+    amount: z.number().min(-10_000_000).max(10_000_000),
+    boards: z.boolean(),
+  }),
+  z.object({ kind: z.literal("lessons"), ids: idList, done: z.boolean(), xp: z.boolean() }),
+  z.object({ kind: z.literal("challenges"), ids: idList, done: z.boolean(), xp: z.boolean() }),
+  z.object({ kind: z.literal("resetProgress") }),
+  z.object({ kind: z.literal("rename"), name: z.string().max(40) }),
+  z.object({ kind: z.literal("recovery") }),
+  z.object({ kind: z.literal("logout") }),
+  z.object({ kind: z.literal("removeImage"), image: z.enum(["avatar", "banner"]) }),
+  z.object({ kind: z.literal("deletePosts") }),
+  z.object({ kind: z.literal("delete") }),
+  z.object({ kind: z.literal("role"), admin: z.boolean() }),
+]);
+
+export const adminOverview = createServerFn({ method: "GET" }).handler(async () =>
+  withAdmin(async (a) => ({ ok: true as const, stats: await a.stats() })),
+);
+
+export const adminUsers = createServerFn({ method: "GET" })
+  .validator(
+    z.object({
+      query: z.string().max(40),
+      sort: z.enum(["new", "xp", "name"]),
+      filter: z.enum(["all", "banned", "admins"]),
+      page: z.number().int().min(0).max(10_000),
+    }),
+  )
+  .handler(async ({ data }) =>
+    withAdmin(async (a) => ({ ok: true as const, ...(await a.listUsers(data)) })),
+  );
+
+export const adminUser = createServerFn({ method: "GET" })
+  .validator(z.object({ id: userId }))
+  .handler(async ({ data }) =>
+    withAdmin(async (a) => {
+      const user = await a.user(data.id);
+      return user
+        ? { ok: true as const, user }
+        : { ok: false as const, error: "not_found" as const };
+    }),
+  );
+
+export const adminAct = createServerFn({ method: "POST" })
+  .validator(z.object({ id: userId, action: adminAction }))
+  .handler(async ({ data }) => withAdmin((a, actor) => a.act(actor, data.id, data.action)));
+
+export const adminSetRole = createServerFn({ method: "POST" })
+  .validator(z.object({ name: z.string().max(40), admin: z.boolean() }))
+  .handler(async ({ data }) =>
+    withAdmin((a, actor) => a.setRoleByName(actor, data.name, data.admin)),
+  );
+
+export const adminNameBans = createServerFn({ method: "GET" }).handler(async () =>
+  withAdmin(async (a) => ({ ok: true as const, ...(await a.nameBans()) })),
+);
+
+export const adminAddNameBan = createServerFn({ method: "POST" })
+  .validator(z.object({ name: z.string().max(40), mode: z.enum(["exact", "contains"]) }))
+  .handler(async ({ data }) => withAdmin((a, actor) => a.addNameBan(actor, data.name, data.mode)));
+
+export const adminRemoveNameBan = createServerFn({ method: "POST" })
+  .validator(z.object({ name: z.string().max(40) }))
+  .handler(async ({ data }) => withAdmin((a, actor) => a.removeNameBan(actor, data.name)));
+
+export const adminSaveSettings = createServerFn({ method: "POST" })
+  .validator(
+    z.object({
+      announcement: z.string().max(600),
+      tone: z.enum(["info", "warn"]),
+      signupsClosed: z.boolean(),
+      forumReadOnly: z.boolean(),
+    }),
+  )
+  .handler(async ({ data }) => withAdmin((a, actor) => a.setSettings(actor, data)));
+
+export const adminAudit = createServerFn({ method: "GET" })
+  .validator(z.object({ page: z.number().int().min(0).max(100) }))
+  .handler(async ({ data }) =>
+    withAdmin(async (a) => ({ ok: true as const, ...(await a.audit(data.page)) })),
+  );
+
+export const adminRecentPosts = createServerFn({ method: "GET" })
+  .validator(z.object({ page: z.number().int().min(0).max(100) }))
+  .handler(async ({ data }) =>
+    withAdmin(async () => ({ ok: true as const, ...(await forum()!.recent(data.page)) })),
+  );
+
+export const adminReports = createServerFn({ method: "GET" }).handler(async () =>
+  withAdmin(async () => ({ ok: true as const, reports: await forum()!.reports() })),
+);
+
+export const adminDismissReport = createServerFn({ method: "POST" })
+  .validator(z.object({ key: z.string().max(40) }))
+  .handler(async ({ data }) =>
+    withAdmin(async (a, actor) => {
+      await forum()!.dismissReport(data.key);
+      await a.logForum(actor, "dismissReport", data.key);
+      return { ok: true as const };
+    }),
+  );
+
+export const adminDeletePost = createServerFn({ method: "POST" })
+  .validator(z.object({ id: threadId, n: z.number().int().positive().max(1e6) }))
+  .handler(async ({ data }) =>
+    withAdmin(async (a, actor, token) => {
+      const r = await forum()!.remove(token, data);
+      if (r.ok)
+        await a.logForum(
+          actor,
+          r.threadDeleted ? "deleteThread" : "deletePost",
+          `${data.id}:${data.n}`,
+        );
+      return r;
+    }),
+  );
+
+export const adminEditThread = createServerFn({ method: "POST" })
+  .validator(
+    z.object({
+      id: threadId,
+      title: z
+        .string()
+        .max(FORUM_TITLE_MAX * 2)
+        .optional(),
+      category: z.string().max(20).optional(),
+    }),
+  )
+  .handler(async ({ data }) =>
+    withAdmin(async (a, actor) => {
+      const r = await forum()!.editThread(data);
+      if (r.ok) {
+        await a.logForum(
+          actor,
+          "editThread",
+          String(data.id),
+          [data.title, data.category].filter(Boolean).join(" · "),
+        );
+      }
+      return r;
+    }),
+  );
