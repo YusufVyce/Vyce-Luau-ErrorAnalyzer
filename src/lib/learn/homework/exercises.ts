@@ -7,6 +7,7 @@
 import { Color3, Vector3 } from "@/lib/luau/roblox/datatypes";
 import type { Instance } from "@/lib/luau/roblox/instance";
 import type { World } from "@/lib/luau/roblox/world";
+import { EXTRA_EXERCISES } from "./extra";
 import { fmtValue, type Exercise, type Harness, type Say } from "./harness";
 
 const approx = (a: unknown, b: number, eps = 0.02) =>
@@ -47,7 +48,7 @@ function character(p: Instance): Instance | undefined {
   return p.props.get("Character") as Instance | undefined;
 }
 
-export const EXERCISES: Exercise[] = [
+const BASE_EXERCISES: Exercise[] = [
   // ---------------------------------------------------------------- studio-tour
   {
     lessonId: "studio-tour",
@@ -2103,6 +2104,8 @@ if not __ok then print("__TEST__", "error", tostring(__err)) end`,
     },
   },
 ];
+
+export const EXERCISES: Exercise[] = [...BASE_EXERCISES, ...EXTRA_EXERCISES];
 
 export function exerciseFor(lessonId: string): Exercise | undefined {
   return EXERCISES.find((e) => e.lessonId === lessonId);

@@ -77,7 +77,8 @@ This makes it easier to see exactly where an expression stops working.
 
 Vyce Parser includes a structured learning system for learning Roblox Studio scripting.
 
-- Lessons designed for beginners.
+- 39 lessons in 6 units, from the Studio tour to CFrames, pcall, RemoteFunctions and two full game projects (a coin shop and a dropper tycoon).
+- Every lesson has homework that runs in the browser simulator.
 - English and Turkish language support.
 - Step-by-step learning path.
 - Short explanations and examples.
@@ -110,7 +111,7 @@ Write and test your code directly inside Vyce Parser.
 
 ## 🎯 Tasks
 
-The task system gives you coding exercises with different difficulty levels.
+The task system gives you 88 coding challenges in three difficulty levels (easy, medium, hard): game maths, text and table puzzles, a maze solver and a tic-tac-toe judge, plus Roblox world tasks like kill bricks, coin pickups, click doors and a safe RemoteEvent shop.
 
 Your code is executed and checked against the requirements of the task.
 
@@ -128,7 +129,7 @@ This lets you practice writing code instead of only reading explanations.
 
 # 📖 Error Dictionary
 
-The **Error Dictionary** is a searchable collection of common Roblox/Luau errors.
+The **Error Dictionary** is a searchable collection of about 150 common Roblox/Luau errors, each explained by the analyzer in English and Turkish.
 
 For each error, you can find information such as:
 

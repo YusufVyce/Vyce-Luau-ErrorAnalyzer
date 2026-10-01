@@ -253,9 +253,19 @@ export function doneLessonIds(p: Progress): string[] {
   return LESSONS.filter((l) => lessonComplete(p, l) || p.stars[l.id]).map((l) => l.id);
 }
 
-/** A lesson is unlocked when every lesson before it is complete. */
+/**
+ * A lesson is unlocked up to one step past the furthest lesson the student
+ * has finished. For someone going in order that's "every lesson before it is
+ * complete"; when new lessons are added to the course later, the ones that
+ * land behind a student's progress open up instead of locking what they
+ * already reached.
+ */
 export function lessonUnlocked(p: Progress, index: number): boolean {
-  return LESSONS.slice(0, index).every((l) => lessonComplete(p, l));
+  let furthest = -1;
+  LESSONS.forEach((l, i) => {
+    if (lessonComplete(p, l)) furthest = i;
+  });
+  return index <= furthest + 1;
 }
 
 export function homeworkXp(p: Progress, lessonId: string): number {

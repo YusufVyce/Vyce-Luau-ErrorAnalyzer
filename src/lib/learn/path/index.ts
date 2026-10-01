@@ -3,12 +3,20 @@ import { CH2 } from "./ch2";
 import { CH3 } from "./ch3";
 import { CH4 } from "./ch4";
 import { CH6 } from "./ch6";
+import { CH_EXTRA } from "./extra";
 import type { Exercise, PathLesson } from "./types";
 
 export * from "./types";
 
 /** Bite-sized steps for every lesson, keyed by lesson id. */
-export const PATH: Record<string, PathLesson> = { ...CH1, ...CH2, ...CH3, ...CH4, ...CH6 };
+export const PATH: Record<string, PathLesson> = {
+  ...CH1,
+  ...CH2,
+  ...CH3,
+  ...CH4,
+  ...CH6,
+  ...CH_EXTRA,
+};
 
 export function pathLesson(id: string): PathLesson | undefined {
   return PATH[id];

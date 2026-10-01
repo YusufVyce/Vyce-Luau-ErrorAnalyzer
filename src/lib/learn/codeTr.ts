@@ -7,6 +7,7 @@
  * i18n.test.ts checks that no English comment is left in Turkish mode.
  */
 import type { Lang } from "./path/types";
+import { EXTRA_COMMENTS, EXTRA_STRINGS } from "./codeTr.extra";
 
 /** Whole lines whose Turkish needs a different word order. Matched after trimming. */
 const LINES: Record<string, string> = {
@@ -21,6 +22,7 @@ const LINES: Record<string, string> = {
 
 /** Comment text (after `--`, trimmed). */
 const COMMENTS: Record<string, string> = {
+  ...EXTRA_COMMENTS,
   "This line is ignored": "Bu satır yok sayılır",
   "a comment can also go at the end": "yorum satırın sonuna da yazılabilir",
   number: "sayı (number)",
@@ -89,6 +91,7 @@ const COMMENTS: Record<string, string> = {
  * code looks up (object names, tags, item and pet names) are not here.
  */
 const STRINGS: Record<string, string> = {
+  ...EXTRA_STRINGS,
   "Hello world!": "Merhaba dünya!",
   "This line runs": "Bu satır çalışır",
   "This runs": "Bu çalışır",

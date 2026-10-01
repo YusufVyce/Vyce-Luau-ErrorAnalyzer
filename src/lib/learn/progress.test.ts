@@ -5,6 +5,7 @@ import { LESSONS } from "./lessons";
 import {
   EMPTY_PROGRESS,
   gainXp,
+  lessonUnlocked,
   levelFor,
   normalizeProgress,
   starsFor,
@@ -65,6 +66,43 @@ describe("progress", () => {
   it("levels go up with XP", () => {
     expect(levelFor(0).level).toBe(1);
     expect(levelFor(5000).title).toBe("Legend");
+  });
+});
+
+describe("lesson unlocking", () => {
+  const done = (ids: string[]) => ({ ...EMPTY_PROGRESS, quiz: ids, homework: ids });
+  const at = (id: string) => LESSONS.findIndex((l) => l.id === id);
+
+  it("opens lessons one at a time in order", () => {
+    expect(lessonUnlocked(EMPTY_PROGRESS, 0)).toBe(true);
+    expect(lessonUnlocked(EMPTY_PROGRESS, 1)).toBe(false);
+    const first = done([LESSONS[0].id]);
+    expect(lessonUnlocked(first, 1)).toBe(true);
+    expect(lessonUnlocked(first, 2)).toBe(false);
+  });
+
+  it("never locks lessons a student already reached when new ones are added behind them", () => {
+    // Someone who finished everything up to "modules" before the new lessons existed.
+    const old = LESSONS.slice(0, at("modules") + 1)
+      .map((l) => l.id)
+      .filter(
+        (id) =>
+          ![
+            "dictionaries",
+            "string-tools",
+            "instances",
+            "task-library",
+            "attributes",
+            "characters",
+            "user-input",
+            "remote-functions",
+          ].includes(id),
+      );
+    const p = done(old);
+    expect(lessonUnlocked(p, at("datastores"))).toBe(true);
+    expect(lessonUnlocked(p, at("dictionaries"))).toBe(true);
+    expect(lessonUnlocked(p, at("bindables"))).toBe(true);
+    expect(lessonUnlocked(p, at("project-obby"))).toBe(false);
   });
 });
 

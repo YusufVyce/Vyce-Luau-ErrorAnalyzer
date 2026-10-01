@@ -1,4 +1,5 @@
 import {
+  ArrowLeftRight,
   Backpack,
   Blocks,
   Braces,
@@ -28,6 +29,18 @@ import {
   Trophy,
   Wrench,
   Zap,
+  BellRing,
+  BookA,
+  CaseSensitive,
+  Copy,
+  Factory,
+  Hourglass,
+  LifeBuoy,
+  Mouse,
+  Navigation,
+  PersonStanding,
+  ShoppingCart,
+  StickyNote,
   type LucideIcon,
 } from "lucide-react";
 
@@ -59,6 +72,19 @@ export const LESSON_ICONS: Record<string, LucideIcon> = {
   oop: Cookie,
   tools: Sword,
   "round-system": TrafficCone,
+  dictionaries: BookA,
+  "string-tools": CaseSensitive,
+  instances: Copy,
+  "task-library": Hourglass,
+  attributes: StickyNote,
+  characters: PersonStanding,
+  "user-input": Mouse,
+  "remote-functions": ArrowLeftRight,
+  bindables: BellRing,
+  "project-shop": ShoppingCart,
+  "project-tycoon": Factory,
+  pcall: LifeBuoy,
+  cframes: Navigation,
 };
 
 /** One icon per unit (chapter), in chapter order. */

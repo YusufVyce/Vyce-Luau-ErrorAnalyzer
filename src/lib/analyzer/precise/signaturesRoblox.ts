@@ -941,12 +941,12 @@ const unableToAssign: Signature = {
       );
     return result({
       title: tx(
-        `${prop} needs a ${expected}, got ${got}`,
+        `${prop} needs ${/^[AEIOU]/i.test(expected) ? "an" : "a"} ${expected}, got ${got}`,
         `${prop} ${expectedTr} ister, ${gotTr} verildi`,
       ),
       severity: "Medium",
       summary: tx(
-        `You set ${q(prop)} to a ${got}, but it only accepts a ${expected}.`,
+        `You set ${q(prop)} to ${/^[AEIOU]/i.test(got) ? "an" : "a"} ${got}, but it only accepts ${/^[AEIOU]/i.test(expected) ? "an" : "a"} ${expected}.`,
         `${q(prop)} özelliğine bir ${gotTr} verdin, ama o sadece ${expectedTr} kabul eder.`,
       ),
       explanation: tx(
