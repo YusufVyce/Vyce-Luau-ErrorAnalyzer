@@ -184,7 +184,7 @@ function ForumPage() {
         </div>
 
         {site?.forumReadOnly && (
-          <p className="ep-card flex items-center gap-2 border-amber-400/40 p-4 text-sm text-[var(--warn-ink)]">
+          <p className="ep-card flex items-center gap-2 border-amber-400/40 p-4 text-sm text-[var(--tint-warn)]">
             <Lock className="h-4 w-4 shrink-0" aria-hidden="true" /> {t("acc.err.forum_closed")}
           </p>
         )}

@@ -183,7 +183,7 @@ export function ForumAdmin({ onReports }: { onReports?: (n: number) => void }) {
                   {r.reasons.map((x, i) => (
                     <p key={i} className="text-[12px] text-ink-2">
                       <Flag
-                        className="mr-1 inline h-3 w-3 text-[var(--warn-ink)]"
+                        className="mr-1 inline h-3 w-3 text-[var(--tint-warn)]"
                         aria-hidden="true"
                       />
                       <b className="text-ink">{x.by}</b>: {x.reason || "—"}{" "}

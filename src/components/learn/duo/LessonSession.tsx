@@ -686,7 +686,9 @@ function FeedbackHead({ ok, text }: { ok: boolean; text: string }) {
     <div className="flex items-center gap-3">
       <span
         className={`vy-pop inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
-          ok ? "bg-[var(--ok)] text-[var(--ok-ink)]" : "bg-[var(--bad)] text-[var(--bad-ink)]"
+          ok
+            ? "bg-[var(--ok-fill)] text-[var(--ok-ink)]"
+            : "bg-[var(--bad-fill)] text-[var(--bad-ink)]"
         }`}
       >
         {ok ? (

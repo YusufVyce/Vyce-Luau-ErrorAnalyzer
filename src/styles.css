@@ -191,10 +191,10 @@
   --glow-a: rgba(130, 170, 255, 0.16);
   --glow-b: rgba(199, 146, 234, 0.12);
   /* Tinted text that stays readable on both themes, and the chart color. */
-  --warn-ink: #fcd34d;
-  --info-ink: #7dd3fc;
-  --ok-ink: #6ee7b7;
-  --bad-ink: #fca5a5;
+  --tint-warn: #fcd34d;
+  --tint-info: #7dd3fc;
+  --tint-ok: #6ee7b7;
+  --tint-bad: #fca5a5;
   --viz-1: #5b8af0;
 }
 :root[data-theme="light"] {
@@ -224,10 +224,10 @@
   --dot: rgba(11, 16, 32, 0.07);
   --glow-a: rgba(54, 86, 216, 0.1);
   --glow-b: rgba(142, 68, 201, 0.07);
-  --warn-ink: #a16207;
-  --info-ink: #0369a1;
-  --ok-ink: #047857;
-  --bad-ink: #b91c1c;
+  --tint-warn: #a16207;
+  --tint-info: #0369a1;
+  --tint-ok: #047857;
+  --tint-bad: #b91c1c;
   --viz-1: #3656d8;
 }
 

@@ -336,7 +336,7 @@ function PublicProfilePage() {
                 <LeagueBadge tier={profile.league} lang={lang} size={28} />
               </div>
               {licensed && (
-                <p className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1 text-[13px] font-semibold text-[var(--warn-ink)]">
+                <p className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1 text-[13px] font-semibold text-[var(--tint-warn)]">
                   <Award className="h-4 w-4" aria-hidden="true" /> {t("pr.licensed")}
                 </p>
               )}
@@ -381,7 +381,7 @@ function PublicProfilePage() {
                 <Link
                   to="/admin"
                   search={{ tab: "users", user: profile.id }}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-sky-400/40 bg-sky-400/10 px-3 py-2 text-[13px] font-medium text-[var(--info-ink)] hover:bg-sky-400/20"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-sky-400/40 bg-sky-400/10 px-3 py-2 text-[13px] font-medium text-[var(--tint-info)] hover:bg-sky-400/20"
                 >
                   <ShieldCheck className="h-4 w-4" aria-hidden="true" />
                   {t("adm.manageUser")}

@@ -394,7 +394,7 @@ export function UserDetail({
 
       <div className="grid gap-4 lg:grid-cols-2">
         {/* ---------------------------------------------------------------- ban */}
-        <Panel title={t("adm.banTitle")} icon={<Ban className="h-4 w-4 text-[var(--bad-ink)]" />}>
+        <Panel title={t("adm.banTitle")} icon={<Ban className="h-4 w-4 text-[var(--tint-bad)]" />}>
           {user.ban ? (
             <div className="space-y-3">
               <div className="space-y-1 rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-[13px]">
@@ -680,7 +680,7 @@ export function UserDetail({
         </div>
         {ownerView && !isOwner && (
           <div className="flex flex-wrap items-center gap-2 border-t border-line pt-3">
-            <ShieldCheck className="h-4 w-4 text-[var(--info-ink)]" aria-hidden="true" />
+            <ShieldCheck className="h-4 w-4 text-[var(--tint-info)]" aria-hidden="true" />
             <span className="text-[13px] text-ink-2">
               {user.role === "admin" ? t("adm.isAdmin") : t("adm.notAdmin")}
             </span>
