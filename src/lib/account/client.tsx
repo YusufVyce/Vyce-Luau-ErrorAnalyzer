@@ -70,8 +70,14 @@ function recordUid(): string | null {
   return r && typeof r.uid === "string" ? r.uid : null;
 }
 
-function setRecord(uid: string | null) {
-  writeJson(RECORD_KEY, uid ? { uid } : null);
+/** The account's progress revision this browser last took (admins bump it when they edit). */
+function recordRev(): number {
+  const r = readJson<{ rev?: unknown }>(RECORD_KEY);
+  return r && typeof r.rev === "number" ? r.rev : 0;
+}
+
+function setRecord(uid: string | null, rev = 0) {
+  writeJson(RECORD_KEY, uid ? { uid, rev } : null);
 }
 
 function readQueue(): Claim[] {
@@ -178,10 +184,12 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const adopt = useCallback(
     (u: PublicUser, server: Progress, keepLocal: boolean) => {
       const s = normalizeProgress(server);
-      const next = keepLocal ? mergeProgress(s, loadProgress()) : s;
+      // An admin changed this account's progress: the server copy wins over this browser's.
+      const edited = recordUid() === u.id && (u.rev ?? 0) !== recordRev();
+      const next = keepLocal && !edited ? mergeProgress(s, loadProgress()) : s;
       next.xp = u.xp;
       store(next);
-      setRecord(u.id);
+      setRecord(u.id, u.rev ?? 0);
       setAccount({ ...u });
     },
     [setAccount, store],

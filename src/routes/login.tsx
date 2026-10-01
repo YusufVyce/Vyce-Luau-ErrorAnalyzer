@@ -6,11 +6,45 @@ import { PageHeader } from "@/components/PageHeader";
 import { Field, FormError, PasswordField } from "@/components/account/fields";
 import { Mascot } from "@/components/learn/duo/Mascot";
 import { useAccount } from "@/lib/account/client";
-import { PASSWORD_MIN, USERNAME_MAX, USERNAME_MIN, accountErrorKey } from "@/lib/account/shared";
-import { useT } from "@/lib/prefs";
+import {
+  PASSWORD_MIN,
+  USERNAME_MAX,
+  USERNAME_MIN,
+  accountErrorKey,
+  type AccountError,
+  type BanInfo,
+} from "@/lib/account/shared";
+import { useLang, useT } from "@/lib/prefs";
+
+/** Error text for the forms; a ban says why and until when. */
+function useErrorText() {
+  const t = useT();
+  const lang = useLang();
+  return (r: { error: AccountError; ban?: BanInfo }) => {
+    if (r.error !== "banned" || !r.ban) return t(accountErrorKey(r.error));
+    const until = r.ban.until
+      ? t("acc.bannedUntil", {
+          date: new Date(r.ban.until).toLocaleString(lang === "tr" ? "tr-TR" : "en-US", {
+            dateStyle: "medium",
+            timeStyle: "short",
+          }),
+        })
+      : t("acc.bannedForever");
+    const reason = r.ban.reason ? ` ${t("acc.bannedReason", { reason: r.ban.reason })}` : "";
+    return `${t("acc.err.banned")} ${until}${reason}`;
+  };
+}
 
 type Mode = "login" | "signup" | "recover";
-const NEXT = ["/profile", "/leaderboard", "/learn", "/challenges", "/forum", "/forum/new"] as const;
+const NEXT = [
+  "/profile",
+  "/leaderboard",
+  "/learn",
+  "/challenges",
+  "/forum",
+  "/forum/new",
+  "/admin",
+] as const;
 type Next = (typeof NEXT)[number];
 /** Pages the login page may send people back to. */
 export type LoginNext = Next;
@@ -144,6 +178,7 @@ function AuthForm({
 }) {
   const t = useT();
   const acc = useAccount();
+  const errorText = useErrorText();
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [importLocal, setImportGuest] = useState(true);
@@ -164,12 +199,12 @@ function AuthForm({
       const r = await acc.signUp(name.trim(), password, withGuest);
       setBusy(false);
       if (r.ok) onCode(r.recoveryCode);
-      else setError(t(accountErrorKey(r.error)));
+      else setError(errorText(r));
     } else {
       const r = await acc.logIn(name.trim(), password, withGuest);
       setBusy(false);
       if (r.ok) onDone();
-      else setError(t(accountErrorKey(r.error)));
+      else setError(errorText(r));
     }
   }
 
@@ -234,6 +269,7 @@ function AuthForm({
 function RecoverForm({ onCode }: { onCode: (code: string) => void }) {
   const t = useT();
   const acc = useAccount();
+  const errorText = useErrorText();
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
@@ -252,7 +288,7 @@ function RecoverForm({ onCode }: { onCode: (code: string) => void }) {
     const r = await acc.recover(name.trim(), code, password);
     setBusy(false);
     if (r.ok) onCode(r.recoveryCode);
-    else setError(t(accountErrorKey(r.error)));
+    else setError(errorText(r));
   }
 
   return (

@@ -16,11 +16,13 @@ import { Route as LearnRouteImport } from './routes/learn'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as ErrorsRouteImport } from './routes/errors'
 import { Route as ChallengesRouteImport } from './routes/challenges'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ForumIndexRouteImport } from './routes/forum/index'
 import { Route as UNameRouteImport } from './routes/u/$name'
 import { Route as ForumNewRouteImport } from './routes/forum/new'
 import { Route as ForumIdRouteImport } from './routes/forum/$id'
+import { Route as ApiFimgIdRouteImport } from './routes/api/fimg.$id'
 import { Route as ApiImgIdKindRouteImport } from './routes/api/img.$id.$kind'
 
 const ProfileRoute = ProfileRouteImport.update({
@@ -58,6 +60,11 @@ const ChallengesRoute = ChallengesRouteImport.update({
   path: '/challenges',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -83,6 +90,11 @@ const ForumIdRoute = ForumIdRouteImport.update({
   path: '/forum/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiFimgIdRoute = ApiFimgIdRouteImport.update({
+  id: '/api/fimg/$id',
+  path: '/api/fimg/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiImgIdKindRoute = ApiImgIdKindRouteImport.update({
   id: '/api/img/$id/$kind',
   path: '/api/img/$id/$kind',
@@ -91,6 +103,7 @@ const ApiImgIdKindRoute = ApiImgIdKindRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/challenges': typeof ChallengesRoute
   '/errors': typeof ErrorsRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -102,10 +115,12 @@ export interface FileRoutesByFullPath {
   '/forum/new': typeof ForumNewRoute
   '/u/$name': typeof UNameRoute
   '/forum/': typeof ForumIndexRoute
+  '/api/fimg/$id': typeof ApiFimgIdRoute
   '/api/img/$id/$kind': typeof ApiImgIdKindRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/challenges': typeof ChallengesRoute
   '/errors': typeof ErrorsRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -117,11 +132,13 @@ export interface FileRoutesByTo {
   '/forum/new': typeof ForumNewRoute
   '/u/$name': typeof UNameRoute
   '/forum': typeof ForumIndexRoute
+  '/api/fimg/$id': typeof ApiFimgIdRoute
   '/api/img/$id/$kind': typeof ApiImgIdKindRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/challenges': typeof ChallengesRoute
   '/errors': typeof ErrorsRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -133,12 +150,14 @@ export interface FileRoutesById {
   '/forum/new': typeof ForumNewRoute
   '/u/$name': typeof UNameRoute
   '/forum/': typeof ForumIndexRoute
+  '/api/fimg/$id': typeof ApiFimgIdRoute
   '/api/img/$id/$kind': typeof ApiImgIdKindRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/challenges'
     | '/errors'
     | '/leaderboard'
@@ -150,10 +169,12 @@ export interface FileRouteTypes {
     | '/forum/new'
     | '/u/$name'
     | '/forum/'
+    | '/api/fimg/$id'
     | '/api/img/$id/$kind'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/challenges'
     | '/errors'
     | '/leaderboard'
@@ -165,10 +186,12 @@ export interface FileRouteTypes {
     | '/forum/new'
     | '/u/$name'
     | '/forum'
+    | '/api/fimg/$id'
     | '/api/img/$id/$kind'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/challenges'
     | '/errors'
     | '/leaderboard'
@@ -180,11 +203,13 @@ export interface FileRouteTypes {
     | '/forum/new'
     | '/u/$name'
     | '/forum/'
+    | '/api/fimg/$id'
     | '/api/img/$id/$kind'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   ChallengesRoute: typeof ChallengesRoute
   ErrorsRoute: typeof ErrorsRoute
   LeaderboardRoute: typeof LeaderboardRoute
@@ -196,6 +221,7 @@ export interface RootRouteChildren {
   ForumNewRoute: typeof ForumNewRoute
   UNameRoute: typeof UNameRoute
   ForumIndexRoute: typeof ForumIndexRoute
+  ApiFimgIdRoute: typeof ApiFimgIdRoute
   ApiImgIdKindRoute: typeof ApiImgIdKindRoute
 }
 
@@ -250,6 +276,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChallengesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -285,6 +318,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForumIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/fimg/$id': {
+      id: '/api/fimg/$id'
+      path: '/api/fimg/$id'
+      fullPath: '/api/fimg/$id'
+      preLoaderRoute: typeof ApiFimgIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/img/$id/$kind': {
       id: '/api/img/$id/$kind'
       path: '/api/img/$id/$kind'
@@ -297,6 +337,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   ChallengesRoute: ChallengesRoute,
   ErrorsRoute: ErrorsRoute,
   LeaderboardRoute: LeaderboardRoute,
@@ -308,6 +349,7 @@ const rootRouteChildren: RootRouteChildren = {
   ForumNewRoute: ForumNewRoute,
   UNameRoute: UNameRoute,
   ForumIndexRoute: ForumIndexRoute,
+  ApiFimgIdRoute: ApiFimgIdRoute,
   ApiImgIdKindRoute: ApiImgIdKindRoute,
 }
 export const routeTree = rootRouteImport

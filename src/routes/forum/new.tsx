@@ -4,7 +4,10 @@ import { ArrowLeft, Send } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
 import { Field, FormError, TextArea } from "@/components/account/fields";
 import { RequireAccount } from "@/components/account/RequireAccount";
+import { useForumImages } from "@/components/forum/ForumImages";
 import { createThread } from "@/lib/account/api";
+import { useAccount } from "@/lib/account/client";
+import { useSiteSettings } from "@/lib/account/site";
 import {
   accountErrorKey,
   FORUM_BODY_MAX,
@@ -39,12 +42,18 @@ function NewThreadPage() {
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const images = useForumImages();
+  const site = useSiteSettings();
+  const acc = useAccount();
+  const closed = Boolean(site?.forumReadOnly && !acc.user?.role);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const r = await createThread({ data: { title, category, body } }).catch(() => null);
+    const r = await createThread({ data: { title, category, body, images: images.ids } }).catch(
+      () => null,
+    );
     setBusy(false);
     if (r?.ok) void navigate({ to: "/forum/$id", params: { id: String(r.id) } });
     else setError(t(accountErrorKey(r ? r.error : "server_error")));
@@ -61,7 +70,12 @@ function NewThreadPage() {
           <ArrowLeft className="h-4 w-4" aria-hidden="true" /> {t("fo.back")}
         </Link>
         <h1 className="text-3xl font-bold tracking-tight text-ink">{t("fo.newTitle")}</h1>
-        <form onSubmit={submit} className="ep-card space-y-4 p-5 sm:p-6">
+        {closed && (
+          <p className="ep-card border-amber-400/40 p-4 text-sm text-[var(--warn-ink)]">
+            {t("acc.err.forum_closed")}
+          </p>
+        )}
+        <form onSubmit={submit} {...images.formProps} className="ep-card space-y-4 p-5 sm:p-6">
           <fieldset className="space-y-1.5">
             <legend className="text-[13px] font-medium text-ink">{t("fo.category")}</legend>
             <div className="flex flex-wrap gap-1.5 pt-1">
@@ -109,14 +123,15 @@ function NewThreadPage() {
             }}
             rows={10}
             maxLength={FORUM_BODY_MAX}
-            required
+            required={images.ids.length === 0}
           />
+          {images.picker}
           <FormError>{error}</FormError>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-[12px] text-ink-3">{t("fo.rules")}</p>
             <button
               type="submit"
-              disabled={busy}
+              disabled={busy || images.uploading || closed}
               className="ep-cta inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold disabled:opacity-60"
             >
               <Send className="h-4 w-4" aria-hidden="true" />

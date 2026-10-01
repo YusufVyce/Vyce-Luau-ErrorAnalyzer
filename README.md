@@ -209,11 +209,22 @@ Lessons, challenges and the profile need an account: sign up with a username and
 
 ## 🌐 Public Profiles
 
-Every player has a public page at `/u/<username>` with their level, streak, league and achievements. Players can upload a profile photo and a banner there; the browser crops and shrinks them before upload, and the server only accepts PNG, JPEG or WebP files. The account button in the nav opens your own public profile.
+Every player has a public page at `/u/<username>` with their level, streak, league and achievements. Players can upload a profile photo and a banner there (PNG, JPEG, WebP or animated GIF). A crop window lets them drag and zoom the picture into the round photo frame or the 3:1 banner strip before saving; the browser shrinks it (GIFs stay animated) and the server checks the file type and size. The account button in the nav opens your own public profile.
 
 ## 💬 Forum
 
-A community forum at `/forum` with categories (general, scripting help, showcase, site feedback). Anyone can read; posting needs an account and is rate-limited. Code between ``` lines is highlighted. Authors can delete their own posts, and forum admins can pin, lock and delete threads. Admins are the usernames in `FORUM_ADMINS` (comma separated, `vyce` by default).
+A community forum at `/forum` with categories (general, scripting help, showcase, site feedback). Anyone can read; posting needs an account and is rate-limited. Code between ``` lines is highlighted, and posts can carry up to 4 pictures or GIFs (pick, paste or drop them). Authors can delete their own posts, anyone signed in can report a post, and admins can pin, lock, edit and delete threads.
+
+## 🛡️ Admin Panel
+
+`/admin` is for the site owner and the admins they add. The owner is the account named `vyce` (pinned to that account the first time it's seen, so the role can't be taken over by renaming). The owner adds or removes admins by username; admins can't touch the owner or each other.
+
+- **Overview:** accounts, sign-ups, active players, XP, forum activity, open reports and stored pictures, with 30-day charts (or tables), league sizes and homework completion per lesson.
+- **Users:** search, sort and filter every account, then ban (with a reason and a length, optionally deleting their forum posts), lift a ban, add or set XP, mark lessons and challenges done or not done (with or without their XP), reset progress, rename, make a new recovery code, sign them out everywhere, remove their photo or banner, delete their forum posts or delete the account. Banned players see the reason and end date when they try to log in.
+- **Forum:** reported posts with the reasons, and the newest posts, with delete and dismiss.
+- **Name bans:** block a name exactly or anywhere in a username (e.g. `admin` blocks `xAdminx`).
+- **Site settings:** an announcement shown on every page, closing sign-ups, and a read-only forum.
+- **Log:** every admin action, newest first.
 
 ## 🎓 Vyce Parser License
 
@@ -311,7 +322,8 @@ Vyce Parser is designed to keep its core learning and analysis features local an
 - 🔑 Accounts with cross-device sync and server-checked XP
 - 🏅 Weekly leagues, friends and daily / weekly / all-time leaderboards
 - 🌐 Public player profiles with photos and banners
-- 💬 Community forum
+- 💬 Community forum with pictures and reports
+- 🛡️ Admin panel: stats, bans, name bans, XP and lesson editing, site announcement
 
 ---
 
@@ -375,6 +387,7 @@ UPSTASH_REDIS_REST_TOKEN=...
 - ✅ Code testing system
 - ✅ Accounts & leaderboard
 - ✅ Forum and profile photos
+- ✅ Admin panel
 
 ## Planned
 

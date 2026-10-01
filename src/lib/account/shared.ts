@@ -109,6 +109,10 @@ export interface PublicProfile {
   isMe: boolean;
   following: boolean;
   followers: number;
+  /** Set for the site owner and admins (shown as a badge). */
+  role?: Role;
+  /** True when the viewer is an admin who can manage this account. */
+  canManage?: boolean;
 }
 
 export interface PublicUser {
@@ -120,6 +124,10 @@ export interface PublicUser {
   /** Profile photo and banner versions (0 = none); see imageUrl. */
   avatar: number;
   banner: number;
+  /** Set for people who can open the admin panel. */
+  role?: Role;
+  /** Goes up when an admin edits the account's progress, so browsers drop their old copy. */
+  rev: number;
 }
 
 export interface LeaderboardEntry {
@@ -160,9 +168,23 @@ export type AccountError =
   | "bad_image"
   | "forbidden"
   | "locked"
+  | "banned"
+  | "signups_closed"
+  | "forum_closed"
   | "server_error";
 
-export type Result<T> = ({ ok: true } & T) | { ok: false; error: AccountError };
+/** Why an account can't sign in: shown on the login page. */
+export interface BanInfo {
+  reason: string;
+  /** End of a temporary ban (ms); 0 for permanent. */
+  until: number;
+}
+
+export type Result<T> = ({ ok: true } & T) | { ok: false; error: AccountError; ban?: BanInfo };
+
+/** "owner" is the site owner (vyce); "admin" is someone the owner let into the admin panel. */
+export type Role = "owner" | "admin";
+export const OWNER_NAME = "vyce";
 
 export const USERNAME_MIN = 3;
 export const USERNAME_MAX = 20;
@@ -214,10 +236,21 @@ export type ImageKind = "avatar" | "banner";
 export const IMAGE_KINDS: ImageKind[] = ["avatar", "banner"];
 
 /** Size the browser resizes uploads to, and the largest file the server keeps. */
-export const IMAGE_SPECS: Record<ImageKind, { width: number; height: number; maxBytes: number }> = {
-  avatar: { width: 256, height: 256, maxBytes: 80_000 },
-  banner: { width: 1200, height: 400, maxBytes: 240_000 },
+export const IMAGE_SPECS: Record<
+  ImageKind,
+  { width: number; height: number; maxBytes: number; gifMaxBytes: number }
+> = {
+  avatar: { width: 256, height: 256, maxBytes: 120_000, gifMaxBytes: 900_000 },
+  banner: { width: 1200, height: 400, maxBytes: 300_000, gifMaxBytes: 2_000_000 },
 };
+
+/** Forum pictures: longest side in pixels, size limits, and how many per post. */
+export const FORUM_IMAGE_SPEC = { maxSide: 1600, maxBytes: 700_000, gifMaxBytes: 2_000_000 };
+export const FORUM_IMAGES_PER_POST = 4;
+
+export function forumImageUrl(id: string): string {
+  return `/api/fimg/${encodeURIComponent(id)}`;
+}
 
 /** Where a player's photo or banner is served; the version makes each upload a new URL. */
 export function imageUrl(id: string, kind: ImageKind, version: number): string {
@@ -248,6 +281,7 @@ export interface ForumAuthor {
   name: string;
   avatar: number;
   xp: number;
+  role?: Role;
 }
 
 export interface ForumThreadRow {
@@ -268,6 +302,8 @@ export interface ForumPost {
   n: number;
   author: ForumAuthor;
   body: string;
+  /** Attached picture ids; see forumImageUrl. */
+  images: string[];
   createdAt: number;
   deleted: boolean;
 }
@@ -286,7 +322,157 @@ export function forumTitleError(title: string): AccountError | null {
   return t.length < FORUM_TITLE_MIN || t.length > FORUM_TITLE_MAX ? "bad_request" : null;
 }
 
-export function forumBodyError(body: string): AccountError | null {
+/** A post needs some text, unless it has pictures. */
+export function forumBodyError(body: string, images = 0): AccountError | null {
   const b = body.trim();
-  return b.length < 1 || b.length > FORUM_BODY_MAX ? "bad_request" : null;
+  return (b.length < 1 && images === 0) || b.length > FORUM_BODY_MAX ? "bad_request" : null;
+}
+
+export const FORUM_REPORT_MAX = 300;
+
+// ------------------------------------------------------------------ site settings
+
+export interface SiteSettings {
+  /** A note shown at the top of every page (empty for none). */
+  announcement: string;
+  tone: "info" | "warn";
+  signupsClosed: boolean;
+  /** Only admins can post. */
+  forumReadOnly: boolean;
+}
+
+export const DEFAULT_SETTINGS: SiteSettings = {
+  announcement: "",
+  tone: "info",
+  signupsClosed: false,
+  forumReadOnly: false,
+};
+
+// ------------------------------------------------------------------ admin panel
+
+export interface DayStat {
+  day: string;
+  signups: number;
+  logins: number;
+  /** People who earned XP that day. */
+  active: number;
+  xp: number;
+  posts: number;
+}
+
+export interface AdminUserRow {
+  id: string;
+  name: string;
+  avatar: number;
+  xp: number;
+  createdAt: number;
+  role?: Role;
+  banned: boolean;
+}
+
+export interface AdminStats {
+  users: number;
+  banned: number;
+  admins: number;
+  signupsToday: number;
+  signups7: number;
+  signups30: number;
+  activeToday: number;
+  /** People who earned XP this week. */
+  activeWeek: number;
+  totalXp: number;
+  xpToday: number;
+  threads: number;
+  posts: number;
+  postsToday: number;
+  reports: number;
+  /** Bytes of stored pictures (since counting started). */
+  imageBytes: number;
+  /** Players in each league this week, lowest first. */
+  leagues: number[];
+  /** The last 30 days, oldest first. */
+  days: DayStat[];
+  topUsers: AdminUserRow[];
+  newUsers: AdminUserRow[];
+  /** How many people finished each lesson's homework (since counting started). */
+  lessons: Array<{ id: string; done: number }>;
+}
+
+export interface BanRecord extends BanInfo {
+  by: string;
+  at: number;
+}
+
+export interface AdminUserDetail extends AdminUserRow {
+  banner: number;
+  streak: number;
+  league: number;
+  weekXp: number;
+  lastDay: string | null;
+  sessions: number;
+  followers: number;
+  following: number;
+  forumPosts: number;
+  ban: BanRecord | null;
+  quiz: string[];
+  homework: string[];
+  challenges: string[];
+  stars: Record<string, number>;
+}
+
+export type AdminUsersSort = "new" | "xp" | "name";
+export type AdminUsersFilter = "all" | "banned" | "admins";
+
+export type AdminAction =
+  | { kind: "ban"; reason: string; days: number; deletePosts: boolean }
+  | { kind: "unban" }
+  | { kind: "xp"; mode: "add" | "set"; amount: number; boards: boolean }
+  | { kind: "lessons"; ids: string[]; done: boolean; xp: boolean }
+  | { kind: "challenges"; ids: string[]; done: boolean; xp: boolean }
+  | { kind: "resetProgress" }
+  | { kind: "rename"; name: string }
+  | { kind: "recovery" }
+  | { kind: "logout" }
+  | { kind: "removeImage"; image: ImageKind }
+  | { kind: "deletePosts" }
+  | { kind: "delete" }
+  | { kind: "role"; admin: boolean };
+
+export interface NameBan {
+  name: string;
+  /** "exact": only this name; "contains": any name with this in it. */
+  mode: "exact" | "contains";
+  by: string;
+  at: number;
+}
+
+export interface AuditEntry {
+  at: number;
+  by: string;
+  action: string;
+  target?: string;
+  detail?: string;
+}
+
+export interface AdminPostRow {
+  thread: number;
+  n: number;
+  title: string;
+  author: ForumAuthor;
+  body: string;
+  images: string[];
+  createdAt: number;
+  deleted: boolean;
+}
+
+export interface ReportRow extends AdminPostRow {
+  /** "thread:n" */
+  key: string;
+  reasons: Array<{ by: string; reason: string; at: number }>;
+}
+
+/** Name bans: exact names and "contains" parts, all lowercase. */
+export function nameBanned(name: string, bans: NameBan[]): boolean {
+  const lower = name.toLowerCase();
+  return bans.some((b) => (b.mode === "exact" ? lower === b.name : lower.includes(b.name)));
 }

@@ -4,11 +4,13 @@ import { Lock, MessageSquare, MessagesSquare, Pin, Plus } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Avatar } from "@/components/account/Avatar";
+import { RoleBadge } from "@/components/account/RoleBadge";
 import { Mascot } from "@/components/learn/duo/Mascot";
 import { CategoryTag } from "@/components/forum/CategoryTag";
 import { fullDate, timeAgo } from "@/components/forum/time";
 import { listThreads } from "@/lib/account/api";
 import { useAccount } from "@/lib/account/client";
+import { useSiteSettings } from "@/lib/account/site";
 import {
   accountErrorKey,
   FORUM_CATEGORIES,
@@ -71,6 +73,9 @@ function ThreadRow({ thread }: { thread: ForumThreadRow }) {
             </Link>
           ) : (
             author
+          )}
+          {thread.author.role && (
+            <RoleBadge role={thread.author.role} className="mx-1 align-middle" />
           )}{" "}
           ·{" "}
           <span title={fullDate(thread.createdAt, lang)}>
@@ -104,6 +109,7 @@ function ForumPage() {
   const page = (search.p ?? 1) - 1;
   const [data, setData] = useState<{ threads: ForumThreadRow[]; total: number } | null>(null);
   const [error, setError] = useState<AccountError | null>(null);
+  const site = useSiteSettings();
 
   useEffect(() => {
     let alive = true;
@@ -177,6 +183,11 @@ function ForumPage() {
           )}
         </div>
 
+        {site?.forumReadOnly && (
+          <p className="ep-card flex items-center gap-2 border-amber-400/40 p-4 text-sm text-[var(--warn-ink)]">
+            <Lock className="h-4 w-4 shrink-0" aria-hidden="true" /> {t("acc.err.forum_closed")}
+          </p>
+        )}
         {error ? (
           <div className="ep-card flex flex-col items-center gap-3 p-10 text-center">
             <Mascot mood="sad" size={80} />

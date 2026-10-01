@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { CheckCircle2, GitBranch, Zap } from "lucide-react";
 import { Logo, SiteNav } from "@/components/SiteNav";
+import { SiteAnnouncement } from "@/components/SiteAnnouncement";
 import { AchievementToaster } from "@/components/ProgressBits";
 import { usePrefs, useT } from "@/lib/prefs";
 
@@ -22,6 +23,7 @@ export function PageShell({
   return (
     <>
       <SiteNav />
+      <SiteAnnouncement />
       <AchievementToaster />
       <div className={`relative mx-auto w-full ${width} px-4 pb-16`}>{children}</div>
       <footer className="border-t border-line bg-canvas/60">
