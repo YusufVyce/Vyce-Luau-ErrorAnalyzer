@@ -199,6 +199,10 @@ export class MemoryKV implements KV {
       }
       case "SMEMBERS":
         return [...(this.get(a[0], "set")?.value ?? [])];
+      case "SISMEMBER":
+        return this.get(a[0], "set")?.value.has(a[1]) ? 1 : 0;
+      case "SCARD":
+        return this.get(a[0], "set")?.value.size ?? 0;
       case "ZADD": {
         const z = this.ensure(a[0], "zset").value;
         let n = 0;
@@ -252,10 +256,48 @@ export class MemoryKV implements KV {
   }
 }
 
+/** Every environment variable we can see: process.env (Node, Vercel) and Workers bindings. */
+function allEnv(): Record<string, unknown> {
+  const fromProcess = typeof process !== "undefined" ? (process.env ?? {}) : {};
+  // Nitro keeps the Cloudflare Workers bindings here.
+  const fromWorkers = (globalThis as { __env__?: Record<string, unknown> }).__env__ ?? {};
+  return { ...fromWorkers, ...fromProcess };
+}
+
 function env(name: string): string | undefined {
-  // process.env exists on Node (Vercel) and is filled from bindings by Nitro on Workers.
-  const v = typeof process !== "undefined" ? process.env?.[name] : undefined;
-  return v && v.trim() ? v.trim() : undefined;
+  const v = allEnv()[name];
+  return typeof v === "string" && v.trim() ? v.trim() : undefined;
+}
+
+/**
+ * Upstash REST settings. Vercel's storage integration names them
+ * KV_REST_API_URL / KV_REST_API_TOKEN, or with a custom prefix
+ * (MYDB_KV_REST_API_URL); Upstash itself uses UPSTASH_REDIS_REST_*.
+ */
+export function findUpstashEnv(vars: Record<string, unknown> = allEnv()): {
+  url: string;
+  token: string;
+} | null {
+  const get = (k: string) => {
+    const v = vars[k];
+    return typeof v === "string" && v.trim() ? v.trim() : undefined;
+  };
+  for (const [urlKey, tokenKey] of [
+    ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"],
+    ["KV_REST_API_URL", "KV_REST_API_TOKEN"],
+  ]) {
+    const url = get(urlKey);
+    const token = get(tokenKey);
+    if (url && token) return { url, token };
+  }
+  for (const key of Object.keys(vars)) {
+    const m = /^(.*_)(KV_REST_API_URL|UPSTASH_REDIS_REST_URL)$/.exec(key);
+    if (!m) continue;
+    const url = get(key);
+    const token = get(m[1] + m[2].replace(/URL$/, "TOKEN"));
+    if (url && token) return { url, token };
+  }
+  return null;
 }
 
 const MEMORY = Symbol.for("vyce.accounts.memoryKV");
@@ -266,9 +308,8 @@ const MEMORY = Symbol.for("vyce.accounts.memoryKV");
  * production reports "not configured" instead of silently losing accounts.
  */
 export function getKV(): KV | null {
-  const url = env("UPSTASH_REDIS_REST_URL") ?? env("KV_REST_API_URL");
-  const token = env("UPSTASH_REDIS_REST_TOKEN") ?? env("KV_REST_API_TOKEN");
-  if (url && token) return new UpstashKV(url, token);
+  const upstash = findUpstashEnv();
+  if (upstash) return new UpstashKV(upstash.url, upstash.token);
   // import.meta.env.DEV is fixed at build time, so a production build never
   // falls back to memory unless asked to (even where process.env is missing).
   const memoryAllowed = import.meta.env.DEV || env("ACCOUNTS_MEMORY_STORE") === "1";

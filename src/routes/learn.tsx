@@ -23,10 +23,14 @@ import {
   lessonUnlocked,
   starsFor,
   streakOf,
+  today,
   todayXp,
   type Progress,
 } from "@/lib/learn/progress";
 import { useProgressState, type ProgressUpdate } from "@/lib/learn/useProgress";
+import { RequireAccount } from "@/components/account/RequireAccount";
+import { useAccount } from "@/lib/account/client";
+import type { SolvedStep } from "@/lib/account/shared";
 import { useLang, useT, type TFunction } from "@/lib/prefs";
 
 type LearnSearch = { lesson?: string; view?: "notes"; review?: boolean };
@@ -47,7 +51,11 @@ export const Route = createFileRoute("/learn")({
       },
     ],
   }),
-  component: LearnPage,
+  component: () => (
+    <RequireAccount next="/learn">
+      <LearnPage />
+    </RequireAccount>
+  ),
 });
 
 type Update = ProgressUpdate;
@@ -68,6 +76,7 @@ function quizStep(lesson: Lesson): ChoiceStep | undefined {
 function LearnPage() {
   const t = useT();
   const lang = useLang();
+  const acc = useAccount();
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/learn" });
   const { progress, loaded, update } = useProgressState();
@@ -96,9 +105,10 @@ function LearnPage() {
         todayXp={todayXp(progress)}
         dailyGoal={progress.dailyGoal}
         streak={streakOf(progress.days)}
-        onPracticeDone={({ mistakes }) =>
-          update((p) => gainXp(p, practiceXp({ review: true, firstTime: false, mistakes })))
-        }
+        onPracticeDone={({ mistakes, answers }) => {
+          update((p) => gainXp(p, practiceXp({ review: true, firstTime: false, mistakes })));
+          void acc.claim({ kind: "practice", mistakes, answers, day: today() });
+        }}
         onExit={toPath}
       />
     );
@@ -177,6 +187,7 @@ function LessonRunner({
 }) {
   const t = useT();
   const lang = useLang();
+  const acc = useAccount();
   const id = base.id;
   const lesson = useMemo(() => localizeLesson(base, lang), [base, lang]);
   const baseExercise = exerciseFor(id);
@@ -199,16 +210,20 @@ function LessonRunner({
   const path = PATH[id];
   const next = LESSONS[index + 1];
 
-  function onQuiz(correct: boolean) {
+  // Each handler updates the screen right away; the server then checks the
+  // work and its answer (the real XP) replaces the local guess.
+  function onQuiz(correct: boolean, pick: number) {
+    if (progress.quiz.includes(id)) return;
     update((p) => {
       if (p.quiz.includes(id)) return p;
       if (!correct)
         return { ...p, quizMisses: { ...p.quizMisses, [id]: (p.quizMisses[id] ?? 0) + 1 } };
       return gainXp({ ...p, quiz: [...p.quiz, id] }, (p.quizMisses[id] ?? 0) === 0 ? 20 : 10);
     });
+    void acc.claim({ kind: "quiz", lessonId: id, answer: pick, day: today() });
   }
 
-  function onPracticeDone({ mistakes }: { mistakes: number }) {
+  function onPracticeDone({ mistakes, answers }: { mistakes: number; answers: SolvedStep[] }) {
     update((p) => {
       const firstTime = !(id in p.stars);
       const stars = Math.max(p.stars[id] ?? 0, starsFor(mistakes));
@@ -217,14 +232,26 @@ function LessonRunner({
         practiceXp({ firstTime, mistakes }),
       );
     });
+    void acc.claim({ kind: "practice", lessonId: id, mistakes, answers, day: today() });
   }
 
-  function onHomework(passed: boolean) {
+  function onHomework(passed: boolean, code: string) {
+    const first = passed && !progress.homework.includes(id);
     update((p) => {
       const n = { ...p, attempts: { ...p.attempts, [id]: (p.attempts[id] ?? 0) + 1 } };
       if (!passed || p.homework.includes(id)) return n;
       return gainXp({ ...n, homework: [...n.homework, id] }, homeworkXp(p, id));
     });
+    if (first) {
+      void acc.claim({
+        kind: "homework",
+        lessonId: id,
+        code,
+        hints: progress.hints[id] ?? 0,
+        solution: progress.solutions.includes(id),
+        day: today(),
+      });
+    }
   }
 
   return (

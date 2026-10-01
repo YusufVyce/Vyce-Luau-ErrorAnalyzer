@@ -194,15 +194,21 @@ Track your learning progress, XP, achievements, and other activity from your pro
 
 ## 🔑 Accounts
 
-Sign up with a username and password (no email needed) to keep your progress on the server and continue on any device.
+Lessons, challenges and the profile need an account: sign up with a username and password (no email needed) and your progress follows you to every device.
 
-- Progress is still saved in the browser first, then synced to your account a few seconds later.
-- Guest progress can be added to a new account when you sign up.
+- XP is checked by the server: finished homework and challenges are run again in the same Luau simulator, quiz and practice answers are compared with the real answers. Editing browser storage can't add XP.
+- Progress saved in a browser before accounts can be brought into a new account; only work the server can check counts.
 - A one-time recovery code is shown at sign-up; it resets a forgotten password.
 
-## 🏅 Leaderboard
+## 🏅 Leaderboards, Leagues & Friends
 
-Daily, weekly and all-time XP rankings, plus a board for the longest daily streaks. Days and weeks follow UTC.
+- Weekly leagues (Bronze, Silver, Gold, Platinum, Diamond): every Monday the top 20% move up and the bottom 20% move down.
+- Follow friends by username and compare this week's XP.
+- Daily, weekly and all-time XP rankings, plus the longest daily streaks. Days and weeks follow UTC.
+
+## 🌐 Public Profiles
+
+Every player has a public page at `/u/<username>` with their level, streak, league and achievements.
 
 ## 🎓 Vyce Parser License
 
@@ -297,8 +303,9 @@ Vyce Parser is designed to keep its core learning and analysis features local an
 - 🌙 Dark / ☀️ Light theme
 - 🇹🇷 Turkish / 🇬🇧 English
 - 📈 Learning progress tracking
-- 🔑 Accounts with cross-device sync
-- 🏅 Daily / weekly / all-time leaderboard
+- 🔑 Accounts with cross-device sync and server-checked XP
+- 🏅 Weekly leagues, friends and daily / weekly / all-time leaderboards
+- 🌐 Public player profiles
 
 ---
 

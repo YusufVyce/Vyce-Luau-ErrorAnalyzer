@@ -79,7 +79,8 @@ export function HomeworkPanel({
   passed: boolean;
   attempts: number;
   hintsUsed: number;
-  onChecked: (passed: boolean) => void;
+  /** `code` is exactly what was checked (the server checks it again before paying XP). */
+  onChecked: (passed: boolean, code: string) => void;
   onHint: () => void;
   onSolution: () => void;
 }) {
@@ -107,10 +108,10 @@ export function HomeworkPanel({
         : await checkHomework(exercise.lessonId, code, lang);
       setResult(r);
       setTab("checks");
-      onChecked(r.passed);
+      onChecked(r.passed, code);
     } catch (e) {
       setRunError((e as Error).message);
-      onChecked(false);
+      onChecked(false, code);
     } finally {
       setRunning(false);
     }

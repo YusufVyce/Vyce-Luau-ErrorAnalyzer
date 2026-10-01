@@ -1,14 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
-import {
-  CloudCheck,
-  KeyRound,
-  LogOut,
-  RefreshCw,
-  RotateCcw,
-  Trash2,
-  UserRound,
-} from "lucide-react";
+import { CloudCheck, KeyRound, LogOut, RefreshCw, Trash2, Globe2 } from "lucide-react";
 import { useAccount } from "@/lib/account/client";
 import { PASSWORD_MIN, accountErrorKey } from "@/lib/account/shared";
 import { useLang, useT } from "@/lib/prefs";
@@ -18,7 +10,7 @@ const SMALL_BTN =
   "inline-flex items-center gap-1.5 rounded-xl border border-line bg-surface px-3 py-2 text-[13px] text-ink-2 hover:border-brand-line hover:text-ink disabled:opacity-50";
 
 /** The account card on the profile page (replaces the old backup buttons). */
-export function AccountPanel({ onReset }: { onReset: () => void }) {
+export function AccountPanel() {
   const t = useT();
   const lang = useLang();
   const acc = useAccount();
@@ -29,37 +21,8 @@ export function AccountPanel({ onReset }: { onReset: () => void }) {
     return <div className="ep-card h-28 animate-pulse p-6" aria-busy="true" />;
   }
 
-  if (acc.status !== "user" || !acc.user) {
-    return (
-      <div className="ep-card flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="max-w-xl space-y-1.5">
-          <div className="font-semibold text-ink">{t("acc.guestTitle")}</div>
-          <p className="text-[13px] leading-relaxed text-ink-3">
-            {acc.status === "unavailable" ? t("acc.unavailable") : t("acc.guestBody")}
-          </p>
-          {acc.expired && <p className="text-[13px] text-amber-400">{t("acc.expired")}</p>}
-          {msg && <p className="text-[13px] text-brand">{msg}</p>}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {acc.status !== "unavailable" && (
-            <Link
-              to="/login"
-              className="ep-cta inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold"
-            >
-              <UserRound className="h-4 w-4" aria-hidden="true" /> {t("acc.cta")}
-            </Link>
-          )}
-          <button
-            type="button"
-            onClick={onReset}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-red-500/30 px-3 py-2 text-[13px] text-red-400 hover:bg-red-500/10"
-          >
-            <RotateCcw className="h-4 w-4" aria-hidden="true" /> {t("prof.reset")}
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // The profile page is only shown when signed in.
+  if (!acc.user) return null;
 
   const user = acc.user;
   const since = new Date(user.createdAt).toLocaleDateString(lang === "tr" ? "tr-TR" : "en-US", {
@@ -92,6 +55,9 @@ export function AccountPanel({ onReset }: { onReset: () => void }) {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Link to="/u/$name" params={{ name: user.name }} className={SMALL_BTN}>
+            <Globe2 className="h-4 w-4" aria-hidden="true" /> {t("acc.publicProfile")}
+          </Link>
           <button
             type="button"
             className={SMALL_BTN}

@@ -26,6 +26,7 @@ import {
 } from "@/lib/learn/path/session";
 import { rng } from "@/lib/learn/path";
 import { starsFor } from "@/lib/learn/progress";
+import type { SolvedStep } from "@/lib/account/shared";
 import { play, setSoundOn, soundOn } from "@/lib/learn/sound";
 import { useLang, useT } from "@/lib/prefs";
 import { Confetti } from "./Confetti";
@@ -112,8 +113,10 @@ export interface LessonSessionProps {
   todayXp: number;
   dailyGoal: number;
   streak: number;
-  onQuiz?: (correct: boolean) => void;
-  onPracticeDone: (r: { mistakes: number }) => void;
+  /** `pick` is the chosen option, in the quiz's own order. */
+  onQuiz?: (correct: boolean, pick: number) => void;
+  /** `answers` are the correctly answered steps, so the server can check them. */
+  onPracticeDone: (r: { mistakes: number; answers: SolvedStep[] }) => void;
   homework?: ReactNode;
   homeworkPassed?: boolean;
   notes?: ReactNode;
@@ -145,6 +148,7 @@ export function LessonSession(props: LessonSessionProps) {
   const [sound, setSound] = useState(true);
   const [reported, setReported] = useState(false);
   const startedAt = useRef(Date.now());
+  const solved = useRef<SolvedStep[]>([]);
   const [elapsed, setElapsed] = useState(0);
   const startXp = useRef(props.xp);
   const startToday = useRef(props.todayXp);
@@ -177,13 +181,14 @@ export function LessonSession(props: LessonSessionProps) {
     setDone(0);
     setOutOfHearts(false);
     setReported(false);
+    solved.current = [];
     startedAt.current = Date.now();
   }
 
   function report() {
     if (reported || !hasPractice) return;
     setReported(true);
-    props.onPracticeDone({ mistakes });
+    props.onPracticeDone({ mistakes, answers: solved.current });
   }
 
   function finish() {
@@ -216,7 +221,10 @@ export function LessonSession(props: LessonSessionProps) {
     if (!exercise || !isReady(exercise.step, answer)) return;
     const right = isCorrect(exercise.step, answer);
     setChecks((c) => c + 1);
-    if (exercise.quiz) props.onQuiz?.(right);
+    if (exercise.quiz) props.onQuiz?.(right, answer.pick ?? -1);
+    if (right && exercise.ref) {
+      solved.current.push({ ...exercise.ref, pick: answer.pick, seq: answer.seq });
+    }
     if (right) {
       const c = combo + 1;
       setCombo(c);

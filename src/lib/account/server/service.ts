@@ -1,29 +1,42 @@
 /**
- * Accounts, progress sync and leaderboards on top of a Redis-like store.
+ * Accounts, progress, verified XP, leaderboards, leagues and friends on top
+ * of a Redis-like store.
  *
  * Keys (all prefixed with "vyce:"):
  *   u:name:<lowercase name>  → user id (unique usernames)
- *   u:<id>                   → hash: name, pass, rec, created, xp, dayKey, dayXp, streak
+ *   u:<id>                   → hash: name, pass, rec, created, xp, dayKey, dayXp, streak,
+ *                              league, leagueWeek, leagueLast, lastPractice
  *   u:<id>:p                 → progress JSON (the account copy)
  *   u:<id>:s                 → set of session hashes (to sign out everywhere)
+ *   u:<id>:f / u:<id>:fby    → sets: who they follow / who follows them
  *   s:<sha256(token)>        → user id, expires after 30 idle days
  *   lb:all / lb:d:<date> / lb:w:<week> / lb:streak → sorted sets of user ids
+ *   lb:lg:<week>:<tier>      → sorted set: that week's XP inside one league
  *   lb:names / lb:sday       → hashes: id → display name / last active day
  *   rl:<kind>:<key>          → rate-limit counters
  *
- * XP is counted by the server: each sync reports how much XP the browser
- * gained since the last sync, and the server adds it (within limits) to the
- * account and to the day / week / all-time boards. Periods use UTC.
+ * XP only comes from claims the server checked (see verify.ts): finished
+ * homework and challenges are run again, quiz and practice answers are
+ * compared with the real answers. Syncing only stores the browser's own
+ * things (saved code, hint counts, daily goal). Periods use UTC.
  */
+import { earned } from "@/lib/learn/achievements";
 import { mergeProgress, normalizeProgress, type Progress } from "@/lib/learn/progress";
 import {
   BOARDS,
+  LEAGUES,
   passwordError,
   usernameError,
   type AccountError,
   type Board,
+  type Claim,
+  type ClaimOutcome,
+  type FriendRow,
   type LeaderboardEntry,
   type LeaderboardResult,
+  type LeagueBoard,
+  type LeagueResult,
+  type PublicProfile,
   type PublicUser,
   type Result,
 } from "../shared";
@@ -38,37 +51,37 @@ import {
   verifyPassword,
 } from "./crypto";
 import type { Cmd, KV } from "./kv";
+import { verifyClaim, verifyImport } from "./verify";
 
 const P = "vyce:";
 const DAY = 86_400;
 export const SESSION_TTL = 30 * DAY;
 
-/** Most XP one sync may add: more than any single lesson, homework or challenge gives. */
-export const SYNC_XP_CAP = 1000;
-/** Most XP an account can gain per UTC day (blocks edited-browser-storage cheating). */
-export const DAILY_XP_CAP = 3000;
-/** Most XP a brand-new account can bring in from the browser's guest progress. */
-export const IMPORT_XP_CAP = 20_000;
+/** Safety net: most XP an account can gain per UTC day. */
+export const DAILY_XP_CAP = 5000;
 export const BOARD_SIZE = 50;
+/** Practice sessions can't be claimed faster than this (each one takes a while to play). */
+export const PRACTICE_GAP_MS = 15_000;
+/** XP needed in a week before first place in a league moves up. */
+export const PROMOTE_MIN_XP = 50;
+export const MAX_FRIENDS = 100;
 /** Largest progress JSON we store per account. */
 const MAX_PROGRESS_BYTES = 400_000;
+const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 const LIMITS = {
   login: { max: 10, window: 15 * 60 },
   loginName: { max: 8, window: 15 * 60 },
   signup: { max: 5, window: 60 * 60 },
   recover: { max: 5, window: 60 * 60 },
-  sync: { max: 40, window: 60 },
+  sync: { max: 60, window: 60 },
+  claim: { max: 40, window: 60 },
+  follow: { max: 40, window: 60 * 60 },
 } as const;
 
 type Session = { token: string; user: PublicUser; progress: Progress };
-/**
- * signup: guest progress becomes the new account (all-time board only).
- * login: guest progress is added to an existing account (all-time board only).
- * sync: progress earned while signed in (every board).
- */
-type Mode = "signup" | "login" | "sync";
 type WithProgress = { user: PublicUser; progress: Progress };
+type User = { fields: Record<string, string>; progress: Progress };
 
 const fail = (error: AccountError) => ({ ok: false as const, error });
 
@@ -110,6 +123,14 @@ export function streakEndingAt(days: string[], last: string): number {
   return n;
 }
 
+/** How many places move up / down in a league with `players` people in it. */
+export function leagueZones(players: number): { promote: number; demote: number } {
+  return {
+    promote: players > 0 ? Math.max(1, Math.floor(players * 0.2)) : 0,
+    demote: players >= 5 ? Math.max(1, Math.floor(players * 0.2)) : 0,
+  };
+}
+
 /** Flat [k, v, k, v] Redis reply → object. */
 function hash(reply: unknown): Record<string, string> {
   const out: Record<string, string> = {};
@@ -122,6 +143,29 @@ const num = (v: unknown) => {
   const n = Number(v);
   return Number.isFinite(n) ? n : 0;
 };
+
+const lastTier = LEAGUES.length - 1;
+const tierOf = (v: unknown) => Math.min(lastTier, Math.max(0, Math.floor(num(v))));
+
+/**
+ * The account copy, updated with what only the browser knows (saved code,
+ * hint counts, solutions viewed, daily goal). Finished work, stars, days
+ * and XP stay as the server recorded them.
+ */
+export function withServerOwned(server: Progress, incoming: Progress): Progress {
+  const m = mergeProgress(server, incoming);
+  return {
+    ...m,
+    quiz: server.quiz,
+    homework: server.homework,
+    xp: server.xp,
+    quizMisses: server.quizMisses,
+    challenges: server.challenges,
+    days: server.days,
+    stars: server.stars,
+    xpDays: server.xpDays,
+  };
+}
 
 export class AccountService {
   private boardCache = new Map<string, { at: number; entries: LeaderboardEntry[] }>();
@@ -149,7 +193,7 @@ export class AccountService {
     return { id, name: h.name, xp: num(h.xp), createdAt: h.created };
   }
 
-  private async loadUser(id: string) {
+  private async loadUser(id: string): Promise<User | null> {
     const [h, raw] = await this.kv.pipeline([
       ["HGETALL", `${P}u:${id}`],
       ["GET", `${P}u:${id}:p`],
@@ -166,6 +210,12 @@ export class AccountService {
     }
     progress.xp = num(fields.xp);
     return { fields, progress };
+  }
+
+  private async idForName(name: string): Promise<string | null> {
+    const lower = name.trim().toLowerCase();
+    if (!lower || lower.length > 40) return null;
+    return this.kv.run<string | null>(["GET", `${P}u:name:${lower}`]);
   }
 
   private async startSession(id: string): Promise<string> {
@@ -197,76 +247,139 @@ export class AccountService {
     return id;
   }
 
-  /**
-   * Adds XP and merges progress into the account. `gained` is how much XP the
-   * browser earned since its last sync; the server decides how much counts.
-   */
-  private async applyProgress(
-    id: string,
-    user: { fields: Record<string, string>; progress: Progress },
-    incoming: Progress | undefined,
-    gained: number,
-    mode: Mode,
-  ): Promise<{ xp: number; progress: Progress; added: number }> {
-    const now = this.now();
-    const day = utcDay(now);
-    const week = isoWeek(now);
-    const f = user.fields;
-    let dayXp = f.dayKey === day ? num(f.dayXp) : 0;
-
-    let added = Math.max(0, Math.floor(gained));
-    if (mode === "signup") added = Math.min(added, IMPORT_XP_CAP);
-    else added = Math.min(added, SYNC_XP_CAP, Math.max(0, DAILY_XP_CAP - dayXp));
-    const xp = num(f.xp) + added;
-
-    // Browsers count days in local time, which can be up to a day ahead of UTC.
-    const hi = shiftDay(day, 1);
-    let progress = user.progress;
-    if (incoming) {
-      // Only a new account takes the browser's whole day history; after
-      // that, only days around today can be added (no back-filled streaks).
-      const known = new Set(progress.days);
-      const lo = shiftDay(day, -1);
-      const days = incoming.days.filter(
-        (d) => d <= hi && (mode === "signup" || known.has(d) || d >= lo),
-      );
-      progress = mergeProgress(progress, { ...incoming, days });
+  /** The student's local date if it's plausible (time zones), otherwise today in UTC. */
+  private activityDay(day: string | undefined): string {
+    const today = utcDay(this.now());
+    if (day && DAY_RE.test(day) && day >= shiftDay(today, -1) && day <= shiftDay(today, 1)) {
+      return day;
     }
-    progress.xp = xp;
+    return today;
+  }
 
-    const latest = progress.days.filter((d) => d <= hi).at(-1);
-    const streak = latest ? streakEndingAt(progress.days, latest) : 0;
-
+  private async saveProgress(id: string, progress: Progress): Promise<Progress> {
     let json = JSON.stringify(progress);
     if (json.length > MAX_PROGRESS_BYTES) {
       // Saved code is the only part that can get big; drop it before losing anything else.
       progress = { ...progress, code: {}, challengeCode: {} };
       json = JSON.stringify(progress);
     }
+    await this.kv.run(["SET", `${P}u:${id}:p`, json]);
+    return progress;
+  }
 
-    if (mode !== "signup") dayXp += added;
+  /**
+   * Puts the student in this week's league. On the first visit of a new week
+   * last week's league is settled: the top places move up, the last ones move
+   * down. Done lazily per student, so no scheduled job is needed.
+   */
+  private async resolveLeague(id: string, fields: Record<string, string>): Promise<number> {
+    const now = this.now();
+    const week = isoWeek(now);
+    if (fields.leagueWeek === week) return tierOf(fields.league);
+    let tier = tierOf(fields.league);
+    let last: LeagueResult | undefined;
+    const prev = isoWeek(new Date(now.getTime() - 7 * DAY * 1000));
+    if (fields.leagueWeek === prev) {
+      const key = `${P}lb:lg:${prev}:${tier}`;
+      const [rank, score, card] = await this.kv.pipeline([
+        ["ZREVRANK", key, id],
+        ["ZSCORE", key, id],
+        ["ZCARD", key],
+      ]);
+      if (rank !== null && num(score) > 0) {
+        const players = num(card);
+        const r = num(rank);
+        const { promote, demote } = leagueZones(players);
+        const from = tier;
+        if (r < promote && num(score) >= PROMOTE_MIN_XP && tier < lastTier) tier++;
+        else if (r >= players - demote && tier > 0) tier--;
+        last = { week: prev, from, to: tier, rank: r + 1 };
+      }
+    }
+    const leagueLast = last ? JSON.stringify(last) : "";
+    await this.kv.run([
+      "HSET",
+      `${P}u:${id}`,
+      "league",
+      tier,
+      "leagueWeek",
+      week,
+      "leagueLast",
+      leagueLast,
+    ]);
+    Object.assign(fields, { league: String(tier), leagueWeek: week, leagueLast });
+    return tier;
+  }
+
+  /**
+   * Pays verified XP. "every" counts for all boards (work done while signed
+   * in); "all" only for the all-time board (progress brought into an account).
+   */
+  private async award(
+    id: string,
+    user: User,
+    progress: Progress,
+    xp: number,
+    day: string,
+    scope: "every" | "all",
+  ): Promise<{ progress: Progress; added: number }> {
+    const now = this.now();
+    const today = utcDay(now);
+    const week = isoWeek(now);
+    const f = user.fields;
+    let dayXp = f.dayKey === today ? num(f.dayXp) : 0;
+    const added = scope === "every" ? Math.min(xp, Math.max(0, DAILY_XP_CAP - dayXp)) : xp;
+    const total = num(f.xp) + added;
+
+    let p: Progress = { ...progress, xp: total };
+    if (xp > 0) {
+      p.days = [...new Set([...p.days, day])].sort().slice(-400);
+      const xpDays = { ...p.xpDays, [day]: (p.xpDays[day] ?? 0) + added };
+      for (const k of Object.keys(xpDays).sort().slice(0, -60)) delete xpDays[k];
+      p.xpDays = xpDays;
+    }
+    const latest = p.days.filter((d) => d <= shiftDay(today, 1)).at(-1);
+    const streak = latest ? streakEndingAt(p.days, latest) : 0;
+    if (scope === "every") dayXp += added;
+
+    p = await this.saveProgress(id, p);
     const cmds: Cmd[] = [
-      ["SET", `${P}u:${id}:p`, json],
-      ["HSET", `${P}u:${id}`, "xp", xp, "dayKey", day, "dayXp", dayXp, "streak", streak],
+      ["HSET", `${P}u:${id}`, "xp", total, "dayKey", today, "dayXp", dayXp, "streak", streak],
     ];
     if (added > 0) {
       cmds.push(["ZINCRBY", `${P}lb:all`, added, id]);
-      if (mode === "sync") {
+      this.boardCache.delete(`${P}lb:all`);
+      if (scope === "every") {
+        const league = `${P}lb:lg:${week}:${tierOf(f.league)}`;
+        // The student should see their new XP on the boards right away.
+        for (const k of [league, `${P}lb:d:${today}`, `${P}lb:w:${week}`]) {
+          this.boardCache.delete(k);
+        }
         cmds.push(
-          ["ZINCRBY", `${P}lb:d:${day}`, added, id],
-          ["EXPIRE", `${P}lb:d:${day}`, 3 * DAY],
+          ["ZINCRBY", `${P}lb:d:${today}`, added, id],
+          ["EXPIRE", `${P}lb:d:${today}`, 3 * DAY],
           ["ZINCRBY", `${P}lb:w:${week}`, added, id],
           ["EXPIRE", `${P}lb:w:${week}`, 15 * DAY],
+          ["ZINCRBY", league, added, id],
+          ["EXPIRE", league, 22 * DAY],
         );
       }
     }
     if (streak > 0 && latest) {
       cmds.push(["ZADD", `${P}lb:streak`, streak, id], ["HSET", `${P}lb:sday`, id, latest]);
-    } else {
-      cmds.push(["ZREM", `${P}lb:streak`, id], ["HDEL", `${P}lb:sday`, id]);
     }
     await this.kv.pipeline(cmds);
-    return { xp, progress, added };
+    Object.assign(f, { xp: String(total), dayKey: today, dayXp: String(dayXp) });
+    return { progress: p, added };
+  }
+
+  /** Brings checked progress from this browser into the account (all-time board only). */
+  private async importLocal(id: string, user: User, raw: unknown): Promise<Progress> {
+    const local = normalizeProgress(raw);
+    const { xp, progress } = verifyImport(local, user.progress);
+    const merged = withServerOwned(progress, local);
+    const { progress: saved } = await this.award(id, user, merged, xp, utcDay(this.now()), "all");
+    return saved;
   }
 
   // ------------------------------------------------------------------ accounts
@@ -304,15 +417,18 @@ export class AccountService {
       ["HSET", `${P}lb:names`, id, name],
     ]);
     const user = (await this.loadUser(id))!;
-    const guest = input.progress === undefined ? undefined : normalizeProgress(input.progress);
-    const applied = await this.applyProgress(id, user, guest, guest?.xp ?? 0, "signup");
+    await this.resolveLeague(id, user.fields);
+    const progress =
+      input.progress === undefined
+        ? await this.saveProgress(id, user.progress)
+        : await this.importLocal(id, user, input.progress);
     const token = await this.startSession(id);
     return {
       ok: true,
       token,
       recoveryCode,
-      user: { id, name, xp: applied.xp, createdAt: created },
-      progress: applied.progress,
+      user: { id, name, xp: progress.xp, createdAt: created },
+      progress,
     };
   }
 
@@ -325,7 +441,7 @@ export class AccountService {
     if ((await this.limited("login", ip)) || (await this.limited("loginName", lower))) {
       return fail("rate_limited");
     }
-    const id = await this.kv.run<string | null>(["GET", `${P}u:name:${lower}`]);
+    const id = await this.idForName(lower);
     const user = id ? await this.loadUser(id) : null;
     if (!id || !user) {
       await burnPasswordCheck(input.password);
@@ -334,15 +450,15 @@ export class AccountService {
     if (!(await verifyPassword(input.password, user.fields.pass ?? ""))) {
       return fail("bad_credentials");
     }
-
     let { progress } = user;
-    let xp = num(user.fields.xp);
-    if (input.progress !== undefined) {
-      const guest = normalizeProgress(input.progress);
-      ({ progress, xp } = await this.applyProgress(id, user, guest, guest.xp, "login"));
-    }
+    if (input.progress !== undefined) progress = await this.importLocal(id, user, input.progress);
     const token = await this.startSession(id);
-    return { ok: true, token, user: { ...this.publicUser(id, user.fields), xp }, progress };
+    return {
+      ok: true,
+      token,
+      user: { ...this.publicUser(id, user.fields), xp: progress.xp },
+      progress,
+    };
   }
 
   async logout(token: string | undefined): Promise<void> {
@@ -363,23 +479,59 @@ export class AccountService {
     return { user: this.publicUser(id, user.fields), progress: user.progress };
   }
 
-  /**
-   * Stores the browser's progress. `baseXp` is the account XP the browser
-   * last heard from the server; everything above it was earned since.
-   */
+  /** Stores what only the browser knows (saved code, hints, daily goal). Never adds XP. */
   async sync(
     token: string | undefined,
-    input: { progress: unknown; baseXp: number },
-  ): Promise<Result<WithProgress & { added: number }>> {
+    input: { progress: unknown },
+  ): Promise<Result<WithProgress>> {
     const id = await this.sessionUser(token);
     if (!id) return fail("unauthorized");
     if (await this.limited("sync", id)) return fail("rate_limited");
     const user = await this.loadUser(id);
     if (!user) return fail("unauthorized");
-    const incoming = normalizeProgress(input.progress);
-    const gained = incoming.xp - Math.max(0, Math.floor(num(input.baseXp)));
-    const { xp, progress, added } = await this.applyProgress(id, user, incoming, gained, "sync");
-    return { ok: true, added, user: { ...this.publicUser(id, user.fields), xp }, progress };
+    const progress = await this.saveProgress(
+      id,
+      withServerOwned(user.progress, normalizeProgress(input.progress)),
+    );
+    return { ok: true, user: this.publicUser(id, user.fields), progress };
+  }
+
+  /** Checks something the student finished and pays its XP. */
+  async claim(
+    token: string | undefined,
+    claim: Claim,
+  ): Promise<Result<WithProgress & { outcome: ClaimOutcome }>> {
+    const id = await this.sessionUser(token);
+    if (!id) return fail("unauthorized");
+    if (await this.limited("claim", id)) return fail("rate_limited");
+    const user = await this.loadUser(id);
+    if (!user) return fail("unauthorized");
+
+    const nowMs = this.now().getTime();
+    if (claim?.kind === "practice" && nowMs - num(user.fields.lastPractice) < PRACTICE_GAP_MS) {
+      return fail("rate_limited");
+    }
+    const verdict = verifyClaim(claim, user.progress);
+    if (typeof verdict === "string") return fail(verdict);
+
+    await this.resolveLeague(id, user.fields);
+    const { progress, added } = await this.award(
+      id,
+      user,
+      verdict.apply(user.progress),
+      verdict.xp,
+      this.activityDay(claim.day),
+      "every",
+    );
+    if (claim.kind === "practice") {
+      await this.kv.run(["HSET", `${P}u:${id}`, "lastPractice", nowMs]);
+    }
+    return {
+      ok: true,
+      user: this.publicUser(id, user.fields),
+      progress,
+      outcome: { ...verdict.outcome, awarded: added },
+    };
   }
 
   async recover(
@@ -389,9 +541,7 @@ export class AccountService {
     const bad = passwordError(input.password);
     if (bad) return fail(bad);
     if (await this.limited("recover", ip)) return fail("rate_limited");
-    const lower = input.username.trim().toLowerCase();
-    const id =
-      lower.length <= 40 ? await this.kv.run<string | null>(["GET", `${P}u:name:${lower}`]) : null;
+    const id = await this.idForName(input.username);
     const user = id ? await this.loadUser(id) : null;
     const given = await sha256Hex(normalizeRecoveryCode(input.code));
     if (!id || !user || !user.fields.rec || given !== user.fields.rec) return fail("bad_recovery");
@@ -448,12 +598,26 @@ export class AccountService {
     }
     await this.endAllSessions(id);
     const now = this.now();
+    const [following, followers] = (await this.kv.pipeline([
+      ["SMEMBERS", `${P}u:${id}:f`],
+      ["SMEMBERS", `${P}u:${id}:fby`],
+    ])) as [string[], string[]];
     await this.kv.pipeline([
-      ["DEL", `${P}u:${id}`, `${P}u:${id}:p`, `${P}u:name:${user.fields.name.toLowerCase()}`],
+      [
+        "DEL",
+        `${P}u:${id}`,
+        `${P}u:${id}:p`,
+        `${P}u:${id}:f`,
+        `${P}u:${id}:fby`,
+        `${P}u:name:${user.fields.name.toLowerCase()}`,
+      ],
+      ...(following ?? []).map((t): Cmd => ["SREM", `${P}u:${t}:fby`, id]),
+      ...(followers ?? []).map((f): Cmd => ["SREM", `${P}u:${f}:f`, id]),
       ["ZREM", `${P}lb:all`, id],
       ["ZREM", `${P}lb:streak`, id],
       ["ZREM", `${P}lb:d:${utcDay(now)}`, id],
       ["ZREM", `${P}lb:w:${isoWeek(now)}`, id],
+      ["ZREM", `${P}lb:lg:${isoWeek(now)}:${tierOf(user.fields.league)}`, id],
       ["HDEL", `${P}lb:names`, id],
       ["HDEL", `${P}lb:sday`, id],
     ]);
@@ -481,13 +645,13 @@ export class AccountService {
     return Boolean(lastDay) && lastDay! >= shiftDay(utcDay(now), -2);
   }
 
-  private async topEntries(board: Board, now: Date): Promise<LeaderboardEntry[]> {
-    const key = this.boardKey(board, now);
+  /** Top rows of a sorted set, with names and all-time XP (for level badges). */
+  private async topEntries(key: string, now: Date, streak = false): Promise<LeaderboardEntry[]> {
     const cached = this.boardCache.get(key);
     if (cached && now.getTime() - cached.at < 15_000) return cached.entries;
 
     // Fetch extra rows for the streak board: broken streaks are skipped below.
-    const want = board === "streak" ? BOARD_SIZE * 2 : BOARD_SIZE;
+    const want = streak ? BOARD_SIZE * 2 : BOARD_SIZE;
     const flat = ((await this.kv.run(["ZREVRANGE", key, 0, want - 1, "WITHSCORES"])) ??
       []) as string[];
     const rows: Array<{ id: string; score: number }> = [];
@@ -501,13 +665,13 @@ export class AccountService {
         ["HMGET", `${P}lb:names`, ...ids],
         ["ZMSCORE", `${P}lb:all`, ...ids],
       ];
-      if (board === "streak") cmds.push(["HMGET", `${P}lb:sday`, ...ids]);
+      if (streak) cmds.push(["HMGET", `${P}lb:sday`, ...ids]);
       const [names, xps, sdays = []] = await this.kv.pipeline(cmds);
       const stale: string[] = [];
       rows.forEach((r, i) => {
         const name = (names as Array<string | null>)[i];
         if (!name || r.score <= 0) return;
-        if (board === "streak" && !this.streakAlive((sdays as Array<string | null>)[i], now)) {
+        if (streak && !this.streakAlive((sdays as Array<string | null>)[i], now)) {
           stale.push(r.id);
           return;
         }
@@ -529,31 +693,181 @@ export class AccountService {
     return entries;
   }
 
+  private async myRow(
+    key: string,
+    id: string,
+    entries: LeaderboardEntry[],
+    alive = true,
+  ): Promise<{ rank: number | null; score: number }> {
+    const inTop = entries.find((e) => e.id === id);
+    if (inTop) return { rank: inTop.rank, score: inTop.score };
+    const [rank, score] = await this.kv.pipeline([
+      ["ZREVRANK", key, id],
+      ["ZSCORE", key, id],
+    ]);
+    const s = alive ? num(score) : 0;
+    return { rank: s > 0 && rank !== null ? num(rank) + 1 : null, score: s };
+  }
+
   async leaderboard(board: Board, token?: string): Promise<LeaderboardResult> {
     if (!BOARDS.includes(board)) board = "all";
     const now = this.now();
-    const entries = await this.topEntries(board, now);
+    const key = this.boardKey(board, now);
+    const entries = await this.topEntries(key, now, board === "streak");
     const result: LeaderboardResult = { board, entries };
     if (board === "day") result.resetsAt = nextUtcMidnight(now).toISOString();
     if (board === "week") result.resetsAt = nextUtcMonday(now).toISOString();
 
     const id = await this.sessionUser(token);
     if (id) {
-      const inTop = entries.find((e) => e.id === id);
-      if (inTop) {
-        result.me = { rank: inTop.rank, score: inTop.score };
-      } else {
-        const key = this.boardKey(board, now);
-        const [rank, score, sday] = await this.kv.pipeline([
-          ["ZREVRANK", key, id],
-          ["ZSCORE", key, id],
-          ["HGET", `${P}lb:sday`, id],
-        ]);
-        const alive = board !== "streak" || this.streakAlive(sday as string | null, now);
-        const s = alive ? num(score) : 0;
-        result.me = { rank: s > 0 && rank !== null ? num(rank) + 1 : null, score: s };
+      let alive = true;
+      if (board === "streak") {
+        alive = this.streakAlive(
+          await this.kv.run<string | null>(["HGET", `${P}lb:sday`, id]),
+          now,
+        );
       }
+      result.me = await this.myRow(key, id, entries, alive);
     }
     return result;
+  }
+
+  // ------------------------------------------------------------------ leagues
+
+  async league(token: string | undefined): Promise<Result<LeagueBoard>> {
+    const id = await this.sessionUser(token);
+    if (!id) return fail("unauthorized");
+    const user = await this.loadUser(id);
+    if (!user) return fail("unauthorized");
+    const tier = await this.resolveLeague(id, user.fields);
+    const now = this.now();
+    const week = isoWeek(now);
+    const key = `${P}lb:lg:${week}:${tier}`;
+    const entries = await this.topEntries(key, now);
+    const players = num(await this.kv.run(["ZCARD", key]));
+    let last: LeagueResult | undefined;
+    try {
+      const parsed = user.fields.leagueLast ? JSON.parse(user.fields.leagueLast) : undefined;
+      if (parsed && typeof parsed.week === "string") last = parsed;
+    } catch {
+      // ignore a broken value
+    }
+    return {
+      ok: true,
+      week,
+      tier,
+      entries,
+      me: await this.myRow(key, id, entries),
+      players,
+      ...leagueZones(players),
+      resetsAt: nextUtcMonday(now).toISOString(),
+      last,
+    };
+  }
+
+  // ------------------------------------------------------------------ friends
+
+  async follow(token: string | undefined, name: string): Promise<Result<object>> {
+    const id = await this.sessionUser(token);
+    if (!id) return fail("unauthorized");
+    if (await this.limited("follow", id)) return fail("rate_limited");
+    const target = await this.idForName(name);
+    if (!target) return fail("not_found");
+    if (target === id) return fail("bad_request");
+    const count = num(await this.kv.run(["SCARD", `${P}u:${id}:f`]));
+    if (count >= MAX_FRIENDS) return fail("too_many_friends");
+    await this.kv.pipeline([
+      ["SADD", `${P}u:${id}:f`, target],
+      ["SADD", `${P}u:${target}:fby`, id],
+    ]);
+    return { ok: true };
+  }
+
+  async unfollow(token: string | undefined, target: string): Promise<Result<object>> {
+    const id = await this.sessionUser(token);
+    if (!id) return fail("unauthorized");
+    await this.kv.pipeline([
+      ["SREM", `${P}u:${id}:f`, target],
+      ["SREM", `${P}u:${target}:fby`, id],
+    ]);
+    return { ok: true };
+  }
+
+  /** The people the student follows (and the student), ranked by this week's XP. */
+  async friends(token: string | undefined): Promise<Result<{ rows: FriendRow[] }>> {
+    const id = await this.sessionUser(token);
+    if (!id) return fail("unauthorized");
+    const now = this.now();
+    const following = ((await this.kv.run<string[]>(["SMEMBERS", `${P}u:${id}:f`])) ?? []).slice(
+      0,
+      MAX_FRIENDS,
+    );
+    const ids = [id, ...following.filter((f) => f !== id)];
+    const [names, week, all, streaks, sdays] = await this.kv.pipeline([
+      ["HMGET", `${P}lb:names`, ...ids],
+      ["ZMSCORE", `${P}lb:w:${isoWeek(now)}`, ...ids],
+      ["ZMSCORE", `${P}lb:all`, ...ids],
+      ["ZMSCORE", `${P}lb:streak`, ...ids],
+      ["HMGET", `${P}lb:sday`, ...ids],
+    ]);
+    const rows: FriendRow[] = [];
+    ids.forEach((fid, i) => {
+      const name = (names as Array<string | null>)[i];
+      if (!name) return;
+      const alive = this.streakAlive((sdays as Array<string | null>)[i], now);
+      rows.push({
+        id: fid,
+        name,
+        week: num((week as unknown[])[i]),
+        xp: num((all as unknown[])[i]),
+        streak: alive ? num((streaks as unknown[])[i]) : 0,
+        me: fid === id,
+      });
+    });
+    rows.sort((a, b) => b.week - a.week || b.xp - a.xp);
+    return { ok: true, rows };
+  }
+
+  // ------------------------------------------------------------------ public profiles
+
+  async profile(
+    name: string,
+    token: string | undefined,
+  ): Promise<Result<{ profile: PublicProfile }>> {
+    const id = await this.idForName(name);
+    const user = id ? await this.loadUser(id) : null;
+    if (!id || !user) return fail("not_found");
+    const viewer = await this.sessionUser(token);
+    const tier = await this.resolveLeague(id, user.fields);
+    const now = this.now();
+    const [weekXp, following, followers] = await this.kv.pipeline([
+      ["ZSCORE", `${P}lb:w:${isoWeek(now)}`, id],
+      viewer && viewer !== id ? ["SISMEMBER", `${P}u:${viewer}:f`, id] : ["SCARD", `${P}none`],
+      ["SCARD", `${P}u:${id}:fby`],
+    ]);
+    const p = user.progress;
+    const latest = p.days.filter((d) => d <= shiftDay(utcDay(now), 1)).at(-1);
+    const streak = latest && this.streakAlive(latest, now) ? streakEndingAt(p.days, latest) : 0;
+    return {
+      ok: true,
+      profile: {
+        id,
+        name: user.fields.name,
+        createdAt: user.fields.created,
+        xp: num(user.fields.xp),
+        streak,
+        league: tier,
+        weekXp: num(weekXp),
+        quiz: p.quiz,
+        homework: p.homework,
+        challenges: p.challenges,
+        stars: p.stars,
+        days: p.days.slice(-140),
+        achievements: [...earned(p)],
+        isMe: viewer === id,
+        following: Boolean(viewer && viewer !== id && num(following) === 1),
+        followers: num(followers),
+      },
+    };
   }
 }

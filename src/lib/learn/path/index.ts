@@ -41,11 +41,11 @@ export function shuffled(n: number, rand: () => number): number[] {
 
 /** Exercises from the given lessons, for a mixed review session. */
 export function reviewExercises(lessonIds: string[], count: number, rand: () => number) {
-  const pool: Array<{ lessonId: string; step: Exercise }> = [];
+  const pool: Array<{ lessonId: string; step: Exercise; index: number }> = [];
   for (const id of lessonIds) {
-    for (const step of PATH[id]?.steps ?? []) {
-      if (step.kind !== "learn") pool.push({ lessonId: id, step });
-    }
+    (PATH[id]?.steps ?? []).forEach((step, index) => {
+      if (step.kind !== "learn") pool.push({ lessonId: id, step, index });
+    });
   }
   const order = shuffled(pool.length, rand);
   return order.slice(0, count).map((i) => pool[i]);

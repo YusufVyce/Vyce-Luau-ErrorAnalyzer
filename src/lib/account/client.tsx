@@ -1,12 +1,14 @@
 /**
- * The signed-in account in the browser. Progress stays local-first (it's
- * still saved to localStorage on every change); while signed in, every
- * change is also sent to the server a few seconds later, and the server's
- * merged copy (other devices, XP limits) comes back into localStorage.
+ * The signed-in account in the browser. Learning needs an account: progress
+ * is shown from localStorage right away, and the server keeps the real copy.
  *
- * "base" is the account XP this browser last heard from the server. XP above
- * it was earned here since then, which is what the server adds to the
- * leaderboards — so XP is never counted twice.
+ * - Finished work (quiz, practice, homework, challenges) is sent as a claim;
+ *   the server checks it and pays the XP. Claims that can't be sent (offline)
+ *   wait in a queue in localStorage and go out later.
+ * - Everything else the browser knows (saved code, hint counts, daily goal)
+ *   is synced a few seconds after it changes.
+ * - Whatever the server answers replaces the local XP, so the leaderboard
+ *   and the screen always agree.
  */
 import {
   createContext,
@@ -29,6 +31,7 @@ import {
 } from "@/lib/learn/progress";
 import {
   changePassword as changePasswordFn,
+  claimXp,
   deleteAccount as deleteAccountFn,
   getMe,
   logIn as logInFn,
@@ -37,32 +40,43 @@ import {
   signUp as signUpFn,
   syncProgress,
 } from "./api";
-import type { PublicUser, Result } from "./shared";
+import type { AccountError, Claim, ClaimOutcome, PublicUser, Result } from "./shared";
 
 const RECORD_KEY = "vyce-account-sync";
+const QUEUE_KEY = "vyce-pending-claims";
 const SYNC_DELAY = 3000;
+const MAX_QUEUE = 50;
 
-interface SyncRecord {
-  uid: string;
-  base: number;
-}
-
-function readRecord(): SyncRecord | null {
+function readJson<T>(key: string): T | null {
   try {
-    const r = JSON.parse(localStorage.getItem(RECORD_KEY) ?? "null");
-    return r && typeof r.uid === "string" && typeof r.base === "number" ? r : null;
+    return JSON.parse(localStorage.getItem(key) ?? "null") as T | null;
   } catch {
     return null;
   }
 }
 
-function writeRecord(r: SyncRecord | null) {
+function writeJson(key: string, value: unknown) {
   try {
-    if (r) localStorage.setItem(RECORD_KEY, JSON.stringify(r));
-    else localStorage.removeItem(RECORD_KEY);
+    if (value === null) localStorage.removeItem(key);
+    else localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    // storage blocked: syncing still works for this tab
+    // storage blocked: works for this tab only
   }
+}
+
+/** Which account this browser's progress belongs to. */
+function recordUid(): string | null {
+  const r = readJson<{ uid?: unknown }>(RECORD_KEY);
+  return r && typeof r.uid === "string" ? r.uid : null;
+}
+
+function setRecord(uid: string | null) {
+  writeJson(RECORD_KEY, uid ? { uid } : null);
+}
+
+function readQueue(): Claim[] {
+  const q = readJson<Claim[]>(QUEUE_KEY);
+  return Array.isArray(q) ? q : [];
 }
 
 /** Calls a server function; a network failure becomes an error code instead of a throw. */
@@ -75,22 +89,27 @@ async function call<T>(fn: () => Promise<Result<T>>): Promise<Result<T>> {
   }
 }
 
-export type AccountStatus = "loading" | "guest" | "user" | "unavailable";
+/** Errors worth trying again later (the claim itself may be fine). */
+const RETRY: AccountError[] = ["server_error", "rate_limited", "not_configured"];
+
+export type AccountStatus = "loading" | "signedOut" | "user" | "unavailable";
 
 interface AccountContext {
   status: AccountStatus;
   user: PublicUser | null;
   syncing: boolean;
-  /** This browser has guest progress that can be added to an account. */
+  /** This browser has progress from before accounts that can be added to one. */
   canImport: boolean;
   /** Signed out because the session ended (not by pressing "Log out"). */
   expired: boolean;
+  /** Sends finished work to the server; resolves with what it paid. */
+  claim: (claim: Claim) => Promise<Result<{ outcome: ClaimOutcome }>>;
   signUp: (
     name: string,
     password: string,
-    importGuest: boolean,
+    importLocal: boolean,
   ) => Promise<Result<{ recoveryCode: string }>>;
-  logIn: (name: string, password: string, importGuest: boolean) => Promise<Result<object>>;
+  logIn: (name: string, password: string, importLocal: boolean) => Promise<Result<object>>;
   recover: (
     name: string,
     code: string,
@@ -103,6 +122,21 @@ interface AccountContext {
 
 const Ctx = createContext<AccountContext | null>(null);
 
+/** Takes back what a claim the server refused had added locally. */
+function undoClaim(p: Progress, claim: Claim): Progress {
+  const drop = (list: string[], id: string) => list.filter((x) => x !== id);
+  switch (claim.kind) {
+    case "quiz":
+      return { ...p, quiz: drop(p.quiz, claim.lessonId) };
+    case "homework":
+      return { ...p, homework: drop(p.homework, claim.lessonId) };
+    case "challenge":
+      return { ...p, challenges: drop(p.challenges, claim.id) };
+    default:
+      return p;
+  }
+}
+
 export function AccountProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AccountStatus>("loading");
   const [user, setUser] = useState<PublicUser | null>(null);
@@ -111,17 +145,18 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [expired, setExpired] = useState(false);
   const userRef = useRef<PublicUser | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const inflight = useRef(false);
-  const again = useRef(false);
+  const syncBusy = useRef(false);
+  const syncAgain = useRef(false);
+  const flushing = useRef<Promise<void> | null>(null);
   /** JSON of the progress the server last confirmed, to skip no-op syncs. */
   const lastSent = useRef("");
-  /** Set while we write server data locally, so that write doesn't trigger another sync. */
+  /** Set while we write server data locally, so that write doesn't trigger a sync. */
   const applying = useRef(false);
 
   const setAccount = useCallback((u: PublicUser | null) => {
     userRef.current = u;
     setUser(u);
-    setStatus(u ? "user" : "guest");
+    setStatus(u ? "user" : "signedOut");
   }, []);
 
   const store = useCallback((p: Progress) => {
@@ -134,153 +169,200 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     lastSent.current = JSON.stringify(p);
   }, []);
 
-  /** Replaces this browser's progress with the account's copy. */
+  /**
+   * Takes the server's copy. With `keepLocal`, things this browser finished
+   * but hasn't had confirmed yet stay visible; XP always comes from the server.
+   */
   const adopt = useCallback(
-    (u: PublicUser, progress: Progress) => {
-      store(normalizeProgress({ ...progress, xp: u.xp }));
-      writeRecord({ uid: u.id, base: u.xp });
-      setAccount(u);
+    (u: PublicUser, server: Progress, keepLocal: boolean) => {
+      const s = normalizeProgress(server);
+      const next = keepLocal ? mergeProgress(s, loadProgress()) : s;
+      next.xp = u.xp;
+      store(next);
+      setRecord(u.id);
+      setAccount({ ...u });
     },
     [setAccount, store],
   );
 
+  const endSession = useCallback(() => {
+    setExpired(true);
+    setAccount(null);
+  }, [setAccount]);
+
+  /** Sends the queued claims, oldest first. */
+  const flush = useCallback((): Promise<void> => {
+    if (flushing.current) return flushing.current;
+    const run = async () => {
+      for (;;) {
+        const u = userRef.current;
+        const [next] = readQueue();
+        if (!u || !next) return;
+        const r = await call(() => claimXp({ data: next }));
+        if (!r.ok && RETRY.includes(r.error)) return; // try again later
+        if (!r.ok && r.error === "unauthorized") {
+          endSession();
+          return;
+        }
+        writeJson(QUEUE_KEY, readQueue().slice(1));
+        if (r.ok) adopt(r.user, r.progress, true);
+        else store({ ...undoClaim(loadProgress(), next), xp: u.xp });
+      }
+    };
+    flushing.current = run().finally(() => {
+      flushing.current = null;
+    });
+    return flushing.current;
+  }, [adopt, endSession, store]);
+
   const sync = useCallback(async (): Promise<void> => {
     clearTimeout(timer.current);
     const u = userRef.current;
-    const rec = readRecord();
-    if (!u || !rec || rec.uid !== u.id) return;
-    if (inflight.current) {
-      again.current = true;
+    if (!u || recordUid() !== u.id) return;
+    if (syncBusy.current) {
+      syncAgain.current = true;
       return;
     }
     const sent = loadProgress();
-    const json = JSON.stringify(sent);
-    if (json === lastSent.current && sent.xp === rec.base) return;
+    if (JSON.stringify(sent) === lastSent.current) return;
 
-    inflight.current = true;
+    syncBusy.current = true;
     setSyncing(true);
-    const r = await call(() => syncProgress({ data: { progress: sent, baseXp: rec.base } }));
-    inflight.current = false;
+    const r = await call(() => syncProgress({ data: { progress: sent } }));
+    syncBusy.current = false;
     setSyncing(false);
-
-    if (r.ok) {
-      // Keep anything earned while the request was on its way.
-      const now = loadProgress();
-      const extra = Math.max(0, now.xp - sent.xp);
-      const merged = mergeProgress(normalizeProgress(r.progress), now);
-      merged.xp = r.user.xp + extra;
-      writeRecord({ uid: u.id, base: r.user.xp });
-      if (JSON.stringify(merged) !== JSON.stringify(now)) store(merged);
-      else lastSent.current = JSON.stringify(now);
-      setAccount({ ...r.user });
-      if (extra > 0) again.current = true;
-    } else if (r.error === "unauthorized") {
-      // Session ended: keep the local progress and record, so signing back
-      // in to the same account continues from here without double counting.
-      setExpired(true);
-      setAccount(null);
-      return;
-    }
-    if (again.current) {
-      again.current = false;
+    if (r.ok) adopt(r.user, r.progress, true);
+    else if (r.error === "unauthorized") return endSession();
+    if (syncAgain.current) {
+      syncAgain.current = false;
       timer.current = setTimeout(() => void sync(), SYNC_DELAY);
     }
-  }, [setAccount, store]);
+  }, [adopt, endSession]);
 
   // Who is signed in, when the site opens.
   useEffect(() => {
     let alive = true;
     void call(() => getMe()).then((r) => {
       if (!alive) return;
-      const rec = readRecord();
+      const mine = recordUid();
       if (!r.ok) {
-        setStatus(r.error === "not_configured" ? "unavailable" : "guest");
-        setCanImport(!rec && hasProgress(loadProgress()));
+        setStatus(r.error === "not_configured" ? "unavailable" : "signedOut");
+        setCanImport(!mine && hasProgress(loadProgress()));
         return;
       }
       if (!r.user || !r.progress) {
-        setExpired(Boolean(rec));
-        setCanImport(!rec && hasProgress(loadProgress()));
+        setExpired(Boolean(mine));
+        setCanImport(!mine && hasProgress(loadProgress()));
         setAccount(null);
         return;
       }
-      if (rec?.uid === r.user.id) {
-        setAccount(r.user);
-        void sync();
-      } else {
-        adopt(r.user, r.progress);
-      }
+      adopt(r.user, r.progress, mine === r.user.id);
+      void flush().then(() => sync());
     });
     return () => {
       alive = false;
     };
-  }, [adopt, setAccount, sync]);
+  }, [adopt, flush, setAccount, sync]);
 
-  // Send changes a few seconds after they happen, and right away when the tab is hidden.
+  // Sync a few seconds after a change, right away when the tab is hidden.
   useEffect(() => {
-    // Progress events can fire while another component renders, so the
-    // actual work always happens in a timer.
+    // Progress events can fire while another component renders, so the work
+    // always happens in a timer.
     const onProgress = () => {
       if (applying.current) return;
       clearTimeout(timer.current);
-      const signedIn = Boolean(userRef.current);
       timer.current = setTimeout(
         () => {
           if (userRef.current) void sync();
-          else setCanImport(!readRecord() && hasProgress(loadProgress()));
+          else setCanImport(!recordUid() && hasProgress(loadProgress()));
         },
-        signedIn ? SYNC_DELAY : 0,
+        userRef.current ? SYNC_DELAY : 0,
       );
     };
     const onHide = () => {
       if (document.visibilityState === "hidden" && userRef.current) void sync();
     };
+    const onOnline = () => {
+      if (userRef.current) void flush();
+    };
     window.addEventListener("vyce-progress", onProgress);
+    window.addEventListener("online", onOnline);
     document.addEventListener("visibilitychange", onHide);
     return () => {
       window.removeEventListener("vyce-progress", onProgress);
+      window.removeEventListener("online", onOnline);
       document.removeEventListener("visibilitychange", onHide);
       clearTimeout(timer.current);
     };
-  }, [sync]);
+  }, [flush, sync]);
 
-  /** After signing in: continue this browser's copy, or take the account's. */
+  /** After signing in: keep this browser's unconfirmed work if it's the same account. */
   const afterAuth = useCallback(
     (u: PublicUser, progress: Progress) => {
       setExpired(false);
       setCanImport(false);
-      if (readRecord()?.uid === u.id) {
-        setAccount(u);
-        void sync();
-      } else {
-        adopt(u, progress);
-      }
+      const same = recordUid() === u.id;
+      if (!same) writeJson(QUEUE_KEY, null);
+      adopt(u, progress, same);
+      if (same) void flush().then(() => sync());
     },
-    [adopt, setAccount, sync],
+    [adopt, flush, sync],
   );
 
-  const guestProgress = (importGuest: boolean) => {
-    const local = loadProgress();
-    return importGuest && !readRecord() && hasProgress(local) ? local : undefined;
-  };
-
-  const value = useMemo<AccountContext>(
-    () => ({
+  const value = useMemo<AccountContext>(() => {
+    const localForImport = (importLocal: boolean) => {
+      const local = loadProgress();
+      return importLocal && !recordUid() && hasProgress(local) ? local : undefined;
+    };
+    const resetBrowser = () => {
+      setRecord(null);
+      writeJson(QUEUE_KEY, null);
+      lastSent.current = "";
+      applying.current = true;
+      try {
+        clearProgress();
+      } finally {
+        applying.current = false;
+      }
+      setExpired(false);
+      setCanImport(false);
+      setAccount(null);
+    };
+    return {
       status,
       user,
       syncing,
       canImport,
       expired,
-      async signUp(name, password, importGuest) {
-        const progress = guestProgress(importGuest);
+      async claim(claim) {
+        if (!userRef.current) return { ok: false, error: "unauthorized" };
+        const queued = readQueue();
+        if (queued.length > 0) {
+          // Keep the order: this one waits behind the others.
+          writeJson(QUEUE_KEY, [...queued, claim].slice(-MAX_QUEUE));
+          void flush();
+          return { ok: false, error: "server_error" };
+        }
+        const r = await call(() => claimXp({ data: claim }));
+        if (r.ok) {
+          adopt(r.user, r.progress, true);
+          return { ok: true, outcome: r.outcome };
+        }
+        if (r.error === "unauthorized") endSession();
+        else if (RETRY.includes(r.error)) writeJson(QUEUE_KEY, [claim]);
+        else store({ ...undoClaim(loadProgress(), claim), xp: userRef.current?.xp ?? 0 });
+        return r;
+      },
+      async signUp(name, password, importLocal) {
+        const progress = localForImport(importLocal);
         const r = await call(() => signUpFn({ data: { username: name, password, progress } }));
         if (!r.ok) return r;
-        writeRecord(null);
+        setRecord(null);
         afterAuth(r.user, r.progress);
         return { ok: true, recoveryCode: r.recoveryCode };
       },
-      async logIn(name, password, importGuest) {
-        const progress = guestProgress(importGuest);
+      async logIn(name, password, importLocal) {
+        const progress = localForImport(importLocal);
         const r = await call(() => logInFn({ data: { username: name, password, progress } }));
         if (!r.ok) return r;
         afterAuth(r.user, r.progress);
@@ -293,38 +375,35 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         return { ok: true, recoveryCode: r.recoveryCode };
       },
       async logOut() {
+        await flush();
         await sync();
         await call(() => logOutFn());
-        writeRecord(null);
-        lastSent.current = "";
-        // This browser goes back to a fresh guest; the account keeps everything.
-        applying.current = true;
-        try {
-          clearProgress();
-        } finally {
-          applying.current = false;
-        }
-        setExpired(false);
-        setCanImport(false);
-        setAccount(null);
+        // The account keeps everything; this browser starts clean.
+        resetBrowser();
       },
       async changePassword(current, next) {
         return call(() => changePasswordFn({ data: { current, next } }));
       },
       async deleteAccount(password) {
         const r = await call(() => deleteAccountFn({ data: { password } }));
-        if (r.ok) {
-          // The progress stays in this browser as guest progress.
-          writeRecord(null);
-          setCanImport(hasProgress(loadProgress()));
-          setAccount(null);
-        }
+        if (r.ok) resetBrowser();
         return r;
       },
-    }),
-    // guestProgress only reads storage.
-    [status, user, syncing, canImport, expired, afterAuth, setAccount, sync],
-  );
+    };
+  }, [
+    status,
+    user,
+    syncing,
+    canImport,
+    expired,
+    adopt,
+    afterAuth,
+    endSession,
+    flush,
+    setAccount,
+    store,
+    sync,
+  ]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

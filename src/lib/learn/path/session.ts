@@ -9,6 +9,8 @@ export type SessionItem =
       kind: "exercise";
       id: string;
       step: Exercise;
+      /** Where the step lives in PATH, so the server can check the answer. */
+      ref?: { lessonId: string; step: number };
       /** Display order: option indexes (choice/fill/predict) or line indexes (order). */
       perm: number[];
       /** The lesson's graded quick check. */
@@ -59,7 +61,14 @@ export function lessonItems(opts: {
     steps.forEach((step, i) => {
       const id = `${opts.lessonId}:${i}`;
       if (step.kind === "learn") items.push({ kind: "learn", id, step });
-      else items.push({ kind: "exercise", id, step, perm: permFor(step, rand) });
+      else
+        items.push({
+          kind: "exercise",
+          id,
+          step,
+          ref: { lessonId: opts.lessonId, step: i },
+          perm: permFor(step, rand),
+        });
     });
     if (opts.quiz) {
       items.push({
@@ -77,10 +86,11 @@ export function lessonItems(opts: {
 
 export function reviewItems(lessonIds: string[], seed: number, count = 8): SessionItem[] {
   const rand = rng(seed);
-  return reviewExercises(lessonIds, count, rand).map(({ lessonId, step }, i) => ({
+  return reviewExercises(lessonIds, count, rand).map(({ lessonId, step, index }, i) => ({
     kind: "exercise" as const,
     id: `review:${lessonId}:${i}`,
     step,
+    ref: { lessonId, step: index },
     perm: permFor(step, rand),
   }));
 }
