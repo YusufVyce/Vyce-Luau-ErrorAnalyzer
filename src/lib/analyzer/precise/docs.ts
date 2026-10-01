@@ -9,6 +9,8 @@
  * table, the analyzer shows no link rather than a guessed one.
  */
 
+import { analyzerLang } from "./lang";
+
 const BASE = "https://create.roblox.com/docs";
 
 export interface DocLink {
@@ -84,6 +86,20 @@ const EXTRA: Record<string, DocLink> = {
 
 const CLASS_SET = new Set<string>(CLASS_PAGES);
 
+/** Turkish labels for the non-class links (class names stay as they are). */
+const EXTRA_TR: Record<string, string> = {
+  task: "task kütüphanesi",
+  string: "string kütüphanesi",
+  table: "table kütüphanesi",
+  math: "math kütüphanesi",
+  coroutine: "coroutine kütüphanesi",
+  globals: "Luau global'leri (pcall, require, tostring…)",
+  robloxGlobals: "Roblox global'leri (game, workspace, script)",
+  guideDataStores: "Rehber: Data store'lar",
+  guideRemote: "Rehber: Remote event'ler ve callback'ler",
+  guideLuau: "Rehber: Luau dili",
+};
+
 /** Returns a doc link for a known key (class name or EXTRA key), otherwise undefined. */
 export function doc(key: string, anchor?: string): DocLink | undefined {
   if (CLASS_SET.has(key)) {
@@ -91,7 +107,9 @@ export function doc(key: string, anchor?: string): DocLink | undefined {
     const url = `${BASE}/reference/engine/classes/${cls}${anchor ? `#${anchor}` : ""}`;
     return { label: anchor ? `${cls}:${anchor}` : cls, url };
   }
-  return EXTRA[key];
+  const link = EXTRA[key];
+  if (link && analyzerLang() === "tr" && EXTRA_TR[key]) return { ...link, label: EXTRA_TR[key] };
+  return link;
 }
 
 export function docs(...keys: Array<string | [string, string]>): DocLink[] {

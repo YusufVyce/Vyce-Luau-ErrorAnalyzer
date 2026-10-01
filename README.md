@@ -51,6 +51,7 @@ Vyce Parser analyzes Roblox and Luau errors and explains what went wrong in a wa
 - Provides links to official Roblox documentation where relevant.
 - Includes beginner-friendly explanations of technical terms.
 - Can show the corrected version of the script when applicable.
+- Every explanation, cause, step and code check is available in English and Turkish.
 
 ## 🧠 Learn From Your Errors
 

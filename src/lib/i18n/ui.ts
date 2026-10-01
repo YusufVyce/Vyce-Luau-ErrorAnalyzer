@@ -178,7 +178,6 @@ const en = {
     "Each lesson builds on the one before. Finish {title} (quiz + homework) to unlock the next one.",
   "learn.goTo": "Go to {title} →",
   "learn.minutes": "{n} min",
-  "res.enNote": "",
   "footer.tagline":
     "A Roblox Luau error analyzer, a scripting course with real homework and a tiny Roblox server — all running offline in your browser.",
   "footer.noAi": "0 AI · 0 APIs",
@@ -641,8 +640,6 @@ const tr: Partial<Record<UiKey, string>> = {
     "Her ders bir öncekinin üstüne kurulur. Sonrakini açmak için {title} dersini bitir (soru + ödev).",
   "learn.goTo": "{title} dersine git →",
   "learn.minutes": "{n} dk",
-  "res.enNote":
-    "Not: hata açıklamalarının kendisi şimdilik İngilizce; başlıklar, benzetmeler ve sözlük Türkçe.",
   "footer.tagline":
     "Roblox Luau hata analizcisi, gerçek ödevli bir script kursu ve küçük bir Roblox sunucusu — hepsi tarayıcında, çevrimdışı çalışır.",
   "footer.noAi": "0 yapay zekâ · 0 API",

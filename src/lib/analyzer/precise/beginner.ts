@@ -5,6 +5,7 @@
  */
 import { parse } from "@/lib/luau/parser";
 import { escapeRegExp, sanitizeCode, splitLines } from "./codeTools";
+import { analyzerLang, tx } from "./lang";
 import type { DiagnosisCategory, PreciseDiagnosis } from "./types";
 
 export interface BreakdownStep {
@@ -56,7 +57,7 @@ const ANALOGIES: Partial<Record<DiagnosisCategory, string>> = {
     "Animations can only play on characters that are actually in the game world, and only if your game is allowed to use that animation.",
 };
 
-const GLOSSARY: Array<{ term: string; match: RegExp; meaning: string }> = [
+const GLOSSARY: Array<{ term: string; match: RegExp; meaning: string; matchTr?: RegExp }> = [
   {
     term: "nil",
     match: /\bnil\b/i,
@@ -66,26 +67,31 @@ const GLOSSARY: Array<{ term: string; match: RegExp; meaning: string }> = [
   {
     term: "index",
     match: /\bindex(ing)?\b/i,
+    matchTr: /içine bak|\bokun|\bokuma/i,
     meaning: 'Reading something with a dot or brackets, like player.Name or data["Coins"].',
   },
   {
     term: "property",
     match: /\bpropert(y|ies)\b/i,
+    matchTr: /özelli/i,
     meaning: "A setting of an object shown in the Properties window, like Size, Color or Anchored.",
   },
   {
     term: "Instance",
     match: /\binstance\b/i,
+    matchTr: /Roblox objesi/i,
     meaning: "Any object in the Explorer: parts, folders, scripts, players, GUIs…",
   },
   {
     term: "server",
     match: /\bserver\b/i,
+    matchTr: /sunucu/i,
     meaning: "Roblox's computer that runs the game for everyone. Script objects run here.",
   },
   {
     term: "client",
     match: /\bclient|LocalScript\b/i,
+    matchTr: /istemci/i,
     meaning: "One player's device. LocalScripts run here and can use Players.LocalPlayer.",
   },
   {
@@ -113,6 +119,7 @@ const GLOSSARY: Array<{ term: string; match: RegExp; meaning: string }> = [
   {
     term: "Character",
     match: /\bcharacter\b/i,
+    matchTr: /karakter/i,
     meaning: "The 3D avatar model of a player in Workspace. It's nil until it spawns.",
   },
   {
@@ -145,28 +152,38 @@ const GLOSSARY: Array<{ term: string; match: RegExp; meaning: string }> = [
   {
     term: "loop",
     match: /\bloop\b|while true/i,
+    matchTr: /döngü/i,
     meaning: "Code that repeats (for, while, repeat). Endless loops need task.wait() inside.",
   },
   {
     term: "function",
     match: /\bfunction\b/i,
+    matchTr: /fonksiyon/i,
     meaning: "A named block of code you can run again and again by calling it with ().",
   },
   {
     term: "table",
     match: /\btable\b/i,
+    matchTr: /tablo/i,
     meaning: "Luau's container for lists and key/value data, written with { }.",
   },
-  { term: "string", match: /\bstring|text\b/i, meaning: 'Text in quotes, like "Hello".' },
+  {
+    term: "string",
+    match: /\bstring|text\b/i,
+    matchTr: /\bmetin/i,
+    meaning: 'Text in quotes, like "Hello".',
+  },
   {
     term: "ModuleScript",
     match: /module/i,
+    matchTr: /modül/i,
     meaning:
       "A script that other scripts load with require(). It must return one value (usually a table).",
   },
   {
     term: "syntax",
     match: /syntax/i,
+    matchTr: /sözdizimi|yazım hatası/i,
     meaning: "The grammar rules of the language: keywords, brackets, `end`s…",
   },
   {
@@ -179,23 +196,32 @@ const GLOSSARY: Array<{ term: string; match: RegExp; meaning: string }> = [
 const TOUCH_ANALOGY =
   "Touched is like a doorbell that rings for anyone — the mail carrier, a cat, a ball. Your code assumed it was always a player and asked for their Humanoid, but this time something else rang.";
 
+/** The non-character Touched case has its own analogy (its title starts with "hit.Parent"). */
+const isTouchTitle = (title: string) => title.startsWith("hit.Parent ");
+
 export function analogyFor(category: DiagnosisCategory, title = ""): string | undefined {
-  if (title.startsWith("hit.Parent isn't a character")) return TOUCH_ANALOGY;
-  return ANALOGIES[category];
+  const tr = analyzerLang() === "tr";
+  if (isTouchTitle(title)) return tr ? TOUCH_ANALOGY_TR : TOUCH_ANALOGY;
+  return tr ? ANALOGIES_TR[category] : ANALOGIES[category];
 }
 
 export function glossaryFor(
   d: Pick<PreciseDiagnosis, "title" | "summary" | "explanation" | "causes">,
 ): GlossaryTerm[] {
+  const tr = analyzerLang() === "tr";
   const text = [
     d.title,
     d.summary,
     d.explanation,
     ...d.causes.map((c) => `${c.text} ${c.detail ?? ""}`),
   ].join(" ");
-  return GLOSSARY.filter((g) => g.match.test(text))
+  return GLOSSARY.filter((g) => g.match.test(text) || (tr && g.matchTr?.test(text)))
     .slice(0, 6)
-    .map(({ term, meaning }) => ({ term, meaning }));
+    .map(({ term, meaning }) =>
+      tr
+        ? { term: GLOSSARY_TERM_TR[term] ?? term, meaning: GLOSSARY_TR[term] ?? meaning }
+        : { term, meaning },
+    );
 }
 
 /** Splits `player.Character:FindFirstChild("X").Humanoid` into its steps. */
@@ -221,17 +247,26 @@ export function breakdownFor(d: PreciseDiagnosis, key?: string): BreakdownStep[]
         state: last ? "nil" : "ok",
         note: last
           ? i === 0
-            ? `\`${p}\` has no value (nil) at this point`
-            : `\`${parts.slice(0, i + 1).join("")}\` turned out to be nil`
+            ? tx(`\`${p}\` has no value (nil) at this point`, `\`${p}\` şu anda boş (nil)`)
+            : tx(
+                `\`${parts.slice(0, i + 1).join("")}\` turned out to be nil`,
+                `\`${parts.slice(0, i + 1).join("")}\` nil çıktı`,
+              )
           : i === 0
-            ? `\`${p}\` exists`
-            : `→ found \`${parts.slice(0, i + 1).join("")}\``,
+            ? tx(`\`${p}\` exists`, `\`${p}\` var`)
+            : tx(
+                `→ found \`${parts.slice(0, i + 1).join("")}\``,
+                `→ \`${parts.slice(0, i + 1).join("")}\` bulundu`,
+              ),
       });
     });
     steps.push({
       code: `.${key}`,
       state: "error",
-      note: `Luau can't read .${key} from nil → error`,
+      note: tx(
+        `Luau can't read .${key} from nil → error`,
+        `Luau nil'in içinden .${key} okuyamaz → hata`,
+      ),
     });
     return steps;
   }
@@ -245,18 +280,28 @@ export function breakdownFor(d: PreciseDiagnosis, key?: string): BreakdownStep[]
     const steps: BreakdownStep[] = before.map((p, i) => ({
       code: p,
       state: "ok" as const,
-      note: i === 0 ? `\`${p}\` exists` : `→ found \`${before.slice(0, i + 1).join("")}\``,
+      note:
+        i === 0
+          ? tx(`\`${p}\` exists`, `\`${p}\` var`)
+          : tx(
+              `→ found \`${before.slice(0, i + 1).join("")}\``,
+              `→ \`${before.slice(0, i + 1).join("")}\` bulundu`,
+            ),
     }));
     // The error names the object Luau actually looked inside — show it.
     const owner = d.message.match(/is not a valid member of (\w+)(?: "([^"]*)")?/);
     if (owner) {
       const last = steps[steps.length - 1];
-      last.note += ` — it's the ${owner[1]}${owner[2] && owner[2] !== owner[1] ? ` \`${owner[2]}\`` : ""}`;
+      const named = owner[2] && owner[2] !== owner[1] ? ` \`${owner[2]}\`` : "";
+      last.note += tx(` — it's the ${owner[1]}${named}`, ` — bu bir ${owner[1]}${named}`);
     }
     steps.push({
       code: `.${member}`,
       state: "error",
-      note: `there is nothing called “${member}” inside it → error`,
+      note: tx(
+        `there is nothing called “${member}” inside it → error`,
+        `içinde “${member}” diye bir şey yok → hata`,
+      ),
     });
     return steps;
   }
@@ -355,42 +400,18 @@ const ANALOGIES_TR: Partial<Record<DiagnosisCategory, string>> = {
 const TOUCH_ANALOGY_TR =
   "Touched herkes için çalan bir kapı zili gibidir — postacı, kedi, top. Kodun gelenin her zaman oyuncu olduğunu varsayıp Humanoid'ini istedi, ama bu sefer zili başka bir şey çaldı.";
 
-const TITLES_TR: Record<DiagnosisCategory, string> = {
-  "index-nil": "nil olan bir şeyin içine bakılmaya çalışıldı",
-  "call-nil": "Olmayan (nil) bir fonksiyon çağrıldı",
-  arithmetic: "Sayı olmayan bir şeyle matematik yapıldı",
-  concatenate: "Metne eklenemeyen bir şey .. ile birleştirildi",
-  compare: "Karşılaştırılamayan iki şey karşılaştırıldı",
-  "invalid-argument": "Bir fonksiyona yanlış türde değer verildi",
-  "invalid-member": "Böyle bir özellik ya da alt obje yok",
-  "invalid-type": "Bir özelliğe yanlış türde değer verildi",
-  wait: "Bir obje sonsuza dek beklendi",
-  timeout: "Script çok uzun süre beklemeden çalıştı",
-  "stack-overflow": "Fonksiyon kendini durmadan çağırdı",
-  table: "Tabloda bir sorun var",
-  syntax: "Kodda bir yazım (sözdizimi) hatası var",
-  module: "ModuleScript düzgün yüklenemedi",
-  remote: "RemoteEvent yanlış tarafta kullanıldı",
-  datastore: "DataStore isteği başarısız oldu",
-  http: "HttpService isteği başarısız oldu",
-  tween: "Tween oluşturulamadı",
-  animation: "Animasyon oynatılamadı",
-  asset: "Bir içerik (asset) yüklenemedi",
-  instance: "Bir obje üzerinde yapılamayan bir işlem denendi",
-  coroutine: "Coroutine ile ilgili bir sorun var",
-  "code-check": "Kodda bir sorun bulundu",
-  unknown: "Kod bir hatayla durdu",
+const GLOSSARY_TERM_TR: Record<string, string> = {
+  index: "index (içine bakmak)",
+  property: "özellik (property)",
+  server: "sunucu (server)",
+  client: "istemci (client)",
+  event: "event (olay)",
+  loop: "döngü (loop)",
+  function: "fonksiyon (function)",
+  table: "tablo (table)",
+  string: "metin (string)",
+  syntax: "sözdizimi (syntax)",
 };
-
-/** A short Turkish headline for a diagnosis (the detailed text is English only). */
-export function titleTr(d: Pick<PreciseDiagnosis, "category">): string {
-  return TITLES_TR[d.category];
-}
-
-export function analogyTr(d: Pick<PreciseDiagnosis, "category" | "title">): string | undefined {
-  if (d.title.startsWith("hit.Parent isn't a character")) return TOUCH_ANALOGY_TR;
-  return ANALOGIES_TR[d.category];
-}
 
 const GLOSSARY_TR: Record<string, string> = {
   nil: "Luau'da “hiçbir şey / değer yok” demek. Hiç atanmamış değişkenler, olmayan tablo anahtarları ve bulunamayan aramalar nil olur.",
@@ -423,7 +444,3 @@ const GLOSSARY_TR: Record<string, string> = {
   syntax: "Dilin dil bilgisi kuralları: anahtar kelimeler, parantezler, end'ler…",
   tween: "Bir özelliğin bir değerden diğerine zamanla yumuşakça değişmesi.",
 };
-
-export function glossaryTr(term: string): string | undefined {
-  return GLOSSARY_TR[term];
-}

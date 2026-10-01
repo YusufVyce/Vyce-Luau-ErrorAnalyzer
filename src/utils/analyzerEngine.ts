@@ -4,6 +4,7 @@ import {
 } from "@/lib/analyzer/advancedRobloxAnalyzer";
 import { runDynamicRobloxPipeline } from "@/lib/analyzer/pipeline";
 import { diagnose } from "@/lib/analyzer/precise/diagnose";
+import type { AnalyzerLang } from "@/lib/analyzer/precise/lang";
 import type { DiagnosisCategory, PreciseDiagnosis } from "@/lib/analyzer/precise/types";
 
 import type { Analysis, Cause, DeprecatedApi } from "@/lib/types";
@@ -47,9 +48,14 @@ export type AnalyzerResult =
  *
  * This function never throws: any unexpected failure is caught, logged, and
  * surfaced to the caller as `{ matched: false, error }` so the UI can show a
- * graceful "couldn't analyze this" state instead of crashing.
+ * graceful "couldn't analyze this" state instead of crashing. `lang` picks the
+ * language of the diagnosis text (English or Turkish).
  */
-export function analyzeErrorAndCode(logText: string, codeText: string): AnalyzerResult {
+export function analyzeErrorAndCode(
+  logText: string,
+  codeText: string,
+  lang: AnalyzerLang = "en",
+): AnalyzerResult {
   try {
     const safeLogText = typeof logText === "string" ? logText : "";
     const safeCodeText = typeof codeText === "string" ? codeText : "";
@@ -57,14 +63,23 @@ export function analyzeErrorAndCode(logText: string, codeText: string): Analyzer
     if (safeLogText.length > MAX_INPUT_LENGTH || safeCodeText.length > MAX_INPUT_LENGTH) {
       return {
         matched: false,
-        error: `Input too large to analyze (limit is ${MAX_INPUT_LENGTH.toLocaleString()} characters).`,
+        error:
+          lang === "tr"
+            ? `Analiz için çok uzun (sınır ${MAX_INPUT_LENGTH.toLocaleString("tr-TR")} karakter).`
+            : `Input too large to analyze (limit is ${MAX_INPUT_LENGTH.toLocaleString()} characters).`,
       };
     }
 
-    return analyzeWithPipeline(safeLogText, safeCodeText);
+    return analyzeWithPipeline(safeLogText, safeCodeText, lang);
   } catch (error) {
     console.error("[analyzerEngine] analyzeErrorAndCode failed unexpectedly:", error);
-    return { matched: false, error: "An unexpected error occurred while analyzing this input." };
+    return {
+      matched: false,
+      error:
+        lang === "tr"
+          ? "Analiz sırasında beklenmeyen bir hata oldu."
+          : "An unexpected error occurred while analyzing this input.",
+    };
   }
 }
 
@@ -117,12 +132,16 @@ const CATEGORY_RULE_IDS: Record<DiagnosisCategory, string> = {
 
 const LIKELIHOOD_PERCENT = { likely: 70, possible: 25, unlikely: 10 } as const;
 
-function analyzeWithPipeline(logText: string, codeText: string): AnalyzerResult {
+function analyzeWithPipeline(
+  logText: string,
+  codeText: string,
+  lang: AnalyzerLang,
+): AnalyzerResult {
   if (logText.trim().length === 0 && codeText.trim().length === 0) {
     return { matched: false };
   }
 
-  const precise = diagnose(logText, codeText);
+  const precise = diagnose(logText, codeText, lang);
   const dynamic = runDynamicRobloxPipeline(logText, codeText);
 
   if (!precise && !dynamic) {
@@ -147,7 +166,7 @@ function analyzeWithPipeline(logText: string, codeText: string): AnalyzerResult 
       ruleId: CATEGORY_RULE_IDS[precise.category] ?? "roblox-unknown",
       title: precise.title,
       rootCause: precise.causes[0]
-        ? `${precise.summary} Most likely: ${precise.causes[0].text}.`
+        ? `${precise.summary} ${lang === "tr" ? "En olası sebep:" : "Most likely:"} ${precise.causes[0].text}.`
         : precise.summary,
       fix: fixes[0] ?? "",
       correctedExample: precise.fixCode?.after,

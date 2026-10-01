@@ -15,7 +15,6 @@ import {
 import type { AdvancedAnalyzerOutput } from "@/lib/analyzer/advancedRobloxAnalyzer";
 import type { CodeWarning, DiagnosisCause, PreciseDiagnosis } from "@/lib/analyzer/precise/types";
 import { CodeBlock, copyText, highlightLuau } from "@/components/CodeBlock";
-import { analogyTr, glossaryTr } from "@/lib/analyzer/precise/beginner";
 import { useLang, useT, type TFunction } from "@/lib/prefs";
 
 const SEVERITY_STYLE: Record<PreciseDiagnosis["severity"], string> = {
@@ -23,6 +22,15 @@ const SEVERITY_STYLE: Record<PreciseDiagnosis["severity"], string> = {
   High: "border-orange-500/40 bg-orange-500/10 text-orange-300",
   Medium: "border-amber-500/40 bg-amber-500/10 text-amber-200",
   Low: "border-sky-500/40 bg-sky-500/10 text-sky-300",
+};
+
+/** Turkish names for the AST pipeline's inferred object states (role names stay Roblox terms). */
+const STATE_TR: Record<string, string> = {
+  Uninitialized: "Değer verilmemiş",
+  Loaded: "Yüklendi",
+  Missing: "Eksik olabilir",
+  Destroyed: "Silindi",
+  Unknown: "Bilinmiyor",
 };
 
 function confidenceTone(value: number) {
@@ -287,11 +295,6 @@ export function ResultView({
             </span>
           )}
         </div>
-        {lang === "tr" && (
-          <p className="rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-[12px] text-ink-3">
-            {t("res.enNote")}
-          </p>
-        )}
         <h2 className="text-2xl font-semibold leading-tight tracking-tight text-zinc-50 md:text-[32px]">
           <Rich text={diagnosis.title} />
         </h2>
@@ -349,7 +352,7 @@ export function ResultView({
             <Smile className="mt-0.5 h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
             <span>
               <span className="font-semibold text-zinc-100">{t("res.plain")} </span>
-              {(lang === "tr" && analogyTr(diagnosis)) || diagnosis.analogy}
+              {diagnosis.analogy}
             </span>
           </div>
         )}
@@ -468,9 +471,7 @@ export function ResultView({
             {diagnosis.glossary.map((g) => (
               <div key={g.term} className="rounded-xl border border-line p-3">
                 <dt className="font-mono text-xs font-semibold text-brand">{g.term}</dt>
-                <dd className="mt-1 text-xs leading-relaxed text-zinc-400">
-                  {(lang === "tr" && glossaryTr(g.term)) || g.meaning}
-                </dd>
+                <dd className="mt-1 text-xs leading-relaxed text-zinc-400">{g.meaning}</dd>
               </div>
             ))}
           </dl>
@@ -497,7 +498,8 @@ export function ResultView({
         </Section>
       )}
 
-      {advanced && (advanced.hypotheses?.length || advanced.runtimeStates?.length) ? (
+      {advanced &&
+      ((lang !== "tr" && advanced.hypotheses?.length) || advanced.runtimeStates?.length) ? (
         <div className="border-t border-line pt-4">
           <button
             type="button"
@@ -519,8 +521,9 @@ export function ResultView({
                   <ul className="space-y-1 font-mono">
                     {advanced.runtimeStates.slice(0, 8).map((s, i) => (
                       <li key={i}>
-                        {s.name} ({s.role}) → {s.state}
-                        {s.line ? ` · line ${s.line}` : ""}
+                        {s.name} ({lang === "tr" && s.role === "Unknown" ? "?" : s.role}) →{" "}
+                        {lang === "tr" ? (STATE_TR[s.state] ?? s.state) : s.state}
+                        {s.line ? ` · ${t("res.line", { n: s.line }).toLowerCase()}` : ""}
                       </li>
                     ))}
                   </ul>
@@ -530,16 +533,18 @@ export function ResultView({
                 <div>
                   <div className="mb-1.5 font-semibold text-zinc-300">{t("res.flow")}</div>
                   <ul className="space-y-1 font-mono">
-                    {advanced.flowTraces.slice(0, 8).map((t, i) => (
+                    {advanced.flowTraces.slice(0, 8).map((f, i) => (
                       <li key={i}>
-                        {t.target} ← {t.source}
-                        {t.line ? ` · line ${t.line}` : ""} — {t.reason}
+                        {f.target} ← {f.source}
+                        {f.line ? ` · ${t("res.line", { n: f.line }).toLowerCase()}` : ""}
+                        {/* The pipeline writes its reasons in English only. */}
+                        {lang === "tr" ? "" : ` — ${f.reason}`}
                       </li>
                     ))}
                   </ul>
                 </div>
               )}
-              {advanced.hypotheses && advanced.hypotheses.length > 0 && (
+              {lang !== "tr" && advanced.hypotheses && advanced.hypotheses.length > 0 && (
                 <div>
                   <div className="mb-1.5 font-semibold text-zinc-300">{t("res.hyp")}</div>
                   <ul className="space-y-1">

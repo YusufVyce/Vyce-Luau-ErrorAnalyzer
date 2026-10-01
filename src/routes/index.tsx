@@ -53,6 +53,15 @@ function ErrorParserPage() {
   const [errorFlash, setErrorFlash] = useState(false);
   const errorRef = useRef<HTMLTextAreaElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
+  const lastRun = useRef<{ log: string; code: string } | null>(null);
+
+  // Switching the language rewrites the diagnosis on screen in the new language.
+  useEffect(() => {
+    const last = lastRun.current;
+    if (!last) return;
+    const analysis = analyzeErrorAndCode(last.log, last.code, lang);
+    if (analysis.matched) setResult((r) => (r.kind === "match" ? { ...r, data: analysis } : r));
+  }, [lang]);
 
   // Prefill from links like /?error=...&code=... (used by the Learn page).
   useEffect(() => {
@@ -91,7 +100,8 @@ function ErrorParserPage() {
   }
 
   function runAnalysis(log: string, code: string) {
-    const analysis = analyzeErrorAndCode(log, code);
+    lastRun.current = { log, code };
+    const analysis = analyzeErrorAndCode(log, code, lang);
     if (analysis.matched) {
       setResult({ kind: "match", data: analysis, key: Date.now() });
       const title = analysis.precise?.title ?? analysis.title ?? log.slice(0, 60);

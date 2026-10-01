@@ -337,114 +337,173 @@ export const COMMON_MEMBERS = [
  * Members people try to use on the wrong class. Keyed by `Member@Class`
  * (class as it appears in Roblox's "not a valid member of X" message).
  */
-export const WRONG_CLASS_HINTS: Record<string, { why: string; fix: string; code?: string }> = {
+export const WRONG_CLASS_HINTS: Record<
+  string,
+  { why: string; fix: string; code?: string; whyTr: string; fixTr: string; codeTr?: string }
+> = {
   "Touched@Model": {
     why: "Models don't have a Touched event — only parts (BasePart) do.",
     fix: "Connect Touched on a part inside the model (for example its PrimaryPart or a hitbox part).",
     code: 'local hitbox = model:WaitForChild("Hitbox") -- a Part inside the model\nhitbox.Touched:Connect(function(hit)\n\t-- ...\nend)',
+    whyTr: "Modellerin Touched event'i yoktur — sadece parçaların (BasePart) vardır.",
+    fixTr:
+      "Touched'ı modelin içindeki bir parçaya bağla (örneğin PrimaryPart'ına ya da bir hitbox parçasına).",
+    codeTr:
+      'local hitbox = model:WaitForChild("Hitbox") -- modelin içindeki bir Part\nhitbox.Touched:Connect(function(hit)\n\t-- ...\nend)',
   },
   "Touched@Folder": {
     why: "Folders don't have a Touched event — only parts do.",
     fix: "Loop over the parts in the folder and connect Touched on each one.",
     code: 'for _, part in folder:GetChildren() do\n\tif part:IsA("BasePart") then\n\t\tpart.Touched:Connect(function(hit)\n\t\t\t-- ...\n\t\tend)\n\tend\nend',
+    whyTr: "Folder'ların Touched event'i yoktur — sadece parçaların vardır.",
+    fixTr: "Folder'daki parçaları bir döngüyle gez ve her birine Touched bağla.",
   },
   "Position@Model": {
     why: "Models don't have a Position property.",
     fix: "Use model:GetPivot().Position to read it and model:PivotTo(CFrame) to move it.",
     code: "local pos = model:GetPivot().Position\nmodel:PivotTo(CFrame.new(0, 10, 0))",
+    whyTr: "Modellerin Position özelliği yoktur.",
+    fixTr: "Okumak için model:GetPivot().Position, taşımak için model:PivotTo(CFrame) kullan.",
   },
   "CFrame@Model": {
     why: "Models don't have a CFrame property.",
     fix: "Use model:GetPivot() and model:PivotTo(newCFrame).",
     code: "model:PivotTo(model:GetPivot() * CFrame.new(0, 5, 0))",
+    whyTr: "Modellerin CFrame özelliği yoktur.",
+    fixTr: "model:GetPivot() ve model:PivotTo(yeniCFrame) kullan.",
   },
   "Size@Model": {
     why: "Models don't have a Size property.",
     fix: "Use model:GetExtentsSize() to read it or model:ScaleTo(n) to scale it.",
+    whyTr: "Modellerin Size özelliği yoktur.",
+    fixTr: "Okumak için model:GetExtentsSize(), büyütüp küçültmek için model:ScaleTo(n) kullan.",
   },
   "Anchored@Model": {
     why: "Anchored belongs to parts, not to models.",
     fix: "Loop over the model's descendants and anchor each BasePart.",
     code: 'for _, d in model:GetDescendants() do\n\tif d:IsA("BasePart") then\n\t\td.Anchored = true\n\tend\nend',
+    whyTr: "Anchored modellere değil, parçalara aittir.",
+    fixTr: "Modelin içindeki her şeyi (GetDescendants) gez ve her BasePart'ı sabitle (Anchored).",
   },
   "Value@Folder": {
     why: "A Folder (like leaderstats) has no Value — the value objects inside it do.",
     fix: "Index the stat inside the folder first: leaderstats.Coins.Value.",
     code: 'local coins = player.leaderstats:WaitForChild("Coins")\ncoins.Value += 10',
+    whyTr: "Bir Folder'ın (leaderstats gibi) Value'su yoktur — içindeki değer objelerinin vardır.",
+    fixTr: "Önce Folder'ın içindeki değere ulaş: leaderstats.Coins.Value.",
   },
   "Health@Model": {
     why: "Health is a property of the Humanoid, not of the character Model.",
     fix: 'Get the Humanoid first: character:FindFirstChildOfClass("Humanoid").',
     code: 'local humanoid = character:FindFirstChildOfClass("Humanoid")\nif humanoid then\n\thumanoid.Health = 0\nend',
+    whyTr: "Health, karakter Model'inin değil Humanoid'in özelliğidir.",
+    fixTr: 'Önce Humanoid\'i al: character:FindFirstChildOfClass("Humanoid").',
   },
   "Health@Player": {
     why: "Players don't have Health — their character's Humanoid does.",
     fix: "Go through player.Character to reach the Humanoid.",
     code: 'local character = player.Character\nlocal humanoid = character and character:FindFirstChildOfClass("Humanoid")\nif humanoid then\n\thumanoid.Health -= 10\nend',
+    whyTr: "Player'ın Health'i yoktur — karakterinin içindeki Humanoid'in vardır.",
+    fixTr: "Humanoid'e ulaşmak için player.Character üzerinden git.",
   },
   "Humanoid@Player": {
     why: "The Humanoid lives inside the character model, not inside the Player object.",
     fix: "Use player.Character (and wait for it) before looking for the Humanoid.",
     code: 'local character = player.Character or player.CharacterAdded:Wait()\nlocal humanoid = character:WaitForChild("Humanoid")',
+    whyTr: "Humanoid, Player objesinin değil karakter modelinin içindedir.",
+    fixTr: "Humanoid'i aramadan önce player.Character'ı kullan (ve onu bekle).",
   },
   "HumanoidRootPart@Player": {
     why: "HumanoidRootPart is inside the character model, not inside the Player object.",
     fix: "Use player.Character first.",
     code: 'local character = player.Character or player.CharacterAdded:Wait()\nlocal root = character:WaitForChild("HumanoidRootPart")',
+    whyTr: "HumanoidRootPart, Player objesinin değil karakter modelinin içindedir.",
+    fixTr: "Önce player.Character'ı kullan.",
   },
   "leaderstats@Model": {
     why: "You have the character model, but leaderstats lives on the Player object.",
     fix: "Convert the character into a player with Players:GetPlayerFromCharacter.",
     code: "local player = game.Players:GetPlayerFromCharacter(hit.Parent)\nif player then\n\tplayer.leaderstats.Coins.Value += 1\nend",
+    whyTr: "Elinde karakter modeli var, ama leaderstats Player objesinin içindedir.",
+    fixTr: "Players:GetPlayerFromCharacter ile karakterden oyuncuyu bul.",
   },
   "Character@Model": {
     why: "You already have the character model; .Character is a property of Player.",
     fix: "Use the model directly, or get the Player with Players:GetPlayerFromCharacter(model).",
+    whyTr: "Karakter modeli zaten elinde; .Character, Player'ın bir özelliğidir.",
+    fixTr: "Modeli doğrudan kullan ya da Players:GetPlayerFromCharacter(model) ile Player'ı al.",
   },
   "Text@Frame": {
     why: "Frames don't show text. Only TextLabel, TextButton and TextBox have a Text property.",
     fix: "Point the script at the TextLabel inside the frame.",
+    whyTr:
+      "Frame'ler yazı göstermez. Sadece TextLabel, TextButton ve TextBox'ın Text özelliği vardır.",
+    fixTr: "Scriptte Frame'in içindeki TextLabel'ı kullan.",
   },
   "Text@ScreenGui": {
     why: "A ScreenGui is just a container; it has no Text.",
     fix: "Index the TextLabel/TextButton inside it.",
+    whyTr: "ScreenGui sadece bir kaptır; Text'i yoktur.",
+    fixTr: "İçindeki TextLabel/TextButton'a ulaş.",
   },
   "Visible@ScreenGui": {
     why: "ScreenGui uses Enabled, not Visible.",
     fix: "Use screenGui.Enabled = false (Visible is for Frames, labels and buttons).",
+    whyTr: "ScreenGui, Visible değil Enabled kullanır.",
+    fixTr: "screenGui.Enabled = false kullan (Visible; Frame, label ve butonlar içindir).",
   },
   "Enabled@Frame": {
     why: "Frames use Visible, not Enabled.",
     fix: "Use frame.Visible = false.",
+    whyTr: "Frame'ler Enabled değil Visible kullanır.",
+    fixTr: "frame.Visible = false kullan.",
   },
   "MouseButton1Click@TextLabel": {
     why: "TextLabels can't be clicked. Only buttons (TextButton, ImageButton) fire MouseButton1Click.",
     fix: "Change the TextLabel into a TextButton, or put a transparent TextButton over it.",
+    whyTr:
+      "TextLabel'lara tıklanamaz. Sadece butonlar (TextButton, ImageButton) MouseButton1Click çalıştırır.",
+    fixTr: "TextLabel'ı TextButton'a çevir ya da üstüne şeffaf bir TextButton koy.",
   },
   "MouseButton1Click@ImageLabel": {
     why: "ImageLabels can't be clicked. Use an ImageButton instead.",
     fix: "Replace the ImageLabel with an ImageButton.",
+    whyTr: "ImageLabel'lara tıklanamaz. Onun yerine ImageButton kullan.",
+    fixTr: "ImageLabel'ı bir ImageButton ile değiştir.",
   },
   "MouseButton1Click@Frame": {
     why: "Frames can't be clicked. Use a TextButton or ImageButton.",
     fix: "Add a TextButton (it can be transparent) and connect its click.",
+    whyTr: "Frame'lere tıklanamaz. TextButton ya da ImageButton kullan.",
+    fixTr: "Bir TextButton ekle (şeffaf olabilir) ve tıklamasını bağla.",
   },
   "OnServerEvent@RemoteFunction": {
     why: "RemoteFunctions use OnServerInvoke (a callback), not OnServerEvent.",
     fix: "Either switch to a RemoteEvent, or assign remoteFunction.OnServerInvoke = function(player, ...) end.",
+    whyTr:
+      "RemoteFunction'lar OnServerEvent değil OnServerInvoke (bir geri çağırma fonksiyonu) kullanır.",
+    fixTr:
+      "Ya RemoteEvent'e geç ya da remoteFunction.OnServerInvoke = function(player, ...) end ata.",
   },
   "FireServer@RemoteFunction": {
     why: "RemoteFunctions are called with InvokeServer, not FireServer.",
     fix: "Use remoteFunction:InvokeServer(...) or switch the object to a RemoteEvent.",
+    whyTr: "RemoteFunction'lar FireServer ile değil InvokeServer ile çağrılır.",
+    fixTr: "remoteFunction:InvokeServer(...) kullan ya da objeyi RemoteEvent ile değiştir.",
   },
   "InvokeServer@RemoteEvent": {
     why: "RemoteEvents are fired with FireServer; InvokeServer is for RemoteFunctions.",
     fix: "Use remoteEvent:FireServer(...).",
+    whyTr: "RemoteEvent'ler FireServer ile gönderilir; InvokeServer RemoteFunction'lar içindir.",
+    fixTr: "remoteEvent:FireServer(...) kullan.",
   },
   "Play@Animation": {
     why: "An Animation object is only the asset ID. You need to load it into an AnimationTrack first.",
     fix: "Load it on the Animator, then play the track.",
     code: 'local animator = humanoid:WaitForChild("Animator")\nlocal track = animator:LoadAnimation(animation)\ntrack:Play()',
+    whyTr:
+      "Animation objesi sadece asset ID'sini tutar. Önce onu bir AnimationTrack'e yüklemen gerekir.",
+    fixTr: "Animator'a yükle (LoadAnimation), sonra track'i oynat.",
   },
 };
 
@@ -452,7 +511,7 @@ export const WRONG_CLASS_HINTS: Record<string, { why: string; fix: string; code?
  * Members that belong to one specific kind of object. Used when a member is
  * reported missing on some other class, e.g. `door.Triggered` on a Part.
  */
-export const MEMBER_OWNER: Record<string, { owner: string; example: string }> = {
+export const MEMBER_OWNER: Record<string, { owner: string; example: string; ownerTr?: string }> = {
   Triggered: {
     owner: "ProximityPrompt",
     example:
@@ -492,10 +551,19 @@ export const MEMBER_OWNER: Record<string, { owner: string; example: string }> = 
   },
   PlayerAdded: {
     owner: "Players (the service)",
+    ownerTr: "Players (servis)",
     example: 'game:GetService("Players").PlayerAdded:Connect(function(player) end)',
   },
-  Activated: { owner: "Tool or GuiButton", example: "tool.Activated:Connect(function() end)" },
-  Play: { owner: "Sound, AnimationTrack or Tween", example: "sound:Play()" },
+  Activated: {
+    owner: "Tool or GuiButton",
+    ownerTr: "Tool ya da GuiButton",
+    example: "tool.Activated:Connect(function() end)",
+  },
+  Play: {
+    owner: "Sound, AnimationTrack or Tween",
+    ownerTr: "Sound, AnimationTrack ya da Tween",
+    example: "sound:Play()",
+  },
   LoadAnimation: {
     owner: "Animator",
     example:

@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, Library, Search } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
-import { useT } from "@/lib/prefs";
+import { useLang, useT } from "@/lib/prefs";
 import type { UiKey } from "@/lib/i18n/ui";
 import { PageHeader } from "@/components/PageHeader";
 import { diagnose } from "@/lib/analyzer/precise/diagnose";
@@ -52,6 +52,7 @@ const GROUP_KEYS: Record<string, UiKey> = {
 
 function ErrorsPage() {
   const t = useT();
+  const lang = useLang();
   const [query, setQuery] = useState("");
   const [group, setGroup] = useState("All");
   const searchRef = useRef<HTMLInputElement>(null);
@@ -72,7 +73,7 @@ function ErrorsPage() {
   const entries = useMemo(
     () =>
       ERROR_LIBRARY.map((e) => {
-        const d = diagnose(e.log, e.code ?? "")!;
+        const d = diagnose(e.log, e.code ?? "", lang)!;
         return {
           ...e,
           title: d.title,
@@ -81,7 +82,7 @@ function ErrorsPage() {
           message: d.message || e.log,
         };
       }),
-    [],
+    [lang],
   );
   const groups = ["All", ...new Set(ERROR_LIBRARY.map((e) => e.group))];
   const q = query.trim().toLowerCase();
