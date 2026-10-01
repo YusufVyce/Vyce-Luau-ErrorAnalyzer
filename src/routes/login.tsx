@@ -149,6 +149,11 @@ function AuthForm({
   const [importLocal, setImportGuest] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // An old error disappears as soon as the student changes what they typed.
+  const edit = (set: (v: string) => void) => (v: string) => {
+    set(v);
+    setError(null);
+  };
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -175,7 +180,7 @@ function AuthForm({
         label={t("acc.username")}
         hint={signup ? t("acc.usernameHint") : undefined}
         value={name}
-        onValue={setName}
+        onValue={edit(setName)}
         autoComplete="username"
         autoCapitalize="none"
         spellCheck={false}
@@ -189,7 +194,7 @@ function AuthForm({
         label={t("acc.password")}
         hint={signup ? t("acc.passwordHint") : undefined}
         value={password}
-        onValue={setPassword}
+        onValue={edit(setPassword)}
         autoComplete={signup ? "new-password" : "current-password"}
         minLength={signup ? PASSWORD_MIN : undefined}
         required
@@ -234,6 +239,11 @@ function RecoverForm({ onCode }: { onCode: (code: string) => void }) {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // An old error disappears as soon as the student changes what they typed.
+  const edit = (set: (v: string) => void) => (v: string) => {
+    set(v);
+    setError(null);
+  };
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -251,7 +261,7 @@ function RecoverForm({ onCode }: { onCode: (code: string) => void }) {
       <Field
         label={t("acc.username")}
         value={name}
-        onValue={setName}
+        onValue={edit(setName)}
         autoComplete="username"
         autoCapitalize="none"
         spellCheck={false}
@@ -261,7 +271,7 @@ function RecoverForm({ onCode }: { onCode: (code: string) => void }) {
       <Field
         label={t("acc.recoveryCode")}
         value={code}
-        onValue={setCode}
+        onValue={edit(setCode)}
         placeholder="XXXX-XXXX-XXXX-XXXX"
         autoComplete="off"
         autoCapitalize="characters"
@@ -274,7 +284,7 @@ function RecoverForm({ onCode }: { onCode: (code: string) => void }) {
         label={t("acc.newPassword")}
         hint={t("acc.passwordHint")}
         value={password}
-        onValue={setPassword}
+        onValue={edit(setPassword)}
         autoComplete="new-password"
         minLength={PASSWORD_MIN}
         required
