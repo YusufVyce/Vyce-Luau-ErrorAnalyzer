@@ -41,6 +41,9 @@ import {
   PersonStanding,
   ShoppingCart,
   StickyNote,
+  Hammer,
+  Server,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 
@@ -88,4 +91,14 @@ export const LESSON_ICONS: Record<string, LucideIcon> = {
 };
 
 /** One icon per unit (chapter), in chapter order. */
-export const UNIT_ICONS: LucideIcon[] = [Rocket, Braces, Zap, RadioTower, Gamepad2, Crosshair];
+export const UNIT_ICONS: LucideIcon[] = [
+  Rocket,
+  Braces,
+  Zap,
+  RadioTower,
+  Gamepad2,
+  Crosshair,
+  Hammer,
+  Users,
+  Server,
+];

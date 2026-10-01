@@ -43,4 +43,7 @@ export const CHAPTERS = [
   "4 · Multiplayer & saving",
   "5 · Build a game",
   "6 · Advanced scripting",
+  "7 · Luau toolbox",
+  "8 · World & players",
+  "9 · Servers & projects",
 ] as const;

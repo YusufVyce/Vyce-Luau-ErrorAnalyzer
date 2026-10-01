@@ -77,7 +77,7 @@ This makes it easier to see exactly where an expression stops working.
 
 Vyce Parser includes a structured learning system for learning Roblox Studio scripting.
 
-- 39 lessons in 6 units, from the Studio tour to CFrames, pcall, RemoteFunctions and two full game projects (a coin shop and a dropper tycoon).
+- 39 lessons in 9 units, from the Studio tour to CFrames, pcall, RemoteFunctions and two full game projects (a coin shop and a dropper tycoon).
 - Every lesson has homework that runs in the browser simulator.
 - English and Turkish language support.
 - Step-by-step learning path.
