@@ -168,6 +168,12 @@ export class MemoryKV implements KV {
       }
       case "HGET":
         return this.get(a[0], "hash")?.value.get(a[1]) ?? null;
+      case "HINCRBY": {
+        const h = this.ensure(a[0], "hash").value;
+        const n = (Number(h.get(a[1])) || 0) + Number(a[2]);
+        h.set(a[1], String(n));
+        return n;
+      }
       case "HMGET": {
         const h = this.get(a[0], "hash")?.value;
         return a.slice(1).map((f) => h?.get(f) ?? null);
@@ -264,7 +270,7 @@ function allEnv(): Record<string, unknown> {
   return { ...fromWorkers, ...fromProcess };
 }
 
-function env(name: string): string | undefined {
+export function env(name: string): string | undefined {
   const v = allEnv()[name];
   return typeof v === "string" && v.trim() ? v.trim() : undefined;
 }

@@ -10,7 +10,7 @@ import { PASSWORD_MIN, USERNAME_MAX, USERNAME_MIN, accountErrorKey } from "@/lib
 import { useT } from "@/lib/prefs";
 
 type Mode = "login" | "signup" | "recover";
-const NEXT = ["/profile", "/leaderboard", "/learn", "/challenges"] as const;
+const NEXT = ["/profile", "/leaderboard", "/learn", "/challenges", "/forum", "/forum/new"] as const;
 type Next = (typeof NEXT)[number];
 /** Pages the login page may send people back to. */
 export type LoginNext = Next;

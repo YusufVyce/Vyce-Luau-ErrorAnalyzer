@@ -209,7 +209,11 @@ Lessons, challenges and the profile need an account: sign up with a username and
 
 ## 🌐 Public Profiles
 
-Every player has a public page at `/u/<username>` with their level, streak, league and achievements.
+Every player has a public page at `/u/<username>` with their level, streak, league and achievements. Players can upload a profile photo and a banner there; the browser crops and shrinks them before upload, and the server only accepts PNG, JPEG or WebP files. The account button in the nav opens your own public profile.
+
+## 💬 Forum
+
+A community forum at `/forum` with categories (general, scripting help, showcase, site feedback). Anyone can read; posting needs an account and is rate-limited. Code between ``` lines is highlighted. Authors can delete their own posts, and forum admins can pin, lock and delete threads. Admins are the usernames in `FORUM_ADMINS` (comma separated, `vyce` by default).
 
 ## 🎓 Vyce Parser License
 
@@ -306,7 +310,8 @@ Vyce Parser is designed to keep its core learning and analysis features local an
 - 📈 Learning progress tracking
 - 🔑 Accounts with cross-device sync and server-checked XP
 - 🏅 Weekly leagues, friends and daily / weekly / all-time leaderboards
-- 🌐 Public player profiles
+- 🌐 Public player profiles with photos and banners
+- 💬 Community forum
 
 ---
 
@@ -369,6 +374,7 @@ UPSTASH_REDIS_REST_TOKEN=...
 - ✅ Turkish / English language support
 - ✅ Code testing system
 - ✅ Accounts & leaderboard
+- ✅ Forum and profile photos
 
 ## Planned
 

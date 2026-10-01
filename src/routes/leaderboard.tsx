@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
 import { PageHeader } from "@/components/PageHeader";
+import { Avatar } from "@/components/account/Avatar";
 import { LeagueBadge, leagueName } from "@/components/account/LeagueBadge";
 import { FormError } from "@/components/account/fields";
 import { Mascot } from "@/components/learn/duo/Mascot";
@@ -127,18 +128,12 @@ function RankBadge({ rank }: { rank: number }) {
   return <span className="font-mono text-[13px] text-ink-3">{rank}</span>;
 }
 
-function Avatar({ name }: { name: string }) {
-  return (
-    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[linear-gradient(135deg,var(--brand),var(--syn-purple))] font-mono text-sm font-bold text-white">
-      {name[0]?.toUpperCase()}
-    </span>
-  );
-}
-
 /** One leaderboard row; the name links to the player's public profile. */
 function Row({
   rank,
+  id,
   name,
+  avatar,
   xp,
   score,
   me,
@@ -146,7 +141,9 @@ function Row({
   extra,
 }: {
   rank: number;
+  id: string;
   name: string;
+  avatar: number;
   xp: number;
   score: ReactNode;
   me: boolean;
@@ -171,7 +168,7 @@ function Row({
       <span className="inline-flex w-8 shrink-0 justify-center">
         <RankBadge rank={rank} />
       </span>
-      <Avatar name={name} />
+      <Avatar id={id} name={name} avatar={avatar} />
       <span className="min-w-0 flex-1">
         <Link
           to="/u/$name"
@@ -322,7 +319,9 @@ function LeagueTab({ now }: { now: number }) {
             <Row
               key={e.id}
               rank={e.rank}
+              id={e.id}
               name={e.name}
+              avatar={e.avatar}
               xp={e.xp}
               score={`${e.score} XP`}
               me={e.id === acc.user?.id}
@@ -425,7 +424,9 @@ function FriendsTab() {
             <Row
               key={r.id}
               rank={i + 1}
+              id={r.id}
               name={r.name}
+              avatar={r.avatar}
               xp={r.xp}
               me={r.me}
               score={
@@ -505,7 +506,9 @@ function BoardTab({ board, now }: { board: Board; now: number }) {
             <Row
               key={e.id}
               rank={e.rank}
+              id={e.id}
               name={e.name}
+              avatar={e.avatar}
               xp={e.xp}
               me={e.id === acc.user?.id}
               score={

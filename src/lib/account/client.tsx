@@ -118,6 +118,8 @@ interface AccountContext {
   logOut: () => Promise<void>;
   changePassword: (current: string, next: string) => Promise<Result<object>>;
   deleteAccount: (password: string) => Promise<Result<object>>;
+  /** Takes account details the server just sent back (e.g. after a new profile photo). */
+  updateUser: (user: PublicUser) => void;
 }
 
 const Ctx = createContext<AccountContext | null>(null);
@@ -388,6 +390,9 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         const r = await call(() => deleteAccountFn({ data: { password } }));
         if (r.ok) resetBrowser();
         return r;
+      },
+      updateUser(u) {
+        if (userRef.current?.id === u.id) setAccount({ ...u });
       },
     };
   }, [

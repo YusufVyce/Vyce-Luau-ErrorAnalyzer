@@ -44,6 +44,7 @@ export function PageShell({
                 ["/learn", "nav.learn"],
                 ["/challenges", "nav.challenges"],
                 ["/leaderboard", "nav.leaderboard"],
+                ["/forum", "nav.forum"],
                 ["/profile", "nav.profile"],
                 ["/playground", "nav.playground"],
               ] as const

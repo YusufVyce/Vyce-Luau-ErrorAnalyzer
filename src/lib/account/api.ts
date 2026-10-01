@@ -15,23 +15,22 @@ import {
   setCookie,
 } from "@tanstack/react-start/server";
 import { z } from "zod";
-import { getKV } from "./server/kv";
-import { AccountService, SESSION_TTL } from "./server/service";
+import type { ForumService } from "./server/forum";
+import { accountService as service, forumService as forum } from "./server/instance";
+import { SESSION_TTL, type AccountService } from "./server/service";
 import type { Progress } from "@/lib/learn/progress";
-import type { AccountError, Board, Claim, PublicUser, Result } from "./shared";
+import {
+  FORUM_BODY_MAX,
+  FORUM_TITLE_MAX,
+  IMAGE_SPECS,
+  type AccountError,
+  type Board,
+  type Claim,
+  type PublicUser,
+  type Result,
+} from "./shared";
 
 const COOKIE = "vyce_session";
-
-let svc: AccountService | undefined;
-
-/** One service per server instance, so its short leaderboard cache is shared between requests. */
-function service(): AccountService | null {
-  if (!svc) {
-    const kv = getKV();
-    if (kv) svc = new AccountService(kv);
-  }
-  return svc ?? null;
-}
 
 function clientIp(): string {
   return (
@@ -241,3 +240,65 @@ export const unfollowUser = createServerFn({ method: "POST" })
 export const getProfile = createServerFn({ method: "GET" })
   .validator(z.object({ name: username }))
   .handler(async ({ data }) => withService((svc) => svc.profile(data.name, getCookie(COOKIE))));
+
+// ------------------------------------------------------------------ profile images
+
+const imageKind = z.enum(["avatar", "banner"]);
+// base64 is 4/3 of the file size; the service checks the real limit.
+const imageData = z.string().max(Math.ceil((IMAGE_SPECS.banner.maxBytes * 4) / 3) + 8);
+
+export const uploadImage = createServerFn({ method: "POST" })
+  .validator(z.object({ kind: imageKind, data: imageData }))
+  .handler(async ({ data }) =>
+    withService((svc) => svc.setImage(getCookie(COOKIE), data.kind, data.data)),
+  );
+
+export const removeImage = createServerFn({ method: "POST" })
+  .validator(z.object({ kind: imageKind }))
+  .handler(async ({ data }) => withService((svc) => svc.removeImage(getCookie(COOKIE), data.kind)));
+
+// ------------------------------------------------------------------ forum
+
+/** Like withService, for the forum. */
+async function withForum<T>(fn: (f: ForumService) => Promise<Result<T>>): Promise<Result<T>> {
+  const f = forum();
+  if (!f) return { ok: false, error: "not_configured" };
+  try {
+    return await fn(f);
+  } catch (e) {
+    console.error("[forum]", e);
+    return { ok: false, error: "server_error" as AccountError };
+  }
+}
+
+const threadId = z.number().int().positive().max(1e9);
+
+export const listThreads = createServerFn({ method: "GET" })
+  .validator(z.object({ category: z.string().max(20), page: z.number().int().min(0).max(1000) }))
+  .handler(async ({ data }) => withForum((f) => f.list(data.category, data.page)));
+
+export const getThread = createServerFn({ method: "GET" })
+  .validator(z.object({ id: threadId, page: z.number().int().min(-1).max(10_000) }))
+  .handler(async ({ data }) => withForum((f) => f.thread(data.id, data.page, getCookie(COOKIE))));
+
+export const createThread = createServerFn({ method: "POST" })
+  .validator(
+    z.object({
+      title: z.string().max(FORUM_TITLE_MAX * 2),
+      category: z.string().max(20),
+      body: z.string().max(FORUM_BODY_MAX * 2),
+    }),
+  )
+  .handler(async ({ data }) => withForum((f) => f.create(getCookie(COOKIE), data)));
+
+export const replyThread = createServerFn({ method: "POST" })
+  .validator(z.object({ id: threadId, body: z.string().max(FORUM_BODY_MAX * 2) }))
+  .handler(async ({ data }) => withForum((f) => f.reply(getCookie(COOKIE), data)));
+
+export const deletePost = createServerFn({ method: "POST" })
+  .validator(z.object({ id: threadId, n: z.number().int().positive().max(1e6) }))
+  .handler(async ({ data }) => withForum((f) => f.remove(getCookie(COOKIE), data)));
+
+export const moderateThread = createServerFn({ method: "POST" })
+  .validator(z.object({ id: threadId, action: z.enum(["pin", "unpin", "lock", "unlock"]) }))
+  .handler(async ({ data }) => withForum((f) => f.moderate(getCookie(COOKIE), data)));
