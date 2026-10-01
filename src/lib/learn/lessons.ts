@@ -4,53 +4,12 @@
  * references describe how *a feature like the one in that game* can be built;
  * they are not those games' actual source code.
  */
-import type { VisualId } from "@/components/learn/Visuals";
+import { CHAPTERS, lua, type Lesson } from "./lessonBase";
+import { EXTRA_LESSONS } from "./lessons.extra";
 
-export interface LessonCode {
-  code: string;
-  title?: string;
-  /** Where the script goes in Explorer. */
-  where?: string;
-}
+export * from "./lessonBase";
 
-export interface LessonSection {
-  heading?: string;
-  text?: string[];
-  list?: string[];
-  code?: LessonCode;
-  visual?: { id: VisualId; caption?: string };
-  tip?: string;
-}
-
-export interface Lesson {
-  id: string;
-  chapter: string;
-  title: string;
-  minutes: number;
-  summary: string;
-  sections: LessonSection[];
-  game?: { name: string; text: string };
-  tryIt?: string[];
-  mistake?: { error: string; code: string; explain: string };
-  quiz?: { question: string; options: string[]; answer: number; why: string };
-}
-
-/** Strips the first newline so samples can start on their own line. */
-const lua = (strings: TemplateStringsArray, ...values: unknown[]) =>
-  String.raw({ raw: strings }, ...values)
-    .replace(/^\n/, "")
-    .replace(/\s+$/, "");
-
-export const CHAPTERS = [
-  "1 · Getting started",
-  "2 · Luau basics",
-  "3 · Making things happen",
-  "4 · Multiplayer & saving",
-  "5 · Build a game",
-  "6 · Advanced scripting",
-] as const;
-
-export const LESSONS: Lesson[] = [
+const BASE_LESSONS: Lesson[] = [
   // ------------------------------------------------------------------ 1
   {
     id: "studio-tour",
@@ -1839,6 +1798,15 @@ end)
     },
   },
 ];
+
+/**
+ * The whole course. New lessons sit right after the lesson they build on
+ * (see \`after\` in lessons.extra.ts).
+ */
+export const LESSONS: Lesson[] = BASE_LESSONS.flatMap((l) => [
+  l,
+  ...EXTRA_LESSONS.filter((x) => x.after === l.id).map(({ after: _after, ...x }) => x),
+]);
 
 export function analyzerLink(error: string, code: string): string {
   const params = new URLSearchParams({ error, code });

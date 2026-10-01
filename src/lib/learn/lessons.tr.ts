@@ -4,8 +4,9 @@
  */
 import { localizeCode } from "./codeTr";
 import type { Lesson } from "./lessons";
+import { TR_EXTRA } from "./lessons.extra.tr";
 
-interface SectionTr {
+export interface SectionTr {
   h?: string;
   t?: string[];
   l?: string[];
@@ -14,7 +15,7 @@ interface SectionTr {
   w?: string;
 }
 
-interface LessonTr {
+export interface LessonTr {
   title: string;
   summary: string;
   sections?: Array<SectionTr | null>;
@@ -33,7 +34,7 @@ export const CHAPTERS_TR: Record<string, string> = {
   "6 · Advanced scripting": "6 · İleri seviye scripting",
 };
 
-const TR: Record<string, LessonTr> = {
+const TR_BASE: Record<string, LessonTr> = {
   "studio-tour": {
     title: "Roblox Studio turu",
     summary: "Yolunu bul: 3D görüntü alanı, Explorer, Properties ve Output penceresi.",
@@ -823,6 +824,8 @@ const TR: Record<string, LessonTr> = {
     },
   },
 };
+
+const TR: Record<string, LessonTr> = { ...TR_BASE, ...TR_EXTRA };
 
 /** The lesson with its prose in the chosen language (code stays the same). */
 export function localizeLesson(lesson: Lesson, lang: "en" | "tr"): Lesson {

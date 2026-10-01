@@ -10,6 +10,8 @@ import { fmtValue } from "@/lib/learn/homework/harness";
 import type { CFrame } from "@/lib/luau/roblox/datatypes";
 import { Vector3 } from "@/lib/luau/roblox/datatypes";
 import type { Instance } from "@/lib/luau/roblox/instance";
+import { F } from "./define";
+import { EXTRA_CHALLENGES } from "./extra";
 
 export type Difficulty = "easy" | "medium" | "hard";
 export type Tag = "basics" | "math" | "strings" | "tables" | "loops" | "game" | "roblox";
@@ -41,21 +43,7 @@ export interface WorldChallenge extends ChallengeBase {
 
 export type Challenge = FunctionChallenge | WorldChallenge;
 
-const fnStarter = (name: string, params: string, comment: { en: string }) =>
-  `-- ${comment.en}\nlocal function ${name}(${params})\n\t\nend\n`;
-
-const F = (
-  c: Omit<FunctionChallenge, "kind" | "starter"> & { params: string },
-): FunctionChallenge => {
-  const { params, ...rest } = c;
-  return {
-    kind: "function",
-    starter: fnStarter(c.fn, params, { en: "Write your function here" }),
-    ...rest,
-  };
-};
-
-export const CHALLENGES: Challenge[] = [
+const BASE: Challenge[] = [
   // ------------------------------------------------------------------ easy
   F({
     id: "add",
@@ -1072,6 +1060,13 @@ export const CHALLENGES: Challenge[] = [
     },
   },
 ];
+
+const ORDER: Record<Difficulty, number> = { easy: 0, medium: 1, hard: 2 };
+
+/** Every challenge, easiest first (the original ones keep their place within each level). */
+export const CHALLENGES: Challenge[] = [...BASE, ...EXTRA_CHALLENGES].sort(
+  (a, b) => ORDER[a.difficulty] - ORDER[b.difficulty],
+);
 
 export function challengeById(id: string): Challenge | undefined {
   return CHALLENGES.find((c) => c.id === id);

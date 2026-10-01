@@ -1,10 +1,11 @@
 /** Turkish text for the homework (the graders produce Turkish checks via Harness.t). */
 import { localizeCode } from "../codeTr";
+import { EXTRA_TR } from "./extra.tr";
 import type { Exercise } from "./harness";
 
-type ExerciseText = Pick<Exercise, "title" | "goal" | "steps" | "hints">;
+export type ExerciseText = Pick<Exercise, "title" | "goal" | "steps" | "hints">;
 
-const TR: Record<string, ExerciseText> = {
+const TR_BASE: Record<string, ExerciseText> = {
   "studio-tour": {
     title: "Bir özelliği kodla değiştir",
     goal: "Properties penceresindeki her şey bir scriptle de değiştirilebilir. Baseplate üzerinde dene.",
@@ -375,6 +376,8 @@ const TR: Record<string, ExerciseText> = {
     ],
   },
 };
+
+const TR: Record<string, ExerciseText> = { ...TR_BASE, ...EXTRA_TR };
 
 /** The exercise with its visible text in the chosen language. */
 export function localizeExercise(ex: Exercise, lang: "en" | "tr"): Exercise {

@@ -72,7 +72,9 @@ function addFixtures(w: World, code: string) {
   const rs = w.service("ReplicatedStorage");
   for (const n of names("ReplicatedStorage")) {
     if (["Remotes"].includes(n) || rs.findFirstChild(n)) continue;
-    const isFn = new RegExp(`${n}\\s*[:.]\\s*(InvokeServer|OnServerInvoke)`).test(code);
+    const isFn =
+      new RegExp(`${n}\\s*[:.]\\s*(InvokeServer|OnServerInvoke)`).test(code) ||
+      (/InvokeServer|OnServerInvoke/.test(code) && /^Get|Function$/.test(n));
     const isRemote =
       /Remote|Event|Buy|Fire|Notify|Request|Update/.test(n) ||
       /FireServer|OnServerEvent|FireClient|OnClientEvent/.test(code);
@@ -90,7 +92,13 @@ function addFixtures(w: World, code: string) {
   }
   const ss = w.service("ServerStorage");
   for (const n of names("ServerStorage")) {
-    const f = ensure(ss, n, "Folder");
+    // Templates are parts, "…Ended/Started" are BindableEvents, anything else a folder.
+    const cls = /^(Coin|Gem|Ore|Template|Dropper\d*)$/.test(n)
+      ? "Part"
+      : /(Ended|Started|Event)$/.test(n)
+        ? "BindableEvent"
+        : "Folder";
+    const f = ensure(ss, n, cls, cls === "Part" ? { Anchored: true } : {});
     if (n === "Items") ensure(f, "Sword", "Tool");
   }
   let x = 0;
@@ -102,7 +110,11 @@ function addFixtures(w: World, code: string) {
       ensure(npc, "Humanoid", "Humanoid");
       continue;
     }
-    const cls = /^(Checkpoints|Coins|Map|Obby)$/.test(n) ? "Folder" : "Part";
+    const cls = /^(Checkpoints|Coins|Map|Obby)$/.test(n)
+      ? "Folder"
+      : /^(Cash|Money|Score|RoundsPlayed)$/.test(n)
+        ? "IntValue"
+        : "Part";
     ensure(
       w.workspace,
       n,
@@ -140,7 +152,7 @@ function place(w: World, where: string | undefined, code: string) {
         existing ??
         w.create(
           childClass(parent, s.name, s.cls),
-          parent.className === "Workspace"
+          parent.className === "Workspace" && childClass(parent, s.name, s.cls) === "Part"
             ? { Name: s.name, Anchored: true, Position: new Vector3(0, 3, 12) }
             : { Name: s.name },
           parent,
