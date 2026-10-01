@@ -41,6 +41,8 @@ const GUESS_CLASS: Array<[RegExp, string]> = [
   [/Folder$|^Items$|^Checkpoints$|^Coins$/, "Folder"],
 ];
 
+const NPC = /^(Boss|NPC|Zombie|Dummy|Enemy|Noob|Guard)$/i;
+
 function parseSegment(seg: string): { name: string; cls?: string } {
   const m = seg.trim().match(/^(.+?)\s*\((\w+)\)$/);
   return m ? { name: m[1].trim(), cls: m[2] } : { name: seg.trim() };
@@ -104,7 +106,7 @@ function addFixtures(w: World, code: string) {
   let x = 0;
   for (const n of names("workspace")) {
     if (["CurrentCamera", "Gravity", "Terrain"].includes(n)) continue;
-    if (/^(Boss|NPC|Zombie|Dummy|Enemy|Noob)$/i.test(n)) {
+    if (NPC.test(n)) {
       const npc = ensure(w.workspace, n, "Model");
       ensure(npc, "HumanoidRootPart", "Part", { Anchored: true, Position: new Vector3(-20, 3, 0) });
       ensure(npc, "Humanoid", "Humanoid");
@@ -159,6 +161,16 @@ function place(w: World, where: string | undefined, code: string) {
         );
       if (parent.className === "Tool" && !parent.findFirstChild("Handle"))
         w.create("Part", { Name: "Handle", Size: new Vector3(1, 4, 1) }, parent);
+      // "Workspace › Zombie (Model) › Script": an NPC needs a body.
+      if (parent.className === "Model" && NPC.test(parent.name)) {
+        if (!parent.findFirstChild("HumanoidRootPart"))
+          w.create(
+            "Part",
+            { Name: "HumanoidRootPart", Anchored: true, Position: new Vector3(-20, 3, 0) },
+            parent,
+          );
+        if (!parent.findFirstChild("Humanoid")) w.create("Humanoid", {}, parent);
+      }
     }
     if (!/^(Script|LocalScript|ModuleScript)$/.test(last.name)) name = last.name;
   }
@@ -224,6 +236,18 @@ function recordChanges(w: World, ignore: RegExp | null) {
 export interface SampleModule {
   name: string;
   code: string;
+  /** Explorer path like "ServerScriptService › Services › ShopService (ModuleScript)". */
+  where?: string;
+}
+
+/** The folder a module sample lives in (ReplicatedStorage unless its path says otherwise). */
+function moduleParent(w: World, where: string | undefined): Instance {
+  const segs = (where ?? "").split(" — ")[0].split("›").map(parseSegment);
+  if (segs.length < 2 || !SERVICES.includes(segs[0].name)) return w.service("ReplicatedStorage");
+  let parent = w.service(segs[0].name);
+  for (const s of segs.slice(1, -1))
+    parent = parent.findFirstChild(s.name) ?? w.create(s.cls ?? "Folder", { Name: s.name }, parent);
+  return parent;
 }
 
 export function runSample(
@@ -257,7 +281,7 @@ export function runSample(
       source: m.code,
       kind: "ModuleScript",
       name: m.name,
-      parent: w.service("ReplicatedStorage"),
+      parent: moduleParent(w, m.where),
     });
   addFixtures(w, code);
   const { parent, kind, name } = place(w, where, code);
@@ -312,7 +336,24 @@ end)`,
     w.run(0.5);
     const p = w.addPlayer("Player1");
     actions.push("Player1 joined");
+    // Store samples: the player owns the game pass and buys the first product.
+    const assetId = (re: RegExp) => Number(code.match(re)?.[1] ?? code.match(/\b(\d{4,})\b/)?.[1]);
+    if (/UserOwnsGamePassAsync/.test(code)) {
+      const id = assetId(/PASS\w*\s*=\s*(\d+)/i);
+      if (id) {
+        w.grantGamePass(p, id);
+        actions.push(`Player1 owns game pass ${id}`);
+      }
+    }
     w.run(2);
+    if (/ProcessReceipt/.test(code)) {
+      const id = assetId(/\[(\d+)\]\s*=/);
+      if (id) {
+        w.purchaseProduct(p, id);
+        actions.push(`Player1 bought product ${id}`);
+        w.run(1);
+      }
+    }
     // Simulate the interaction the sample is about.
     const host = parent.className === "Workspace" ? undefined : parent;
     if (/\.Touched/.test(code)) {

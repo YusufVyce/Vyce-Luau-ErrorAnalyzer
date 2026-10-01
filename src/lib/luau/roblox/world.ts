@@ -244,6 +244,10 @@ export class World {
     string,
     { fn: LuaFunction; keys: string[]; script?: ScriptContext }
   >();
+  /** Game passes each user owns (UserId → pass ids), for UserOwnsGamePassAsync. */
+  gamePasses = new Map<number, Set<number>>();
+  /** What ProcessReceipt answered for each simulated purchase, in order. */
+  receipts: Array<{ productId: number; decision: string }> = [];
 
   constructor(options: WorldOptions = {}) {
     installClasses();
@@ -991,6 +995,44 @@ export class World {
     );
   }
 
+  /** Gives `player` a game pass, as if they had bought it earlier. */
+  grantGamePass(player: Instance, passId: number) {
+    const id = player.props.get("UserId") as number;
+    const owned = this.gamePasses.get(id) ?? new Set<number>();
+    owned.add(passId);
+    this.gamePasses.set(id, owned);
+  }
+
+  /**
+   * Simulates `player` buying a developer product: Roblox calls the
+   * ProcessReceipt callback with a receipt and keeps its answer.
+   */
+  purchaseProduct(player: Instance, productId: number) {
+    const cb = this.service("MarketplaceService").callbacks.get("ProcessReceipt");
+    if (!(cb instanceof LuaFunction)) {
+      this.receipts.push({ productId, decision: "no ProcessReceipt" });
+      return;
+    }
+    const receipt = LuaTable.fromRecord({
+      PlayerId: player.props.get("UserId"),
+      ProductId: productId,
+      PurchaseId: this.nextGuid(false),
+      CurrencySpent: 0,
+      CurrencyType: enumItem("CurrencyType", "Robux"),
+      PlaceIdWherePurchased: 0,
+    });
+    const receipts = this.receipts;
+    this.interp.enqueue(
+      nativeGen("ProcessReceipt", function* (_args, I) {
+        const r = yield* I.call(cb, [receipt]);
+        const decision = r[0] instanceof EnumItem ? r[0].name : formatNumber(Number(r[0]));
+        receipts.push({ productId, decision: r[0] === undefined ? "nil" : decision });
+        return [];
+      }),
+      [],
+    );
+  }
+
   async shutdown() {
     for (const p of this.players()) this.removePlayer(p);
     for (const fn of this.bindToClose) this.interp.enqueue(fn, []);
@@ -1469,8 +1511,15 @@ function defineServiceClasses() {
     }
     const track = new Instance(self.world, "AnimationTrack", anim.name);
     track.props.set("Animation", anim);
+    owner.state.tracks = [...((owner.state.tracks as Instance[] | undefined) ?? []), track];
     return track;
   };
+  const playingTracks = (self: Instance) =>
+    LuaTable.from(
+      ((self.state.tracks as Instance[] | undefined) ?? []).filter(
+        (t) => t.props.get("IsPlaying") === true,
+      ),
+    );
 
   defineClass("Humanoid", {
     methods: {
@@ -1537,7 +1586,7 @@ function defineServiceClasses() {
         }
         return [];
       },
-      GetPlayingAnimationTracks: () => new LuaTable(),
+      GetPlayingAnimationTracks: (self) => playingTracks(self),
       GetAccessories: (self) =>
         LuaTable.from(self.parent?.children.filter((c) => c.className === "Accessory") ?? []),
       AddAccessory: (self, a) => {
@@ -1554,7 +1603,7 @@ function defineServiceClasses() {
   defineClass("Animator", {
     methods: {
       LoadAnimation: (self, a) => loadAnimation(self, a, self),
-      GetPlayingAnimationTracks: () => new LuaTable(),
+      GetPlayingAnimationTracks: (self) => playingTracks(self),
     },
   });
   defineClass("AnimationController", {
@@ -2163,9 +2212,10 @@ function defineServiceClasses() {
         return [];
       },
       PromptPurchase: () => [],
-      UserOwnsGamePassAsync: function* (_s, _a, I) {
+      UserOwnsGamePassAsync: function* (self, a, I) {
         yield* waitFor(I, 0.05);
-        return [false];
+        const owned = self.world.gamePasses.get(toNumber(a[0]) ?? -1);
+        return [owned?.has(toNumber(a[1]) ?? -1) ?? false];
       },
       PlayerOwnsAsset: () => false,
       GetProductInfo: (_s, a) =>
