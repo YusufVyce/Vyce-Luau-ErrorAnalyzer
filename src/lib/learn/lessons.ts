@@ -6,6 +6,8 @@
  */
 import { CHAPTERS, lua, type Lesson } from "./lessonBase";
 import { EXTRA_LESSONS } from "./lessons.extra";
+import { PRO_LESSONS_A } from "./lessons.pro";
+import { PRO_LESSONS_B } from "./lessons.pro2";
 
 export * from "./lessonBase";
 
@@ -1800,7 +1802,12 @@ end)
 ];
 
 /** The whole course: the original units, then the newer ones. */
-export const LESSONS: Lesson[] = [...BASE_LESSONS, ...EXTRA_LESSONS];
+export const LESSONS: Lesson[] = [
+  ...BASE_LESSONS,
+  ...EXTRA_LESSONS,
+  ...PRO_LESSONS_A,
+  ...PRO_LESSONS_B,
+];
 
 export function analyzerLink(error: string, code: string): string {
   const params = new URLSearchParams({ error, code });

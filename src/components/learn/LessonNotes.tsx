@@ -76,6 +76,7 @@ export function LessonBody({ lesson, t }: { lesson: Lesson; t: TFunction }) {
     .map((s) => ({
       name: s.code!.where!.match(/(\w+) \(ModuleScript\)/)?.[1] ?? "Module",
       code: s.code!.code,
+      where: s.code!.where,
     }));
   return (
     <>

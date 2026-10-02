@@ -2,7 +2,7 @@
  * Property/event schemas for the Roblox classes the simulator supports.
  * Behaviour that needs the world (players, tweens, remotes…) lives in world.ts.
  */
-import { LuaTable } from "../values";
+import { LuaError, LuaTable, robloxTypeOf } from "../values";
 import { BrickColor, CFrame, Color3, enumItem, UDim, UDim2, Vector2, Vector3 } from "./datatypes";
 import { defineClass, type PropDef, type PropType } from "./instance";
 
@@ -76,6 +76,13 @@ export function installClasses() {
       GetConnectedParts: () => new LuaTable(),
       GetJoints: () => new LuaTable(),
       CanSetNetworkOwnership: () => [true],
+      GetPivot: (self) => self.getProp("CFrame"),
+      PivotTo: (self, a) => {
+        if (!(a[0] instanceof CFrame))
+          throw new LuaError(`Unable to cast ${robloxTypeOf(a[0])} to CoordinateFrame`);
+        self.setProp("CFrame", a[0]);
+        return [];
+      },
     },
     creatable: false,
   });

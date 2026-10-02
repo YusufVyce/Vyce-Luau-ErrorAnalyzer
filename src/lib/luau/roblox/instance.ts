@@ -151,8 +151,8 @@ function methodFunction(owner: string, name: string, impl: MethodImpl): LuaFunct
         throw new LuaError(`Expected ':' not '.' calling member function ${name}`);
       }
       const r = impl(self, args.slice(1), I as Interpreter);
-      if (isGenerator(r)) return yield* r;
-      return Array.isArray(r) ? r : [r];
+      const v = isGenerator(r) ? yield* r : r;
+      return Array.isArray(v) ? v : [v];
     });
     methodFnCache.set(key, fn);
   }

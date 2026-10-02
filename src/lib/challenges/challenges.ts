@@ -11,10 +11,19 @@ import type { CFrame } from "@/lib/luau/roblox/datatypes";
 import { Vector3 } from "@/lib/luau/roblox/datatypes";
 import type { Instance } from "@/lib/luau/roblox/instance";
 import { F } from "./define";
+import { ALGORITHM_CHALLENGES } from "./algorithms";
 import { EXTRA_CHALLENGES } from "./extra";
 
 export type Difficulty = "easy" | "medium" | "hard";
-export type Tag = "basics" | "math" | "strings" | "tables" | "loops" | "game" | "roblox";
+export type Tag =
+  | "algorithms"
+  | "basics"
+  | "math"
+  | "strings"
+  | "tables"
+  | "loops"
+  | "game"
+  | "roblox";
 type Text = { en: string; tr: string };
 
 interface ChallengeBase {
@@ -1064,9 +1073,37 @@ const BASE: Challenge[] = [
 const ORDER: Record<Difficulty, number> = { easy: 0, medium: 1, hard: 2 };
 
 /** Every challenge, easiest first (the original ones keep their place within each level). */
-export const CHALLENGES: Challenge[] = [...BASE, ...EXTRA_CHALLENGES].sort(
-  (a, b) => ORDER[a.difficulty] - ORDER[b.difficulty],
-);
+/** Older challenges that are really algorithm problems get the algorithms tag too. */
+const ALGORITHMIC = new Set([
+  "fibonacci",
+  "binary-search",
+  "roman",
+  "primes",
+  "is-anagram",
+  "second-largest",
+  "longest-streak",
+  "two-sum",
+  "balanced",
+  "merge-intervals",
+  "shortest-path",
+  "rpn",
+  "spiral",
+  "transpose",
+  "rotate",
+  "compress",
+  "decompress",
+  "competition-ranks",
+  "is-palindrome",
+  "remove-duplicates",
+]);
+
+export const CHALLENGES: Challenge[] = [...BASE, ...EXTRA_CHALLENGES, ...ALGORITHM_CHALLENGES]
+  .map((c) =>
+    ALGORITHMIC.has(c.id) && !c.tags.includes("algorithms")
+      ? { ...c, tags: ["algorithms" as Tag, ...c.tags] }
+      : c,
+  )
+  .sort((a, b) => ORDER[a.difficulty] - ORDER[b.difficulty]);
 
 export function challengeById(id: string): Challenge | undefined {
   return CHALLENGES.find((c) => c.id === id);

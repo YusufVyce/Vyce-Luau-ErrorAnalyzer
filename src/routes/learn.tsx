@@ -1,3 +1,4 @@
+import { HOMEWORK_HINT_COST } from "@/lib/learn/rewards";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useMemo, useState } from "react";
 import { ArrowLeft, BookOpen, Brain, Clock, PenLine, Play } from "lucide-react";
@@ -292,6 +293,11 @@ function LessonRunner({
                 p.solutions.includes(id) ? p : { ...p, solutions: [...p.solutions, id] },
               )
             }
+            reward={{
+              xp: homeworkXp(progress, id),
+              hintCost: HOMEWORK_HINT_COST,
+              solutionSeen: progress.solutions.includes(id),
+            }}
           />
         )
       }

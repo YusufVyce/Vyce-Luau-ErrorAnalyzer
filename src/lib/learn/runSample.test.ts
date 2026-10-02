@@ -9,6 +9,7 @@ describe("lesson samples run in the simulator", () => {
       .map((s) => ({
         name: s.code!.where!.match(/(\w+) \(ModuleScript\)/)?.[1] ?? "Module",
         code: s.code!.code,
+        where: s.code!.where,
       }));
     lesson.sections.forEach((s, i) => {
       if (!s.code) return;

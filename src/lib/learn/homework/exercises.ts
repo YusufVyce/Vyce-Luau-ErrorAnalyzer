@@ -8,6 +8,7 @@ import { Color3, Vector3 } from "@/lib/luau/roblox/datatypes";
 import type { Instance } from "@/lib/luau/roblox/instance";
 import type { World } from "@/lib/luau/roblox/world";
 import { EXTRA_EXERCISES } from "./extra";
+import { PRO_EXERCISES } from "./pro";
 import { fmtValue, type Exercise, type Harness, type Say } from "./harness";
 
 const approx = (a: unknown, b: number, eps = 0.02) =>
@@ -2105,7 +2106,7 @@ if not __ok then print("__TEST__", "error", tostring(__err)) end`,
   },
 ];
 
-export const EXERCISES: Exercise[] = [...BASE_EXERCISES, ...EXTRA_EXERCISES];
+export const EXERCISES: Exercise[] = [...BASE_EXERCISES, ...EXTRA_EXERCISES, ...PRO_EXERCISES];
 
 export function exerciseFor(lessonId: string): Exercise | undefined {
   return EXERCISES.find((e) => e.lessonId === lessonId);

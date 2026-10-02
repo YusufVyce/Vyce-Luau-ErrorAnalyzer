@@ -5,6 +5,7 @@
 import { localizeCode } from "./codeTr";
 import type { Lesson } from "./lessons";
 import { TR_EXTRA } from "./lessons.extra.tr";
+import { TR_PRO } from "./lessons.pro.tr";
 
 export interface SectionTr {
   h?: string;
@@ -35,6 +36,12 @@ export const CHAPTERS_TR: Record<string, string> = {
   "7 · Luau toolbox": "7 · Luau araç kutusu",
   "8 · World & players": "8 · Dünya ve oyuncular",
   "9 · Servers & projects": "9 · Sunucu ve projeler",
+  "10 · Pro Luau": "10 · Profesyonel Luau",
+  "11 · Data like a pro": "11 · Profesyonel veri",
+  "12 · Security": "12 · Güvenlik",
+  "13 · Game systems": "13 · Oyun sistemleri",
+  "14 · Polish & feel": "14 · Ses, görüntü ve his",
+  "15 · Ship your game": "15 · Oyununu yayınla",
 };
 
 const TR_BASE: Record<string, LessonTr> = {
@@ -828,7 +835,7 @@ const TR_BASE: Record<string, LessonTr> = {
   },
 };
 
-const TR: Record<string, LessonTr> = { ...TR_BASE, ...TR_EXTRA };
+const TR: Record<string, LessonTr> = { ...TR_BASE, ...TR_EXTRA, ...TR_PRO };
 
 /** The lesson with its prose in the chosen language (code stays the same). */
 export function localizeLesson(lesson: Lesson, lang: "en" | "tr"): Lesson {

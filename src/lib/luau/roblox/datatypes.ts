@@ -861,6 +861,7 @@ export const ENUMS: Record<string, Record<string, number>> = {
     Size352x352: 6,
   },
   ProductPurchaseDecision: { NotProcessedYet: 0, PurchaseGranted: 1 },
+  CurrencyType: { Default: 0, Robux: 1, Tix: 2 },
   AnimationPriority: {
     Idle: 0,
     Movement: 1,

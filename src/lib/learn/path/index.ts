@@ -4,6 +4,8 @@ import { CH3 } from "./ch3";
 import { CH4 } from "./ch4";
 import { CH6 } from "./ch6";
 import { CH_EXTRA } from "./extra";
+import { CH_PRO } from "./pro";
+import { CH_PRO2 } from "./pro2";
 import type { Exercise, PathLesson } from "./types";
 
 export * from "./types";
@@ -16,6 +18,8 @@ export const PATH: Record<string, PathLesson> = {
   ...CH4,
   ...CH6,
   ...CH_EXTRA,
+  ...CH_PRO,
+  ...CH_PRO2,
 };
 
 export function pathLesson(id: string): PathLesson | undefined {
