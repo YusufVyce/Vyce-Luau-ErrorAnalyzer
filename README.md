@@ -77,6 +77,7 @@ This makes it easier to see exactly where an expression stops working.
 
 Vyce Parser includes a structured learning system for learning Roblox Studio scripting.
 
+- Every lesson starts in plain words: an everyday comparison ("pcall is a safety net"), a few very short sentences on what it is and why you need it, and a small example explained one line at a time — in the lesson and at the top of its notes.
 - 67 lessons in 15 units, from the Studio tour to CFrames, pcall, RemoteFunctions and two full game projects (a coin shop and a dropper tycoon).
 - Six pro units take you the rest of the way: strict types, metatables, inheritance, closures and coroutines; session data, global leaderboards, serialization and cross-server messaging; server authority, rate limits, replication and anti-cheat; inventory, combat hitboxes, NPC pathfinding, quests and wave spawners; UI layout, sound, animation, camera and day-night cycles; project architecture, performance, monetization, teams and a final project.
 - Every lesson has homework that runs in the browser simulator.

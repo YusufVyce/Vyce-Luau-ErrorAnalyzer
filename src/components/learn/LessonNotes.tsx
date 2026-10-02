@@ -3,28 +3,13 @@ import type { ReactNode } from "react";
 import { CodeBlock } from "@/components/CodeBlock";
 import { Visual } from "@/components/learn/Visuals";
 import { RunnableCode } from "@/components/learn/RunnableCode";
+import { PlainWords } from "@/components/learn/PlainWords";
+import { Rich } from "@/components/learn/Rich";
 import { analyzerLink, type Lesson } from "@/lib/learn/lessons";
-import type { TFunction } from "@/lib/prefs";
+import { useLang, type TFunction } from "@/lib/prefs";
+import { SIMPLE } from "@/lib/learn/simple";
 
-/** Text with `backtick` spans rendered as inline code. */
-export function Rich({ text }: { text: string }) {
-  return (
-    <>
-      {text.split(/(`[^`]+`)/g).map((p, i) =>
-        p.startsWith("`") && p.endsWith("`") && p.length > 2 ? (
-          <code
-            key={i}
-            className="rounded-md border border-line bg-surface-2 px-1 py-px font-mono text-[0.85em] text-brand-ink"
-          >
-            {p.slice(1, -1)}
-          </code>
-        ) : (
-          <span key={i}>{p}</span>
-        ),
-      )}
-    </>
-  );
-}
+export { Rich };
 
 function Paragraph({ text }: { text: string }) {
   return (
@@ -78,8 +63,11 @@ export function LessonBody({ lesson, t }: { lesson: Lesson; t: TFunction }) {
       code: s.code!.code,
       where: s.code!.where,
     }));
+  const lang = useLang();
+  const plain = SIMPLE[lesson.id];
   return (
     <>
+      {plain && <PlainWords simple={plain} lang={lang} t={t} />}
       {lesson.sections.map((section, i) => (
         <section key={i} className="space-y-4">
           {section.heading && (
