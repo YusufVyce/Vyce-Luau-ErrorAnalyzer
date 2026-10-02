@@ -6,12 +6,12 @@ import { CH6 } from "./ch6";
 import { CH_EXTRA } from "./extra";
 import { CH_PRO } from "./pro";
 import { CH_PRO2 } from "./pro2";
-import type { Exercise, PathLesson } from "./types";
+import { SIMPLE } from "../simple";
+import type { Exercise, LearnStep, PathLesson } from "./types";
 
 export * from "./types";
 
-/** Bite-sized steps for every lesson, keyed by lesson id. */
-export const PATH: Record<string, PathLesson> = {
+const STEPS: Record<string, PathLesson> = {
   ...CH1,
   ...CH2,
   ...CH3,
@@ -21,6 +21,30 @@ export const PATH: Record<string, PathLesson> = {
   ...CH_PRO,
   ...CH_PRO2,
 };
+
+/** The two plain-language cards every lesson starts with. */
+function simpleCards(id: string): LearnStep[] {
+  const s = SIMPLE[id];
+  if (!s) return [];
+  return [
+    { kind: "learn", badge: "simple", title: s.title, body: s.intro, bullets: s.story },
+    {
+      kind: "learn",
+      badge: "walk",
+      title: { en: "Line by line", tr: "Satır satır" },
+      body: {
+        en: "Read a line of code, then what it does in plain words.",
+        tr: "Bir kod satırını oku, sonra sade bir dille ne yaptığına bak.",
+      },
+      walk: s.walk,
+    },
+  ];
+}
+
+/** Bite-sized steps for every lesson, keyed by lesson id: plain words first, then the rest. */
+export const PATH: Record<string, PathLesson> = Object.fromEntries(
+  Object.entries(STEPS).map(([id, p]) => [id, { ...p, steps: [...simpleCards(id), ...p.steps] }]),
+);
 
 export function pathLesson(id: string): PathLesson | undefined {
   return PATH[id];

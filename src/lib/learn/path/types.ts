@@ -19,6 +19,12 @@ export interface LearnStep {
   visual?: VisualId;
   /** A memory hook, said by the mascot. */
   hook?: L;
+  /** "simple": the plain-words intro card; "walk": the line-by-line card. */
+  badge?: "simple" | "walk";
+  /** Very short sentences, shown one per row. */
+  bullets?: L[];
+  /** A code sample explained one line at a time. */
+  walk?: Array<{ line: string; note: L }>;
 }
 
 export interface ChoiceStep {

@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
-import { Sparkles, Terminal } from "lucide-react";
+import { Baby, ListOrdered, Sparkles, Terminal } from "lucide-react";
 import { CodeBlock, highlightLuau } from "@/components/CodeBlock";
-import { Rich } from "@/components/learn/LessonNotes";
+import { Rich } from "@/components/learn/Rich";
+import { StoryList, WalkThrough } from "@/components/learn/PlainWords";
 import { Visual } from "@/components/learn/Visuals";
 import { localizeStep } from "@/lib/learn/path/localize";
 import { pick, type Exercise, type Lang, type LearnStep, type Opt } from "@/lib/learn/path/types";
@@ -35,11 +36,17 @@ const isCode = (o: Opt) => typeof o === "string";
 
 export function LearnCard({ step: base, lang, t }: { step: LearnStep; lang: Lang; t: TFunction }) {
   const step = localizeStep(base, lang);
+  const badge =
+    step.badge === "simple"
+      ? { icon: Baby, label: t("duo.plainWords") }
+      : step.badge === "walk"
+        ? { icon: ListOrdered, label: t("duo.lineByLine") }
+        : { icon: Sparkles, label: t("duo.newConcept") };
   return (
     <div className="space-y-6">
       <span className="inline-flex items-center gap-1.5 rounded-full bg-[color-mix(in_srgb,var(--syn-purple)_16%,transparent)] px-3 py-1 text-[12px] font-bold tracking-[0.12em] text-[var(--syn-purple)] uppercase">
-        <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-        {t("duo.newConcept")}
+        <badge.icon className="h-3.5 w-3.5" aria-hidden="true" />
+        {badge.label}
       </span>
       <h2 className="text-[28px] leading-tight font-bold tracking-tight text-ink md:text-[34px]">
         {pick(step.title, lang)}
@@ -47,6 +54,8 @@ export function LearnCard({ step: base, lang, t }: { step: LearnStep; lang: Lang
       <p className="text-[17px] leading-relaxed text-ink-2 md:text-[18px]">
         <Rich text={pick(step.body, lang)} />
       </p>
+      {step.bullets && <StoryList items={step.bullets} lang={lang} />}
+      {step.walk && <WalkThrough lines={step.walk} lang={lang} />}
       {step.visual && <Visual id={step.visual} />}
       {step.code && <CodeBlock code={step.code} copyable={false} />}
       {step.hook && (

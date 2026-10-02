@@ -7,7 +7,11 @@ export function localizeStep<T extends Step>(step: T, lang: Lang): T {
   const code = (c: string) => localizeCode(c, lang);
   switch (step.kind) {
     case "learn":
-      return { ...step, code: step.code && code(step.code) };
+      return {
+        ...step,
+        code: step.code && code(step.code),
+        walk: step.walk?.map((w) => ({ ...w, line: code(w.line) })),
+      };
     case "choice":
       return {
         ...step,

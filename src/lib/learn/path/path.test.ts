@@ -61,6 +61,11 @@ describe("Duolingo-style path content", () => {
         expect(p.steps.filter((s) => s.kind === "learn").length).toBeGreaterThanOrEqual(2);
         expect(p.steps.filter((s) => s.kind !== "learn").length).toBeGreaterThanOrEqual(3);
         expect(p.steps.length).toBeLessThanOrEqual(10);
+        // Every lesson starts in plain words, then walks through code line by line.
+        expect(p.steps.slice(0, 2).map((s) => (s.kind === "learn" ? s.badge : s.kind))).toEqual([
+          "simple",
+          "walk",
+        ]);
       });
 
       p.steps.forEach((step: Step, i) => {
@@ -74,6 +79,11 @@ describe("Duolingo-style path content", () => {
               if (step.code) expectParses(step.code, where);
               // Learn cards stay short so they are read, not skimmed.
               expect(step.body.en.length, where).toBeLessThan(260);
+              for (const b of step.bullets ?? []) expectText(b, where);
+              if (step.walk) {
+                for (const w of step.walk) expectText(w.note, where);
+                expectParses(step.walk.map((w) => w.line).join("\n"), where);
+              }
               break;
             case "choice":
             case "fill":
@@ -120,6 +130,7 @@ describe("Duolingo-style path content", () => {
           switch (tr.kind) {
             case "learn":
               if (tr.code) code.push(tr.code);
+              if (tr.walk) code.push(tr.walk.map((w) => w.line).join("\n"));
               break;
             case "choice":
               if (tr.code) code.push(tr.code);
