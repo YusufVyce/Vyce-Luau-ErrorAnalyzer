@@ -4,6 +4,7 @@
  * copy on the server is kept in sync by src/lib/account/client.tsx.
  */
 import { exerciseFor } from "./homework/exercises";
+import { homeworkReward } from "./rewards";
 import { LESSONS, type Lesson } from "./lessons";
 
 export interface Progress {
@@ -269,8 +270,7 @@ export function lessonUnlocked(p: Progress, index: number): boolean {
 }
 
 export function homeworkXp(p: Progress, lessonId: string): number {
-  if (p.solutions.includes(lessonId)) return 30;
-  return Math.max(50, 100 - (p.hints[lessonId] ?? 0) * 15);
+  return homeworkReward(p.solutions.includes(lessonId), p.hints[lessonId] ?? 0);
 }
 
 export const LEVELS = [

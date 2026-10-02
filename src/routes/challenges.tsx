@@ -22,6 +22,7 @@ import {
 } from "@/lib/challenges/challenges";
 import { challengeExercise, examplesFor } from "@/lib/challenges/runner";
 import { checkChallenge } from "@/lib/learn/homework/client";
+import { challengeHintCost, challengeReward } from "@/lib/learn/rewards";
 import { gainXp, streakOf, today, withToday, type Progress } from "@/lib/learn/progress";
 import { RequireAccount } from "@/components/account/RequireAccount";
 import { useAccount } from "@/lib/account/client";
@@ -58,7 +59,7 @@ const DIFF_STYLE: Record<Difficulty, string> = {
   hard: "border-red-500/30 bg-red-500/10 text-red-400",
 };
 
-const TAGS: Tag[] = ["basics", "math", "strings", "tables", "loops", "game", "roblox"];
+const TAGS: Tag[] = ["algorithms", "basics", "math", "strings", "tables", "loops", "game", "roblox"];
 
 function Rich({ text }: { text: string }) {
   return (
@@ -159,12 +160,13 @@ function ChallengesPage() {
       }),
     );
     if (passed && !solved.has(id)) {
-      const base = CHALLENGE_XP[current.difficulty];
-      const gain = progress.challengeSolutions.includes(id)
-        ? Math.round(base / 3)
-        : Math.max(Math.round(base / 2), base - (progress.challengeHints[id] ?? 0) * 10);
+      const gain = challengeReward(
+        CHALLENGE_XP[current.difficulty],
+        progress.challengeSolutions.includes(id),
+        progress.challengeHints[id] ?? 0,
+      );
       update((p) => gainXp({ ...p, challenges: [...p.challenges, id] }, gain));
-      setToast(t("ch.xp", { n: gain }));
+      setToast(gain > 0 ? t("ch.xp", { n: gain }) : t("ch.noXp"));
       setTimeout(() => setToast(null), 2600);
       // The server runs the code again before the XP counts.
       void acc.claim({
@@ -372,6 +374,15 @@ function ChallengesPage() {
                   : { ...p, challengeSolutions: [...p.challengeSolutions, current.id] },
               )
             }
+            reward={{
+              xp: challengeReward(
+                CHALLENGE_XP[current.difficulty],
+                progress.challengeSolutions.includes(current.id),
+                progress.challengeHints[current.id] ?? 0,
+              ),
+              hintCost: challengeHintCost(CHALLENGE_XP[current.difficulty]),
+              solutionSeen: progress.challengeSolutions.includes(current.id),
+            }}
           />
           {nextUnsolved && (
             <button

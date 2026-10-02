@@ -8,6 +8,7 @@ import {
   MapPin,
   Play,
   RotateCcw,
+  Star,
   Trophy,
   Wrench,
 } from "lucide-react";
@@ -55,6 +56,7 @@ export function HomeworkPanel({
   onChecked,
   onHint,
   onSolution,
+  reward,
   runner,
   badge,
   badgeTone = "brand",
@@ -82,6 +84,8 @@ export function HomeworkPanel({
   onChecked: (passed: boolean, code: string) => void;
   onHint: () => void;
   onSolution: () => void;
+  /** XP still on offer, what one more hint costs and whether the solution was seen. */
+  reward?: { xp: number; hintCost: number; solutionSeen: boolean };
 }) {
   const t = useT();
   const lang = useLang();
@@ -90,11 +94,13 @@ export function HomeworkPanel({
   const [runError, setRunError] = useState<string | null>(null);
   const [tab, setTab] = useState<"checks" | "output" | "explorer">("checks");
   const [showSolution, setShowSolution] = useState(false);
+  const [confirmSolution, setConfirmSolution] = useState(false);
 
   useEffect(() => {
     setResult(null);
     setRunError(null);
     setShowSolution(false);
+    setConfirmSolution(false);
     setTab("checks");
   }, [exercise.lessonId, lang]);
 
@@ -136,6 +142,18 @@ export function HomeworkPanel({
           <span className="rounded-full border border-line px-2.5 py-0.5 text-[12px] text-zinc-300">
             {t(exercise.kind === "fix" ? "hw.fix" : "hw.write")}
           </span>
+          {reward && !passed && (
+            <span
+              className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[12px] font-semibold ${
+                reward.xp > 0
+                  ? "border-amber-500/40 bg-amber-500/10 text-amber-200"
+                  : "border-line text-zinc-400"
+              }`}
+            >
+              <Star className="h-3.5 w-3.5" aria-hidden="true" />
+              {reward.xp > 0 ? t("hw.reward", { n: reward.xp }) : t("hw.noReward")}
+            </span>
+          )}
           {passed && (
             <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/40 bg-emerald-500/15 px-2 py-0.5 font-semibold text-emerald-200">
               <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> {t("hw.passedTag")}
@@ -201,10 +219,23 @@ export function HomeworkPanel({
         >
           <Lightbulb className="h-4 w-4" aria-hidden="true" /> {t("hw.hint")}{" "}
           {Math.min(hintsUsed, exercise.hints.length)}/{exercise.hints.length}
+          {reward &&
+            !passed &&
+            !reward.solutionSeen &&
+            hintsUsed < exercise.hints.length &&
+            reward.xp > reward.hintCost && (
+              <span className="text-[12px] font-semibold text-amber-200/80">
+                (−{reward.hintCost} XP)
+              </span>
+            )}
         </button>
         <button
           type="button"
           onClick={() => {
+            if (!showSolution && reward && !passed && !reward.solutionSeen) {
+              setConfirmSolution(true);
+              return;
+            }
             if (!showSolution) onSolution();
             setShowSolution((v) => !v);
           }}
@@ -223,6 +254,33 @@ export function HomeworkPanel({
           <RotateCcw className="h-4 w-4" aria-hidden="true" /> {t("hw.reset")}
         </button>
       </div>
+
+      {confirmSolution && (
+        <div
+          role="alertdialog"
+          className="flex flex-wrap items-center gap-3 rounded-xl border border-red-500/30 bg-red-500/[0.07] p-3 text-sm text-red-100"
+        >
+          <span className="flex-1">{t("hw.solutionWarn")}</span>
+          <button
+            type="button"
+            onClick={() => {
+              setConfirmSolution(false);
+              onSolution();
+              setShowSolution(true);
+            }}
+            className="rounded-lg border border-red-400/50 px-3 py-1.5 text-[13px] font-semibold text-red-100 hover:bg-red-500/15"
+          >
+            {t("hw.solutionYes")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setConfirmSolution(false)}
+            className="rounded-lg px-3 py-1.5 text-[13px] text-zinc-300 hover:bg-surface-2"
+          >
+            {t("hw.solutionNo")}
+          </button>
+        </div>
+      )}
 
       {hintsUsed > 0 && (
         <ol className="space-y-2">

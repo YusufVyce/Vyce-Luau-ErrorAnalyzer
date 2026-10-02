@@ -11,6 +11,7 @@ import { exerciseFor } from "@/lib/learn/homework/exercises";
 import { runHomework } from "@/lib/learn/homework/harness";
 import { LESSONS } from "@/lib/learn/lessons";
 import { PATH } from "@/lib/learn/path";
+import { challengeReward, homeworkReward } from "@/lib/learn/rewards";
 import { isCorrect, practiceXp } from "@/lib/learn/path/session";
 import { normalizeProgress, starsFor, type Progress } from "@/lib/learn/progress";
 import type { Claim, ClaimOutcome, SolvedStep } from "../shared";
@@ -34,13 +35,7 @@ const int = (v: unknown, lo: number, hi: number) =>
 
 const add = (list: string[], id: string) => (list.includes(id) ? list : [...list, id]);
 
-export function homeworkReward(solution: boolean, hints: number): number {
-  return solution ? 30 : Math.max(50, 100 - hints * 15);
-}
-
-export function challengeReward(base: number, solution: boolean, hints: number): number {
-  return solution ? Math.round(base / 3) : Math.max(Math.round(base / 2), base - hints * 10);
-}
+export { challengeReward, homeworkReward };
 
 function validAnswer(a: SolvedStep): boolean {
   const step = PATH[a.lessonId]?.steps[a.step];
