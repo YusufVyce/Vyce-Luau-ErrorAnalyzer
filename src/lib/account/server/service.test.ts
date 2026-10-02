@@ -199,8 +199,33 @@ describe("verified XP", () => {
       hints: 1,
       solution: false,
     });
-    expect(good.outcome.awarded).toBe(85);
+    // One hint costs 20 of the 100 XP.
+    expect(good.outcome.awarded).toBe(80);
     expect(good.progress.homework).toEqual(["first-script"]);
+  });
+
+  it("pays no XP when the solution was looked at, but still counts the task", async () => {
+    const { token } = await signup();
+    const ex = hw("first-script");
+    const seen = await claim(token, {
+      kind: "homework",
+      lessonId: ex.lessonId,
+      code: ex.solution,
+      hints: 0,
+      solution: true,
+    });
+    expect(seen.outcome.awarded).toBe(0);
+    expect(seen.progress.homework).toEqual(["first-script"]);
+    const ch = CHALLENGES[0];
+    const peeked = await claim(token, {
+      kind: "challenge",
+      id: ch.id,
+      code: ch.solution,
+      hints: 1,
+      solution: true,
+    });
+    expect(peeked.outcome.awarded).toBe(0);
+    expect(peeked.progress.challenges).toEqual([ch.id]);
   });
 
   it("runs challenge code again on the server", async () => {

@@ -88,7 +88,10 @@ print(pet.nickname or pet.name)
         ),
         ['"Rock" | "Paper" | "Scissors"', "{ string }", "string?", "{ [string]: boolean }"],
         0,
-        t("A union of exact strings: nothing else fits.", "Kesin metinlerin birleşimi: başka hiçbir şey uymaz."),
+        t(
+          "A union of exact strings: nothing else fits.",
+          "Kesin metinlerin birleşimi: başka hiçbir şey uymaz.",
+        ),
       ),
       predict(
         lua`
@@ -167,7 +170,10 @@ print(v)
 `,
         ["V(3)", "table", "3", "x"],
         0,
-        t("print uses __tostring when the metatable has one.", "Metatabloda varsa print __tostring kullanır."),
+        t(
+          "print uses __tostring when the metatable has one.",
+          "Metatabloda varsa print __tostring kullanır.",
+        ),
       ),
       learn(
         t("Frozen tables", "Dondurulmuş tablolar"),
@@ -192,7 +198,10 @@ print(ok, CONFIG.Max)
         ),
       ),
       choice(
-        t("Which metamethod runs when you print an object?", "Bir nesneyi yazdırınca hangi metametot çalışır?"),
+        t(
+          "Which metamethod runs when you print an object?",
+          "Bir nesneyi yazdırınca hangi metametot çalışır?",
+        ),
         ["__tostring", "__print", "__index", "__call"],
         0,
         t("tostring and print both use __tostring.", "tostring de print de __tostring kullanır."),
@@ -289,19 +298,31 @@ print(b:Attack())
 `,
         ["30", "10", "13", ERR],
         0,
-        t("Boss's own Attack runs and triples the parent's 10.", "Boss'un kendi Attack'i çalışır ve üst sınıfın 10'unu üçe katlar."),
+        t(
+          "Boss's own Attack runs and triples the parent's 10.",
+          "Boss'un kendi Attack'i çalışır ve üst sınıfın 10'unu üçe katlar.",
+        ),
       ),
       fill(
         t("Link Boss to its parent", "Boss'u üst sınıfına bağla"),
         "local Boss = setmetatable({}, { ___ = Enemy })",
         ["__index", "__parent", "__add", "__call"],
         0,
-        t("Missing keys are looked up through __index.", "Eksik anahtarlar __index üzerinden aranır."),
+        t(
+          "Missing keys are looked up through __index.",
+          "Eksik anahtarlar __index üzerinden aranır.",
+        ),
       ),
       choice(
-        t("When is composition better than inheritance?", "Kompozisyon ne zaman kalıtımdan iyidir?"),
+        t(
+          "When is composition better than inheritance?",
+          "Kompozisyon ne zaman kalıtımdan iyidir?",
+        ),
         [
-          t("When classes would form long chains of parents", "Sınıflar uzun ebeveyn zincirleri oluşturacaksa"),
+          t(
+            "When classes would form long chains of parents",
+            "Sınıflar uzun ebeveyn zincirleri oluşturacaksa",
+          ),
           t("Never", "Asla"),
           t("Only for numbers", "Sadece sayılar için"),
           t("When you have just one class", "Tek bir sınıfın varsa"),
@@ -393,7 +414,10 @@ print(a(), b())
         "local doubled = map({ 1, 2, 3 }, ___(n) return n * 2 end)",
         ["function", "func", "def", "lambda"],
         0,
-        t("An anonymous function starts with function.", "İsimsiz bir fonksiyon function ile başlar."),
+        t(
+          "An anonymous function starts with function.",
+          "İsimsiz bir fonksiyon function ile başlar.",
+        ),
       ),
       predict(
         lua`
@@ -430,7 +454,10 @@ print(count("a", "b", "c"))
           t("A comment", "Bir yorum"),
         ],
         0,
-        t("... (varargs) collects every extra argument.", "... (varargs) her ekstra argümanı toplar."),
+        t(
+          "... (varargs) collects every extra argument.",
+          "... (varargs) her ekstra argümanı toplar.",
+        ),
       ),
     ],
   },
@@ -516,7 +543,10 @@ print(gen(), gen())
 `,
         ["10 20", "1 2", "10 10", "30"],
         0,
-        t("Each call continues the loop and yields the next value.", "Her çağrı döngüye devam eder ve sıradaki değeri verir."),
+        t(
+          "Each call continues the loop and yields the next value.",
+          "Her çağrı döngüye devam eder ve sıradaki değeri verir.",
+        ),
       ),
       fill(
         t("Pause the coroutine here", "Coroutine'i burada duraklat"),
@@ -529,7 +559,10 @@ end)
 `,
         ["yield", "wait", "pause", "stop"],
         0,
-        t("coroutine.yield pauses until the next resume.", "coroutine.yield bir sonraki resume'a kadar duraklatır."),
+        t(
+          "coroutine.yield pauses until the next resume.",
+          "coroutine.yield bir sonraki resume'a kadar duraklatır.",
+        ),
       ),
       predict(
         lua`
@@ -589,7 +622,10 @@ Players.PlayerRemoving:Connect(save)
         ),
       ),
       choice(
-        t("When should the server NOT save a player's data?", "Sunucu bir oyuncunun verisini ne zaman KAYDETMEMELİ?"),
+        t(
+          "When should the server NOT save a player's data?",
+          "Sunucu bir oyuncunun verisini ne zaman KAYDETMEMELİ?",
+        ),
         [
           t("When their data failed to load", "Verisi yüklenemediyse"),
           t("When they leave", "Çıktığında"),
@@ -621,14 +657,20 @@ print(value)
 `,
         ["10", "nil", "0", "20"],
         0,
-        t("Nothing was saved, so old is nil: 0 + 10.", "Hiçbir şey kayıtlı değildi, old nil: 0 + 10."),
+        t(
+          "Nothing was saved, so old is nil: 0 + 10.",
+          "Hiçbir şey kayıtlı değildi, old nil: 0 + 10.",
+        ),
       ),
       fill(
         t("A failure mustn't crash the script", "Bir hata scripti çökertmemeli"),
         'local ok, data = ___(store.GetAsync, store, "Player_1")',
         ["pcall", "print", "require", "tostring"],
         0,
-        t("pcall catches the error and returns ok = false.", "pcall hatayı yakalar ve ok = false döndürür."),
+        t(
+          "pcall catches the error and returns ok = false.",
+          "pcall hatayı yakalar ve ok = false döndürür.",
+        ),
       ),
       predict(
         lua`
@@ -650,18 +692,27 @@ end))
 `,
         ["2", "1", "3", "0"],
         0,
-        t("The first try fails, the second works: retry returns 2.", "İlk deneme başarısız, ikincisi çalışır: retry 2 döndürür."),
+        t(
+          "The first try fails, the second works: retry returns 2.",
+          "İlk deneme başarısız, ikincisi çalışır: retry 2 döndürür.",
+        ),
       ),
       choice(
         t("Why autosave every few minutes?", "Neden birkaç dakikada bir otomatik kayıt?"),
         [
-          t("So a crash loses only a few minutes of progress", "Bir çökme sadece birkaç dakikalık ilerlemeyi kaybettirsin diye"),
+          t(
+            "So a crash loses only a few minutes of progress",
+            "Bir çökme sadece birkaç dakikalık ilerlemeyi kaybettirsin diye",
+          ),
           t("Because PlayerRemoving never fires", "Çünkü PlayerRemoving hiç tetiklenmez"),
           t("To make the game faster", "Oyun hızlansın diye"),
           t("Roblox requires it", "Roblox zorunlu tutar"),
         ],
         0,
-        t("Servers can crash; autosaves limit the damage.", "Sunucular çökebilir; otomatik kayıt zararı sınırlar."),
+        t(
+          "Servers can crash; autosaves limit the damage.",
+          "Sunucular çökebilir; otomatik kayıt zararı sınırlar.",
+        ),
       ),
     ],
   },
@@ -695,7 +746,10 @@ wins:SetAsync("123", 40)
         "local pages = wins:GetSortedAsync(___, 10)",
         ["false", "true", "10", "nil"],
         0,
-        t("The first argument asks: ascending? false = highest first.", "İlk argüman artan mı diye sorar: false = en yüksek önce."),
+        t(
+          "The first argument asks: ascending? false = highest first.",
+          "İlk argüman artan mı diye sorar: false = en yüksek önce.",
+        ),
       ),
       predict(
         lua`
@@ -711,7 +765,10 @@ end
 `,
         ["1 Bob\n2 Cat", "1 Ann\n2 Bob", "1 Bob\n2 Ann", "1 Cat\n2 Bob"],
         0,
-        t("Highest first, and only 2 per page: Bob (9), Cat (7).", "En yüksek önce ve sayfada sadece 2: Bob (9), Cat (7)."),
+        t(
+          "Highest first, and only 2 per page: Bob (9), Cat (7).",
+          "En yüksek önce ve sayfada sadece 2: Bob (9), Cat (7).",
+        ),
       ),
       learn(
         t("Pages", "Sayfalar"),
@@ -725,7 +782,12 @@ end
           "Your game ranks fastest times (lowest is best). Which call?",
           "Oyunun en hızlı süreleri sıralıyor (en düşük en iyi). Hangi çağrı?",
         ),
-        ["GetSortedAsync(true, 10)", "GetSortedAsync(false, 10)", "GetAsync(10)", "GetSortedAsync(10)"],
+        [
+          "GetSortedAsync(true, 10)",
+          "GetSortedAsync(false, 10)",
+          "GetAsync(10)",
+          "GetSortedAsync(10)",
+        ],
         0,
         t("Ascending = lowest first.", "Artan = en düşük önce."),
       ),
@@ -737,7 +799,10 @@ print(saved, saved / 1000)
 `,
         ["12345 12.345", "12 12", "12.345 12.345", "12345 12"],
         0,
-        t("Save whole milliseconds, divide when showing.", "Tam milisaniye kaydet, gösterirken böl."),
+        t(
+          "Save whole milliseconds, divide when showing.",
+          "Tam milisaniye kaydet, gösterirken böl.",
+        ),
       ),
       choice(
         t("How often should a global board refresh?", "Global bir pano ne sıklıkla yenilenmeli?"),
@@ -789,8 +854,16 @@ print(#packed, packed[2])
         t("Three numbers; the second is Y = 5.", "Üç sayı; ikincisi Y = 5."),
       ),
       choice(
-        t("Which value can go straight into a DataStore?", "Hangi değer doğrudan DataStore'a girebilir?"),
-        ['{ Coins = 10, Items = { "Sword" } }', "Vector3.new(1, 2, 3)", "workspace.Baseplate", "Color3.fromRGB(255, 0, 0)"],
+        t(
+          "Which value can go straight into a DataStore?",
+          "Hangi değer doğrudan DataStore'a girebilir?",
+        ),
+        [
+          '{ Coins = 10, Items = { "Sword" } }',
+          "Vector3.new(1, 2, 3)",
+          "workspace.Baseplate",
+          "Color3.fromRGB(255, 0, 0)",
+        ],
         0,
         t("Tables of numbers and strings are plain data.", "Sayı ve metin tabloları düz veridir."),
       ),
@@ -799,7 +872,10 @@ print(#packed, packed[2])
         "local position = Vector3.new(table.___(saved))",
         ["unpack", "pack", "insert", "concat"],
         0,
-        t("table.unpack turns { 1, 2, 3 } into 1, 2, 3.", "table.unpack { 1, 2, 3 }'ü 1, 2, 3 yapar."),
+        t(
+          "table.unpack turns { 1, 2, 3 } into 1, 2, 3.",
+          "table.unpack { 1, 2, 3 }'ü 1, 2, 3 yapar.",
+        ),
       ),
       predict(
         lua`
@@ -810,7 +886,10 @@ print(json, back.Coins)
 `,
         ['{"Coins":5} 5', "Coins 5", "{Coins = 5} 5", "5 5"],
         0,
-        t("JSON is text; decoding gives the table back.", "JSON bir metindir; çözünce tablo geri gelir."),
+        t(
+          "JSON is text; decoding gives the table back.",
+          "JSON bir metindir; çözünce tablo geri gelir.",
+        ),
       ),
       learn(
         t("Versions", "Sürümler"),
@@ -833,7 +912,10 @@ print(d.Version, d.Gems)
 `,
         ["2 0", "1 nil", "2 nil", "nil 0"],
         0,
-        t("No Version means version 1, so it gets upgraded.", "Version yoksa sürüm 1'dir, bu yüzden güncellenir."),
+        t(
+          "No Version means version 1, so it gets upgraded.",
+          "Version yoksa sürüm 1'dir, bu yüzden güncellenir.",
+        ),
       ),
     ],
   },
@@ -873,14 +955,20 @@ MessagingService:PublishAsync("News", 42)
 `,
         ["42", "News", "nil", t("Nothing", "Hiçbir şey")],
         0,
-        t("The subscriber gets what was published, in message.Data.", "Abone, yayınlananı message.Data'da alır."),
+        t(
+          "The subscriber gets what was published, in message.Data.",
+          "Abone, yayınlananı message.Data'da alır.",
+        ),
       ),
       fill(
         t("Where is the published value?", "Yayınlanan değer nerede?"),
         "print(message.___)",
         ["Data", "Text", "Value", "Message"],
         0,
-        t("message.Data is the value; message.Sent is the time.", "message.Data değerdir; message.Sent zamandır."),
+        t(
+          "message.Data is the value; message.Sent is the time.",
+          "message.Data değerdir; message.Sent zamandır.",
+        ),
       ),
       predict(
         lua`
@@ -902,9 +990,15 @@ MessagingService:PublishAsync("Drops", { Player = "Ann", Item = "Dragon" })
         ),
       ),
       choice(
-        t("Which is a good use of MessagingService?", "Hangisi MessagingService'in iyi bir kullanımı?"),
+        t(
+          "Which is a good use of MessagingService?",
+          "Hangisi MessagingService'in iyi bir kullanımı?",
+        ),
         [
-          t("Telling every server someone hatched a Legendary pet", "Her sunucuya birinin Efsanevi hayvan çıkardığını söylemek"),
+          t(
+            "Telling every server someone hatched a Legendary pet",
+            "Her sunucuya birinin Efsanevi hayvan çıkardığını söylemek",
+          ),
           t("Sending every coin pickup", "Her coin toplamayı göndermek"),
           t("Moving a part every frame", "Her karede bir parça taşımak"),
           t("Saving player data", "Oyuncu verisini kaydetmek"),
@@ -921,7 +1015,10 @@ MessagingService:PublishAsync("Drops", { Player = "Ann", Item = "Dragon" })
           t("always play together", "hep birlikte oynar"),
         ],
         0,
-        t("Each server is its own world; MessagingService bridges them.", "Her sunucu kendi dünyasıdır; MessagingService onları bağlar."),
+        t(
+          "Each server is its own world; MessagingService bridges them.",
+          "Her sunucu kendi dünyasıdır; MessagingService onları bağlar.",
+        ),
       ),
     ],
   },
@@ -975,7 +1072,10 @@ end
 `,
         ['"string"', '"number"', '"table"', '"Instance"'],
         0,
-        t("Item names are strings — anything else is suspicious.", "Eşya isimleri metindir — başka her şey şüphelidir."),
+        t(
+          "Item names are strings — anything else is suspicious.",
+          "Eşya isimleri metindir — başka her şey şüphelidir.",
+        ),
       ),
       predict(
         lua`
@@ -984,7 +1084,12 @@ local function isValid(n)
 end
 print(isValid(50), isValid(-5), isValid(0 / 0), isValid("50"))
 `,
-        ["true false false false", "true false true false", "true true false true", "false false false false"],
+        [
+          "true false false false",
+          "true false true false",
+          "true true false true",
+          "false false false false",
+        ],
         0,
         t("Only 50 is a real number in range.", "Sadece 50 aralıkta gerçek bir sayı."),
       ),
@@ -1002,7 +1107,10 @@ print(n < 0, n > 0, n == n)
 `,
         ["false false false", "true false true", "false false true", "true true false"],
         0,
-        t("Every comparison with NaN is false — even with itself.", "NaN ile her karşılaştırma false'tur — kendisiyle bile."),
+        t(
+          "Every comparison with NaN is false — even with itself.",
+          "NaN ile her karşılaştırma false'tur — kendisiyle bile.",
+        ),
       ),
       predict(
         lua`
@@ -1012,7 +1120,10 @@ print((a - b).Magnitude <= 12)
 `,
         ["false", "true", "50", "12"],
         0,
-        t("The distance is 50 studs — too far to interact.", "Mesafe 50 stud — etkileşim için çok uzak."),
+        t(
+          "The distance is 50 studs — too far to interact.",
+          "Mesafe 50 stud — etkileşim için çok uzak.",
+        ),
       ),
     ],
   },
@@ -1063,7 +1174,12 @@ local function allowed(name, now)
 end
 print(allowed("Ann", 0), allowed("Ann", 0.5), allowed("Ann", 1.2), allowed("Bob", 1.2))
 `,
-        ["true false true true", "true true true true", "true false false true", "false false true true"],
+        [
+          "true false true true",
+          "true true true true",
+          "true false false true",
+          "false false true true",
+        ],
         0,
         t(
           "0.5 is too soon for Ann, 1.2 is fine, and Bob has his own timer.",
@@ -1089,9 +1205,17 @@ local function spend()
 end
 print(spend(), spend(), spend(), spend())
 `,
-        ["true true true false", "true true true true", "true false true false", "false false false false"],
+        [
+          "true true true false",
+          "true true true true",
+          "true false true false",
+          "false false false false",
+        ],
         0,
-        t("Three tokens, three requests; the fourth has to wait.", "Üç jeton, üç istek; dördüncüsü beklemek zorunda."),
+        t(
+          "Three tokens, three requests; the fourth has to wait.",
+          "Üç jeton, üç istek; dördüncüsü beklemek zorunda.",
+        ),
       ),
       choice(
         t(
@@ -1105,18 +1229,27 @@ print(spend(), spend(), spend(), spend())
           t("Crash the server", "Sunucuyu çökert"),
         ],
         0,
-        t("Punish only players far over the limit.", "Sadece sınırın çok üstündeki oyuncuları cezalandır."),
+        t(
+          "Punish only players far over the limit.",
+          "Sadece sınırın çok üstündeki oyuncuları cezalandır.",
+        ),
       ),
       choice(
         t("Why clear the table in PlayerRemoving?", "Tablo neden PlayerRemoving'de temizlenir?"),
         [
-          t("Otherwise it keeps every player forever — a memory leak", "Yoksa her oyuncuyu sonsuza kadar tutar — bellek sızıntısı"),
+          t(
+            "Otherwise it keeps every player forever — a memory leak",
+            "Yoksa her oyuncuyu sonsuza kadar tutar — bellek sızıntısı",
+          ),
           t("Roblox needs it to save", "Roblox kaydetmek için ister"),
           t("It makes cooldowns shorter", "Bekleme sürelerini kısaltır"),
           t("It isn't needed", "Gerek yok"),
         ],
         0,
-        t("Tables keyed by player grow until you remove entries.", "Oyuncuya göre anahtarlanan tablolar sen silene kadar büyür."),
+        t(
+          "Tables keyed by player grow until you remove entries.",
+          "Oyuncuya göre anahtarlanan tablolar sen silene kadar büyür.",
+        ),
       ),
     ],
   },
@@ -1175,7 +1308,10 @@ print(spend(), spend(), spend(), spend())
           t("The server crashes", "Sunucu çöker"),
         ],
         0,
-        t("Client changes don't replicate to the server.", "İstemci değişiklikleri sunucuya replike edilmez."),
+        t(
+          "Client changes don't replicate to the server.",
+          "İstemci değişiklikleri sunucuya replike edilmez.",
+        ),
       ),
       fill(
         t("Ask the server to open the door", "Sunucudan kapıyı açmasını iste"),
@@ -1187,13 +1323,19 @@ print(spend(), spend(), spend(), spend())
       choice(
         t("What can exploiters read?", "Exploit kullananlar neyi okuyabilir?"),
         [
-          t("The code of LocalScripts and modules in ReplicatedStorage", "LocalScript'lerin ve ReplicatedStorage'daki modüllerin kodunu"),
+          t(
+            "The code of LocalScripts and modules in ReplicatedStorage",
+            "LocalScript'lerin ve ReplicatedStorage'daki modüllerin kodunu",
+          ),
           t("Scripts in ServerScriptService", "ServerScriptService'teki scriptleri"),
           t("Everything in ServerStorage", "ServerStorage'daki her şeyi"),
           t("Other players' DataStore data", "Diğer oyuncuların DataStore verilerini"),
         ],
         0,
-        t("Anything sent to their device can be read.", "Cihazlarına gönderilen her şey okunabilir."),
+        t(
+          "Anything sent to their device can be read.",
+          "Cihazlarına gönderilen her şey okunabilir.",
+        ),
       ),
     ],
   },
@@ -1233,7 +1375,10 @@ print(flat.Magnitude)
 `,
         ["60", "100", "160", "0"],
         0,
-        t("Multiplying by (1, 0, 1) drops the fall; only 60 sideways is left.", "(1, 0, 1) ile çarpmak düşüşü atar; sadece 60 yatay kalır."),
+        t(
+          "Multiplying by (1, 0, 1) drops the fall; only 60 sideways is left.",
+          "(1, 0, 1) ile çarpmak düşüşü atar; sadece 60 yatay kalır.",
+        ),
       ),
       fill(
         t("Ignore falling: keep only X and Z", "Düşmeyi yok say: sadece X ve Z kalsın"),
@@ -1283,7 +1428,10 @@ print(canHit(5, true), canHit(15, true), canHit(5, false))
           t("Its weapon's cooldown", "Silahının bekleme süresine"),
         ],
         0,
-        t("The client says what the player did; the server works out the result.", "İstemci oyuncunun ne yaptığını söyler; sonucu sunucu hesaplar."),
+        t(
+          "The client says what the player did; the server works out the result.",
+          "İstemci oyuncunun ne yaptığını söyler; sonucu sunucu hesaplar.",
+        ),
       ),
     ],
   },

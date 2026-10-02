@@ -47,7 +47,10 @@ print(items.Wood)
 `,
         ["5", "3", "2", "nil"],
         0,
-        t("The second add stacks on the first: 3 + 2.", "İkinci add birincinin üstüne yığılır: 3 + 2."),
+        t(
+          "The second add stacks on the first: 3 + 2.",
+          "İkinci add birincinin üstüne yığılır: 3 + 2.",
+        ),
       ),
       fill(
         t("Start new items at 0", "Yeni eşyalar 0'dan başlasın"),
@@ -71,7 +74,10 @@ print(remove("Stone", 5), items.Stone)
 `,
         ["false 3", "true -2", "false 0", "true 3"],
         0,
-        t("Not enough stone, so nothing changes.", "Yeterli taş yok, bu yüzden hiçbir şey değişmez."),
+        t(
+          "Not enough stone, so nothing changes.",
+          "Yeterli taş yok, bu yüzden hiçbir şey değişmez.",
+        ),
       ),
       learn(
         t("Crafting: check, remove, add", "Üretim: kontrol et, çıkar, ekle"),
@@ -90,7 +96,10 @@ print(remove("Stone", 5), items.Stone)
           "bag:Add(itemName)",
           "return true",
         ],
-        t("Check everything, then remove, then add.", "Önce her şeyi kontrol et, sonra çıkar, sonra ekle."),
+        t(
+          "Check everything, then remove, then add.",
+          "Önce her şeyi kontrol et, sonra çıkar, sonra ekle.",
+        ),
       ),
       choice(
         t("Where should the real inventory live?", "Gerçek envanter nerede durmalı?"),
@@ -98,7 +107,10 @@ print(remove("Stone", 5), items.Stone)
           t("On the server, in the player's session data", "Sunucuda, oyuncunun oturum verisinde"),
           t("In a LocalScript", "Bir LocalScript'te"),
           t("In the player's GUI", "Oyuncunun arayüzünde"),
-          t("In ReplicatedStorage so clients can edit it", "İstemciler düzenleyebilsin diye ReplicatedStorage'da"),
+          t(
+            "In ReplicatedStorage so clients can edit it",
+            "İstemciler düzenleyebilsin diye ReplicatedStorage'da",
+          ),
         ],
         0,
         t("The client only gets a copy to draw.", "İstemci sadece çizmek için bir kopya alır."),
@@ -132,7 +144,10 @@ print(remove("Stone", 5), items.Stone)
         "params.FilterDescendantsInstances = { ___ }",
         ["character", "workspace", "params", "hit"],
         0,
-        t("With Exclude, everything inside the attacker's character is skipped.", "Exclude ile saldıranın karakterindeki her şey atlanır."),
+        t(
+          "With Exclude, everything inside the attacker's character is skipped.",
+          "Exclude ile saldıranın karakterindeki her şey atlanır.",
+        ),
       ),
       predict(
         lua`
@@ -178,7 +193,10 @@ print(damaged)
           'part.Parent üzerinde neden FindFirstChildOfClass("Humanoid") kullanılır?',
         ),
         [
-          t("The floor and walls have no Humanoid — it skips them safely", "Zemin ve duvarlarda Humanoid yok — onları güvenle atlar"),
+          t(
+            "The floor and walls have no Humanoid — it skips them safely",
+            "Zemin ve duvarlarda Humanoid yok — onları güvenle atlar",
+          ),
           t("It's faster than TakeDamage", "TakeDamage'den hızlıdır"),
           t("It heals the target", "Hedefi iyileştirir"),
           t("It creates a Humanoid", "Bir Humanoid oluşturur"),
@@ -187,7 +205,10 @@ print(damaged)
         t("It returns nil instead of erroring.", "Hata vermek yerine nil döndürür."),
       ),
       choice(
-        t("Who should make the hitbox and deal damage?", "Hitbox'ı kim yapmalı ve hasarı kim vermeli?"),
+        t(
+          "Who should make the hitbox and deal damage?",
+          "Hitbox'ı kim yapmalı ve hasarı kim vermeli?",
+        ),
         [
           t("The server", "Sunucu"),
           t("The attacker's LocalScript", "Saldıranın LocalScript'i"),
@@ -195,7 +216,10 @@ print(damaged)
           t("Nobody — use Touched", "Kimse — Touched kullan"),
         ],
         0,
-        t("The client plays the animation; the server decides who's hit.", "İstemci animasyonu oynatır; kimin vurulduğuna sunucu karar verir."),
+        t(
+          "The client plays the animation; the server decides who's hit.",
+          "İstemci animasyonu oynatır; kimin vurulduğuna sunucu karar verir.",
+        ),
       ),
     ],
   },
@@ -244,7 +268,10 @@ print(best)
         "local path = PathfindingService:___()",
         ["CreatePath", "ComputeAsync", "GetWaypoints", "MoveTo"],
         0,
-        t("CreatePath makes the Path object; ComputeAsync fills it.", "CreatePath Path nesnesini yapar; ComputeAsync onu doldurur."),
+        t(
+          "CreatePath makes the Path object; ComputeAsync fills it.",
+          "CreatePath Path nesnesini yapar; ComputeAsync onu doldurur.",
+        ),
       ),
       learn(
         t("Waypoints", "Ara noktalar"),
@@ -262,7 +289,10 @@ print(best)
           "    humanoid.MoveToFinished:Wait()",
           "end",
         ],
-        t("Compute first, then walk each waypoint and wait.", "Önce hesapla, sonra her ara noktayı yürü ve bekle."),
+        t(
+          "Compute first, then walk each waypoint and wait.",
+          "Önce hesapla, sonra her ara noktayı yürü ve bekle.",
+        ),
       ),
       predict(
         lua`
@@ -278,10 +308,16 @@ print(think(100), think(20), think(2))
 `,
         ["Idle Chase Attack", "Chase Chase Attack", "Idle Idle Attack", "Attack Chase Idle"],
         0,
-        t("Far: Idle. In range: Chase. Very close: Attack.", "Uzak: Idle. Menzilde: Chase. Çok yakın: Attack."),
+        t(
+          "Far: Idle. In range: Chase. Very close: Attack.",
+          "Uzak: Idle. Menzilde: Chase. Çok yakın: Attack.",
+        ),
       ),
       choice(
-        t("How often should an NPC recompute its path?", "Bir NPC yolunu ne sıklıkla yeniden hesaplamalı?"),
+        t(
+          "How often should an NPC recompute its path?",
+          "Bir NPC yolunu ne sıklıkla yeniden hesaplamalı?",
+        ),
         [
           t("About every 0.5–1 seconds", "Yaklaşık 0.5–1 saniyede bir"),
           t("Every frame", "Her karede"),
@@ -289,7 +325,10 @@ print(think(100), think(20), think(2))
           t("Only when a player chats", "Sadece bir oyuncu yazınca"),
         ],
         0,
-        t("Often enough to follow players, rarely enough not to lag.", "Oyuncuları izleyecek kadar sık, kastırmayacak kadar seyrek."),
+        t(
+          "Often enough to follow players, rarely enough not to lag.",
+          "Oyuncuları izleyecek kadar sık, kastırmayacak kadar seyrek.",
+        ),
       ),
     ],
   },
@@ -377,10 +416,16 @@ print(count)
           t("the tracker prints something", "takipçi bir şey yazdırınca"),
         ],
         0,
-        t("Compare progress with Goal after every report.", "Her report'tan sonra ilerlemeyi Goal ile karşılaştır."),
+        t(
+          "Compare progress with Goal after every report.",
+          "Her report'tan sonra ilerlemeyi Goal ile karşılaştır.",
+        ),
       ),
       choice(
-        t("Where should each player's quest progress live?", "Her oyuncunun görev ilerlemesi nerede durmalı?"),
+        t(
+          "Where should each player's quest progress live?",
+          "Her oyuncunun görev ilerlemesi nerede durmalı?",
+        ),
         [
           t("In their session data, so it's saved", "Oturum verisinde, kaydedilsin diye"),
           t("In a LocalScript", "Bir LocalScript'te"),
@@ -388,7 +433,10 @@ print(count)
           t("In a TextLabel", "Bir TextLabel'da"),
         ],
         0,
-        t("Session data is loaded and saved with everything else.", "Oturum verisi her şeyle birlikte yüklenir ve kaydedilir."),
+        t(
+          "Session data is loaded and saved with everything else.",
+          "Oturum verisi her şeyle birlikte yüklenir ve kaydedilir.",
+        ),
       ),
     ],
   },
@@ -429,14 +477,20 @@ end
 `,
         ["2\n4\n6", "1\n2\n3", "6", "2\n4"],
         0,
-        t("Each wave has twice its number of enemies.", "Her dalgada numarasının iki katı düşman var."),
+        t(
+          "Each wave has twice its number of enemies.",
+          "Her dalgada numarasının iki katı düşman var.",
+        ),
       ),
       fill(
         t("Always spawn a copy", "Her zaman bir kopya çıkar"),
         "local enemy = template:___()",
         ["Clone", "Copy", "Destroy", "Spawn"],
         0,
-        t("Clone keeps the template safe in ServerStorage.", "Clone şablonu ServerStorage'da güvende tutar."),
+        t(
+          "Clone keeps the template safe in ServerStorage.",
+          "Clone şablonu ServerStorage'da güvende tutar.",
+        ),
       ),
       predict(
         lua`
@@ -457,7 +511,10 @@ print(waited)
 `,
         ["3", "1", "0", "6"],
         0,
-        t("The last enemy is gone after 2.5 seconds, so the loop waits 3 times.", "Son düşman 2.5 saniyede gider, bu yüzden döngü 3 kez bekler."),
+        t(
+          "The last enemy is gone after 2.5 seconds, so the loop waits 3 times.",
+          "Son düşman 2.5 saniyede gider, bu yüzden döngü 3 kez bekler.",
+        ),
       ),
       learn(
         t("Scale slowly", "Yavaşça zorlaştır"),
@@ -480,13 +537,19 @@ print(count(1), count(5))
       choice(
         t("Why count enemies with a folder?", "Düşmanlar neden bir klasörle sayılır?"),
         [
-          t("A missed -1 can't freeze the wave: the folder is always right", "Unutulan bir -1 dalgayı donduramaz: klasör hep doğrudur"),
+          t(
+            "A missed -1 can't freeze the wave: the folder is always right",
+            "Unutulan bir -1 dalgayı donduramaz: klasör hep doğrudur",
+          ),
           t("Folders are faster", "Klasörler daha hızlı"),
           t("Variables can't hold numbers", "Değişkenler sayı tutamaz"),
           t("Roblox requires folders", "Roblox klasör zorunlu tutar"),
         ],
         0,
-        t("Destroyed enemies leave the folder by themselves.", "Yok edilen düşmanlar klasörden kendiliğinden çıkar."),
+        t(
+          "Destroyed enemies leave the folder by themselves.",
+          "Yok edilen düşmanlar klasörden kendiliğinden çıkar.",
+        ),
       ),
     ],
   },
@@ -520,7 +583,10 @@ print(size.X.Scale, size.Y.Scale, size.X.Offset)
 `,
         ["0.4 0.6 0", "0 0 0.4", "40 60 0", "0.4 0.6 400"],
         0,
-        t("fromScale sets only the Scale parts; Offset stays 0.", "fromScale sadece Scale kısımlarını ayarlar; Offset 0 kalır."),
+        t(
+          "fromScale sets only the Scale parts; Offset stays 0.",
+          "fromScale sadece Scale kısımlarını ayarlar; Offset 0 kalır.",
+        ),
       ),
       fill(
         t("Center the frame on its Position", "Frame'i Position'ında ortala"),
@@ -551,20 +617,34 @@ print(#frame:GetChildren())
       ),
       choice(
         t("Which size works on every screen?", "Hangi boyut her ekranda çalışır?"),
-        ["UDim2.fromScale(0.3, 0.1)", "UDim2.fromOffset(300, 100)", "UDim2.new(0, 300, 0, 100)", "Vector2.new(0.3, 0.1)"],
+        [
+          "UDim2.fromScale(0.3, 0.1)",
+          "UDim2.fromOffset(300, 100)",
+          "UDim2.new(0, 300, 0, 100)",
+          "Vector2.new(0.3, 0.1)",
+        ],
         0,
         t("Only Scale grows with the screen.", "Sadece Scale ekranla büyür."),
       ),
       choice(
-        t("How do you test UI on a phone without one?", "Telefonun yokken arayüzü telefonda nasıl test edersin?"),
+        t(
+          "How do you test UI on a phone without one?",
+          "Telefonun yokken arayüzü telefonda nasıl test edersin?",
+        ),
         [
-          t("Studio's device emulator (Test → Device)", "Studio'nun cihaz emülatörü (Test → Device)"),
+          t(
+            "Studio's device emulator (Test → Device)",
+            "Studio'nun cihaz emülatörü (Test → Device)",
+          ),
           t("Make the Studio window smaller", "Studio penceresini küçült"),
           t("You can't", "Yapamazsın"),
           t("Publish and hope", "Yayınla ve umut et"),
         ],
         0,
-        t("The emulator shows real phone and tablet screens.", "Emülatör gerçek telefon ve tablet ekranlarını gösterir."),
+        t(
+          "The emulator shows real phone and tablet screens.",
+          "Emülatör gerçek telefon ve tablet ekranlarını gösterir.",
+        ),
       ),
     ],
   },
@@ -639,7 +719,10 @@ print(sound.Volume)
         t("2 divided by 4 is 0.5.", "2 bölü 4, 0.5'tir."),
       ),
       choice(
-        t("Who hears a sound a LocalScript plays in the player's GUI?", "Bir LocalScript'in oyuncunun arayüzünde çaldığı sesi kim duyar?"),
+        t(
+          "Who hears a sound a LocalScript plays in the player's GUI?",
+          "Bir LocalScript'in oyuncunun arayüzünde çaldığı sesi kim duyar?",
+        ),
         [
           t("Only that player", "Sadece o oyuncu"),
           t("Everyone", "Herkes"),
@@ -647,7 +730,10 @@ print(sound.Volume)
           t("Players nearby", "Yakındaki oyuncular"),
         ],
         0,
-        t("Things made on a client stay on that client.", "İstemcide yapılan şeyler o istemcide kalır."),
+        t(
+          "Things made on a client stay on that client.",
+          "İstemcide yapılan şeyler o istemcide kalır.",
+        ),
       ),
     ],
   },
@@ -717,12 +803,18 @@ end)
           "Enum.AnimationPriority.Movement",
         ],
         0,
-        t("Action beats idle and walking animations.", "Action, bekleme ve yürüme animasyonlarını bastırır."),
+        t(
+          "Action beats idle and walking animations.",
+          "Action, bekleme ve yürüme animasyonlarını bastırır.",
+        ),
       ),
       choice(
         t("When should you call LoadAnimation?", "LoadAnimation ne zaman çağrılmalı?"),
         [
-          t("Once per character, then reuse the track", "Karakter başına bir kez, sonra track'i tekrar kullan"),
+          t(
+            "Once per character, then reuse the track",
+            "Karakter başına bir kez, sonra track'i tekrar kullan",
+          ),
           t("Every time you play it", "Her oynattığında"),
           t("Every frame", "Her karede"),
           t("Never on the server", "Sunucuda asla"),
@@ -735,7 +827,10 @@ end)
         'track:___("Impact"):Connect(dealDamage)',
         ["GetMarkerReachedSignal", "GetMarker", "AdjustSpeed", "Play"],
         0,
-        t("It fires exactly when the animation reaches that marker.", "Animasyon o işaretçiye ulaştığı anda tetiklenir."),
+        t(
+          "It fires exactly when the animation reaches that marker.",
+          "Animasyon o işaretçiye ulaştığı anda tetiklenir.",
+        ),
       ),
     ],
   },
@@ -759,8 +854,8 @@ local camera = workspace.CurrentCamera
 camera.CameraType = Enum.CameraType.Scriptable
 `,
           hook: t(
-            "A film director 🎬: \"action!\" and the camera is yours.",
-            "Film yönetmeni 🎬: \"motor!\" ve kamera senin.",
+            'A film director 🎬: "action!" and the camera is yours.',
+            'Film yönetmeni 🎬: "motor!" ve kamera senin.',
           ),
         },
       ),
@@ -769,7 +864,10 @@ camera.CameraType = Enum.CameraType.Scriptable
         "camera.CFrame = CFrame.___(Vector3.new(0, 20, 30), Vector3.zero)",
         ["lookAt", "new", "Angles", "fromHex"],
         0,
-        t("lookAt(from, to) places it at from, facing to.", "lookAt(from, to) onu from'a koyar ve to'ya baktırır."),
+        t(
+          "lookAt(from, to) places it at from, facing to.",
+          "lookAt(from, to) onu from'a koyar ve to'ya baktırır.",
+        ),
       ),
       predict(
         lua`
@@ -816,7 +914,10 @@ print(elapsed > 0.5)
           t("only works on the server", "sadece sunucuda çalışır"),
         ],
         0,
-        t("Client-made objects stay on that client.", "İstemcide yapılan nesneler o istemcide kalır."),
+        t(
+          "Client-made objects stay on that client.",
+          "İstemcide yapılan nesneler o istemcide kalır.",
+        ),
       ),
     ],
   },
@@ -876,19 +977,28 @@ print(isNight(20), isNight(12), isNight(3))
       choice(
         t("Where should the day-night loop run?", "Gece-gündüz döngüsü nerede çalışmalı?"),
         [
-          t("On the server, so everyone shares the time", "Sunucuda, herkes aynı saati paylaşsın diye"),
+          t(
+            "On the server, so everyone shares the time",
+            "Sunucuda, herkes aynı saati paylaşsın diye",
+          ),
           t("In each LocalScript", "Her LocalScript'te"),
           t("In a ModuleScript nobody requires", "Kimsenin require etmediği bir ModuleScript'te"),
           t("In StarterGui", "StarterGui'de"),
         ],
         0,
-        t("Server changes to Lighting replicate to all players.", "Sunucunun Lighting değişiklikleri bütün oyunculara replike edilir."),
+        t(
+          "Server changes to Lighting replicate to all players.",
+          "Sunucunun Lighting değişiklikleri bütün oyunculara replike edilir.",
+        ),
       ),
       choice(
         t("Which adds haze in the distance?", "Uzakta pusu hangisi ekler?"),
         ["Atmosphere", "BlurEffect", "UICorner", "SoundGroup"],
         0,
-        t("Atmosphere's Density makes far-away things hazy.", "Atmosphere'in Density'si uzaktaki şeyleri puslu yapar."),
+        t(
+          "Atmosphere's Density makes far-away things hazy.",
+          "Atmosphere'in Density'si uzaktaki şeyleri puslu yapar.",
+        ),
       ),
     ],
   },
@@ -914,8 +1024,8 @@ for _, module in Services:GetChildren() do
 end
 `,
           hook: t(
-            "A team 👷: each worker has one job, and the manager says \"go\".",
-            "Bir ekip 👷: her işçinin tek bir işi var, yönetici de \"başla\" der.",
+            'A team 👷: each worker has one job, and the manager says "go".',
+            'Bir ekip 👷: her işçinin tek bir işi var, yönetici de "başla" der.',
           ),
         },
       ),
@@ -923,13 +1033,19 @@ end
         t("Where do server services live?", "Sunucu servisleri nerede durur?"),
         ["ServerScriptService", "ReplicatedStorage", "StarterPlayerScripts", "Workspace"],
         0,
-        t("Server code stays where clients can't read it.", "Sunucu kodu istemcilerin okuyamadığı yerde kalır."),
+        t(
+          "Server code stays where clients can't read it.",
+          "Sunucu kodu istemcilerin okuyamadığı yerde kalır.",
+        ),
       ),
       choice(
         t("Where does code both sides use go?", "İki tarafın da kullandığı kod nereye gider?"),
         ["ReplicatedStorage", "ServerStorage", "ServerScriptService", "StarterGui"],
         0,
-        t("Only ReplicatedStorage is visible to both.", "İkisine de sadece ReplicatedStorage görünür."),
+        t(
+          "Only ReplicatedStorage is visible to both.",
+          "İkisine de sadece ReplicatedStorage görünür.",
+        ),
       ),
       predict(
         lua`
@@ -957,10 +1073,16 @@ end
         "task.___(service.Start)",
         ["spawn", "wait", "cancel", "desynchronize"],
         0,
-        t("task.spawn so one slow Start doesn't hold up the rest.", "Yavaş bir Start diğerlerini bekletmesin diye task.spawn."),
+        t(
+          "task.spawn so one slow Start doesn't hold up the rest.",
+          "Yavaş bir Start diğerlerini bekletmesin diye task.spawn.",
+        ),
       ),
       choice(
-        t("Two modules require each other at the top. What happens?", "İki modül en üstte birbirini require ediyor. Ne olur?"),
+        t(
+          "Two modules require each other at the top. What happens?",
+          "İki modül en üstte birbirini require ediyor. Ne olur?",
+        ),
         [
           t("A recursive require error", "Özyinelemeli require hatası"),
           t("It works fine", "Sorunsuz çalışır"),
@@ -1014,7 +1136,10 @@ print(connection.Connected)
         "connections[player] = ___",
         ["nil", "0", "false", "{}"],
         0,
-        t("Setting a key to nil removes it from the table.", "Bir anahtarı nil yapmak onu tablodan siler."),
+        t(
+          "Setting a key to nil removes it from the table.",
+          "Bir anahtarı nil yapmak onu tablodan siler.",
+        ),
       ),
       learn(
         t("Memory leaks", "Bellek sızıntıları"),
@@ -1033,7 +1158,10 @@ print(connection.Connected, part.Parent)
 `,
         ["false nil", "true nil", "false Workspace", "true Workspace"],
         0,
-        t("Destroy removes the part and disconnects its events.", "Destroy parçayı kaldırır ve olaylarının bağlantısını keser."),
+        t(
+          "Destroy removes the part and disconnects its events.",
+          "Destroy parçayı kaldırır ve olaylarının bağlantısını keser.",
+        ),
       ),
       choice(
         t("Which loop is fine?", "Hangi döngü sorunsuz?"),
@@ -1044,18 +1172,27 @@ print(connection.Connected, part.Parent)
           "for i = 1, math.huge do check() end",
         ],
         0,
-        t("Only the first ever lets the rest of the game run.", "Sadece ilki oyunun geri kalanının çalışmasına izin veriyor."),
+        t(
+          "Only the first ever lets the rest of the game run.",
+          "Sadece ilki oyunun geri kalanının çalışmasına izin veriyor.",
+        ),
       ),
       choice(
         t("What should you do before optimizing?", "Optimize etmeden önce ne yapmalısın?"),
         [
-          t("Measure with the MicroProfiler or Developer Console", "MicroProfiler ya da Developer Console ile ölç"),
+          t(
+            "Measure with the MicroProfiler or Developer Console",
+            "MicroProfiler ya da Developer Console ile ölç",
+          ),
           t("Rewrite everything", "Her şeyi baştan yaz"),
           t("Delete half the scripts", "Scriptlerin yarısını sil"),
           t("Add task.wait everywhere", "Her yere task.wait ekle"),
         ],
         0,
-        t("Fix what's really slow, not what you guess.", "Tahmin ettiğini değil, gerçekten yavaş olanı düzelt."),
+        t(
+          "Fix what's really slow, not what you guess.",
+          "Tahmin ettiğini değil, gerçekten yavaş olanı düzelt.",
+        ),
       ),
     ],
   },
@@ -1074,10 +1211,7 @@ print(connection.Connected, part.Parent)
           "Game pass: bir kez alınır, sonsuza kadar sahip olunur — UserOwnsGamePassAsync ile kontrol et. Developer product: çok kez alınır — ProcessReceipt'te ver.",
         ),
         {
-          hook: t(
-            "A season ticket 🎟️ vs. a snack 🍿.",
-            "Sezonluk bilet 🎟️ ve atıştırmalık 🍿.",
-          ),
+          hook: t("A season ticket 🎟️ vs. a snack 🍿.", "Sezonluk bilet 🎟️ ve atıştırmalık 🍿."),
         },
       ),
       choice(
@@ -1092,7 +1226,10 @@ print(connection.Connected, part.Parent)
           t("A group rank", "Bir grup rütbesi"),
         ],
         0,
-        t("Repeatable purchases are developer products.", "Tekrarlanabilen satın almalar developer product'tır."),
+        t(
+          "Repeatable purchases are developer products.",
+          "Tekrarlanabilen satın almalar developer product'tır.",
+        ),
       ),
       fill(
         t("Tell Roblox the reward was given", "Roblox'a ödülün verildiğini söyle"),
@@ -1121,21 +1258,33 @@ print(coinsFor(222), coinsFor(999))
 `,
         ["500 0", "100 0", "500 nil", "0 0"],
         0,
-        t("Look the reward up by product id; unknown ids give nothing.", "Ödülü product id ile bul; bilinmeyen id'ler hiçbir şey vermez."),
+        t(
+          "Look the reward up by product id; unknown ids give nothing.",
+          "Ödülü product id ile bul; bilinmeyen id'ler hiçbir şey vermez.",
+        ),
       ),
       choice(
         t("Where do you call PromptProductPurchase?", "PromptProductPurchase nerede çağrılır?"),
         [
-          t("In a LocalScript, e.g. when a button is clicked", "Bir LocalScript'te, örneğin bir butona basılınca"),
+          t(
+            "In a LocalScript, e.g. when a button is clicked",
+            "Bir LocalScript'te, örneğin bir butona basılınca",
+          ),
           t("Inside ProcessReceipt", "ProcessReceipt'in içinde"),
           t("In a DataStore", "Bir DataStore'da"),
           t("Nowhere — purchases are automatic", "Hiçbir yerde — satın almalar otomatik"),
         ],
         0,
-        t("The client opens the window; the server handles the receipt.", "Pencereyi istemci açar; makbuzu sunucu işler."),
+        t(
+          "The client opens the window; the server handles the receipt.",
+          "Pencereyi istemci açar; makbuzu sunucu işler.",
+        ),
       ),
       choice(
-        t("Why wrap UserOwnsGamePassAsync in pcall?", "UserOwnsGamePassAsync neden pcall ile sarılır?"),
+        t(
+          "Why wrap UserOwnsGamePassAsync in pcall?",
+          "UserOwnsGamePassAsync neden pcall ile sarılır?",
+        ),
         [
           t("It's a web request that can fail", "Başarısız olabilen bir web isteği"),
           t("It's slow on purpose", "Kasıtlı olarak yavaş"),
@@ -1204,7 +1353,10 @@ print(pick)
 `,
         ["Red", "Blue", "2", "3"],
         0,
-        t("Red has fewer players, so the newcomer joins Red.", "Red'de daha az oyuncu var, yeni gelen Red'e katılır."),
+        t(
+          "Red has fewer players, so the newcomer joins Red.",
+          "Red'de daha az oyuncu var, yeni gelen Red'e katılır.",
+        ),
       ),
       learn(
         t("Friendly fire", "Dost ateşi"),
@@ -1222,7 +1374,10 @@ print(canDamage("Red", "Blue"), canDamage("Red", "Red"), canDamage("Red", nil))
 `,
         ["true false true", "true true true", "false false true", "true false false"],
         0,
-        t("Same team: no damage. No team (an NPC): damage.", "Aynı takım: hasar yok. Takım yok (NPC): hasar var."),
+        t(
+          "Same team: no damage. No team (an NPC): damage.",
+          "Aynı takım: hasar yok. Takım yok (NPC): hasar var.",
+        ),
       ),
       choice(
         t('Why does player.Team = "Red" error?', 'player.Team = "Red" neden hata verir?'),
@@ -1279,7 +1434,10 @@ print(canPickUp(4, false), canPickUp(4, true), canPickUp(40, false))
 `,
         ["true false false", "true true false", "false false false", "true false true"],
         0,
-        t("Only a close coin that nobody took yet.", "Sadece yakın ve henüz kimsenin almadığı bir coin."),
+        t(
+          "Only a close coin that nobody took yet.",
+          "Sadece yakın ve henüz kimsenin almadığı bir coin.",
+        ),
       ),
       learn(
         t("Test like players", "Oyuncu gibi test et"),
@@ -1308,18 +1466,30 @@ end
           t("Data saves on shutdown", "Veri kapanışta kaydediliyor"),
         ],
         0,
-        t("pcall is what keeps DataStore failures from crashing your game.", "DataStore hatalarının oyununu çökertmesini önleyen pcall'dur."),
+        t(
+          "pcall is what keeps DataStore failures from crashing your game.",
+          "DataStore hatalarının oyununu çökertmesini önleyen pcall'dur.",
+        ),
       ),
       choice(
-        t("After launch, what tells you what to fix next?", "Yayından sonra sırada neyi düzelteceğini ne söyler?"),
+        t(
+          "After launch, what tells you what to fix next?",
+          "Yayından sonra sırada neyi düzelteceğini ne söyler?",
+        ),
         [
-          t("Analytics: retention and session length", "Analizler: geri dönme oranı ve oturum süresi"),
+          t(
+            "Analytics: retention and session length",
+            "Analizler: geri dönme oranı ve oturum süresi",
+          ),
           t("Nothing — the game is done", "Hiçbir şey — oyun bitti"),
           t("The number of scripts", "Script sayısı"),
           t("Your line count", "Satır sayın"),
         ],
         0,
-        t("Players' behavior shows where the game loses them.", "Oyuncuların davranışı oyunun onları nerede kaybettiğini gösterir."),
+        t(
+          "Players' behavior shows where the game loses them.",
+          "Oyuncuların davranışı oyunun onları nerede kaybettiğini gösterir.",
+        ),
       ),
     ],
   },

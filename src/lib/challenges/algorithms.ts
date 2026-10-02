@@ -52,8 +52,14 @@ export const ALGORITHM_CHALLENGES: FunctionChallenge[] = [
     solution:
       "local function isSorted(list)\n\tfor i = 2, #list do\n\t\tif list[i - 1] > list[i] then\n\t\t\treturn false\n\t\tend\n\tend\n\treturn true\nend\n",
     hints: {
-      en: ["Compare each item with the one before it: list[i - 1] and list[i].", "Return false as soon as one pair is out of order."],
-      tr: ["Her elemanı bir öncekiyle karşılaştır: list[i - 1] ve list[i].", "Sırası bozuk ilk çiftte hemen false döndür."],
+      en: [
+        "Compare each item with the one before it: list[i - 1] and list[i].",
+        "Return false as soon as one pair is out of order.",
+      ],
+      tr: [
+        "Her elemanı bir öncekiyle karşılaştır: list[i - 1] ve list[i].",
+        "Sırası bozuk ilk çiftte hemen false döndür.",
+      ],
     },
   }),
   F({
@@ -90,8 +96,14 @@ export const ALGORITHM_CHALLENGES: FunctionChallenge[] = [
     solution:
       "local function isPowerOfTwo(n)\n\tif n < 1 then\n\t\treturn false\n\tend\n\twhile n % 2 == 0 do\n\t\tn /= 2\n\tend\n\treturn n == 1\nend\n",
     hints: {
-      en: ["Numbers below 1 are never powers of two.", "Keep dividing by 2 while the number is even. Did you end at 1?"],
-      tr: ["1'den küçük sayılar asla ikinin kuvveti değildir.", "Sayı çift olduğu sürece 2'ye bölmeye devam et. 1'de mi bittin?"],
+      en: [
+        "Numbers below 1 are never powers of two.",
+        "Keep dividing by 2 while the number is even. Did you end at 1?",
+      ],
+      tr: [
+        "1'den küçük sayılar asla ikinin kuvveti değildir.",
+        "Sayı çift olduğu sürece 2'ye bölmeye devam et. 1'de mi bittin?",
+      ],
     },
   }),
   F({
@@ -105,12 +117,21 @@ export const ALGORITHM_CHALLENGES: FunctionChallenge[] = [
       en: "A list holds every number from 1 to n except one, in any order. Write `missingNumber(list)` that finds it in one pass. Hint: what should the total be?",
       tr: "Bir liste, biri hariç 1'den n'ye kadar her sayıyı herhangi bir sırada tutuyor. Onu tek geçişte bulan `missingNumber(list)` fonksiyonunu yaz. İpucu: toplam ne olmalıydı?",
     },
-    tests: T(["{ 3, 1, 4 }", "{ 2 }"], ["{ 1 }", "{ 5, 2, 3, 1 }", range(4999, "i < 777 and i or i + 1")]),
+    tests: T(
+      ["{ 3, 1, 4 }", "{ 2 }"],
+      ["{ 1 }", "{ 5, 2, 3, 1 }", range(4999, "i < 777 and i or i + 1")],
+    ),
     solution:
       "local function missingNumber(list)\n\tlocal n = #list + 1\n\tlocal expected = n * (n + 1) / 2\n\tlocal total = 0\n\tfor _, v in list do\n\t\ttotal += v\n\tend\n\treturn expected - total\nend\n",
     hints: {
-      en: ["The full list would have #list + 1 numbers.", "1 + 2 + … + n = n * (n + 1) / 2. Subtract what you actually have."],
-      tr: ["Tam liste #list + 1 sayı tutardı.", "1 + 2 + … + n = n * (n + 1) / 2. Elindekilerin toplamını çıkar."],
+      en: [
+        "The full list would have #list + 1 numbers.",
+        "1 + 2 + … + n = n * (n + 1) / 2. Subtract what you actually have.",
+      ],
+      tr: [
+        "Tam liste #list + 1 sayı tutardı.",
+        "1 + 2 + … + n = n * (n + 1) / 2. Elindekilerin toplamını çıkar.",
+      ],
     },
   }),
 
@@ -174,8 +195,14 @@ export const ALGORITHM_CHALLENGES: FunctionChallenge[] = [
     solution:
       'local function toDecimal(bits)\n\tlocal n = 0\n\tfor i = 1, #bits do\n\t\tn = n * 2 + (if bits:sub(i, i) == "1" then 1 else 0)\n\tend\n\treturn n\nend\n',
     hints: {
-      en: ["Go left to right. Each step: n = n * 2 + digit.", 'bits:sub(i, i) is the i-th character: "0" or "1".'],
-      tr: ["Soldan sağa git. Her adımda: n = n * 2 + rakam.", 'bits:sub(i, i), i. karakterdir: "0" ya da "1".'],
+      en: [
+        "Go left to right. Each step: n = n * 2 + digit.",
+        'bits:sub(i, i) is the i-th character: "0" or "1".',
+      ],
+      tr: [
+        "Soldan sağa git. Her adımda: n = n * 2 + rakam.",
+        'bits:sub(i, i), i. karakterdir: "0" ya da "1".',
+      ],
     },
   }),
   F({
@@ -193,8 +220,14 @@ export const ALGORITHM_CHALLENGES: FunctionChallenge[] = [
     solution:
       'local function toBinary(n)\n\tif n == 0 then\n\t\treturn "0"\n\tend\n\tlocal bits = ""\n\twhile n > 0 do\n\t\tbits = (n % 2) .. bits\n\t\tn = math.floor(n / 2)\n\tend\n\treturn bits\nend\n',
     hints: {
-      en: ["n % 2 is the last bit; math.floor(n / 2) drops it.", "Put each new bit in front: bits = (n % 2) .. bits"],
-      tr: ["n % 2 son bittir; math.floor(n / 2) onu atar.", "Her yeni biti öne ekle: bits = (n % 2) .. bits"],
+      en: [
+        "n % 2 is the last bit; math.floor(n / 2) drops it.",
+        "Put each new bit in front: bits = (n % 2) .. bits",
+      ],
+      tr: [
+        "n % 2 son bittir; math.floor(n / 2) onu atar.",
+        "Her yeni biti öne ekle: bits = (n % 2) .. bits",
+      ],
     },
   }),
   F({
@@ -208,7 +241,10 @@ export const ALGORITHM_CHALLENGES: FunctionChallenge[] = [
       en: "A list holds the coins won or lost each round. Write `maxSubarray(list)`: the biggest total of any run of consecutive rounds (at least one round). It must be O(n) — the hidden test has 3000 rounds.",
       tr: "Bir liste her turda kazanılan ya da kaybedilen coinleri tutuyor. Ardışık turlardan oluşan herhangi bir serinin (en az bir tur) en büyük toplamını veren `maxSubarray(list)`'i yaz. O(n) olmalı — gizli testte 3000 tur var.",
     },
-    tests: T(["{ -2, 1, -3, 4, -1, 2, 1, -5, 4 }", "{ -3, -1, -2 }"], ["{ 5 }", "{ 2, -1, 2, -1, 2 }", range(3000, "(i % 7) - 3")]),
+    tests: T(
+      ["{ -2, 1, -3, 4, -1, 2, 1, -5, 4 }", "{ -3, -1, -2 }"],
+      ["{ 5 }", "{ 2, -1, 2, -1, 2 }", range(3000, "(i % 7) - 3")],
+    ),
     solution:
       "local function maxSubarray(list)\n\tlocal best = list[1]\n\tlocal current = 0\n\tfor _, v in list do\n\t\tcurrent = math.max(v, current + v)\n\t\tbest = math.max(best, current)\n\tend\n\treturn best\nend\n",
     hints: {
@@ -239,7 +275,10 @@ export const ALGORITHM_CHALLENGES: FunctionChallenge[] = [
     solution:
       "local function moveZeros(list)\n\tlocal result = {}\n\tlocal zeros = 0\n\tfor _, v in list do\n\t\tif v == 0 then\n\t\t\tzeros += 1\n\t\telse\n\t\t\ttable.insert(result, v)\n\t\tend\n\tend\n\tfor _ = 1, zeros do\n\t\ttable.insert(result, 0)\n\tend\n\treturn result\nend\n",
     hints: {
-      en: ["Copy the non-zero items first and count the zeros.", "Then add that many zeros at the end."],
+      en: [
+        "Copy the non-zero items first and count the zeros.",
+        "Then add that many zeros at the end.",
+      ],
       tr: ["Önce sıfır olmayanları kopyala ve sıfırları say.", "Sonra o kadar sıfırı sona ekle."],
     },
   }),
@@ -258,8 +297,14 @@ export const ALGORITHM_CHALLENGES: FunctionChallenge[] = [
     solution:
       "local function pascalRow(n)\n\tlocal row = { 1 }\n\tfor _ = 1, n do\n\t\tlocal nextRow = { 1 }\n\t\tfor i = 2, #row do\n\t\t\tnextRow[i] = row[i - 1] + row[i]\n\t\tend\n\t\ttable.insert(nextRow, 1)\n\t\trow = nextRow\n\tend\n\treturn row\nend\n",
     hints: {
-      en: ["Start with { 1 } and build the next row n times.", "nextRow[i] = row[i - 1] + row[i], with a 1 at both ends."],
-      tr: ["{ 1 } ile başla ve sonraki satırı n kez oluştur.", "nextRow[i] = row[i - 1] + row[i], iki ucunda da 1."],
+      en: [
+        "Start with { 1 } and build the next row n times.",
+        "nextRow[i] = row[i - 1] + row[i], with a 1 at both ends.",
+      ],
+      tr: [
+        "{ 1 } ile başla ve sonraki satırı n kez oluştur.",
+        "nextRow[i] = row[i - 1] + row[i], iki ucunda da 1.",
+      ],
     },
   }),
   F({
@@ -273,12 +318,21 @@ export const ALGORITHM_CHALLENGES: FunctionChallenge[] = [
       en: "More than half of the votes are for one map. Write `majority(votes)` that returns it. Try Boyer–Moore voting: one candidate and a counter, no extra table.",
       tr: "Oyların yarıdan fazlası tek bir harita için. Onu döndüren `majority(votes)`'u yaz. Boyer–Moore oylamasını dene: tek bir aday ve bir sayaç, ekstra tablo yok.",
     },
-    tests: T(['{ "Lava", "Ice", "Lava" }', '{ "Sky" }'], ['{ "A", "B", "A", "C", "A", "A", "B" }', '{ "X", "X", "Y", "Y", "X" }']),
+    tests: T(
+      ['{ "Lava", "Ice", "Lava" }', '{ "Sky" }'],
+      ['{ "A", "B", "A", "C", "A", "A", "B" }', '{ "X", "X", "Y", "Y", "X" }'],
+    ),
     solution:
       "local function majority(votes)\n\tlocal candidate, count = nil, 0\n\tfor _, v in votes do\n\t\tif count == 0 then\n\t\t\tcandidate = v\n\t\tend\n\t\tcount += if v == candidate then 1 else -1\n\tend\n\treturn candidate\nend\n",
     hints: {
-      en: ["When the counter is 0, the current vote becomes the candidate.", "Same as the candidate: +1. Different: -1. The majority always survives."],
-      tr: ["Sayaç 0 olunca mevcut oy aday olur.", "Adayla aynıysa +1, farklıysa -1. Çoğunluk her zaman ayakta kalır."],
+      en: [
+        "When the counter is 0, the current vote becomes the candidate.",
+        "Same as the candidate: +1. Different: -1. The majority always survives.",
+      ],
+      tr: [
+        "Sayaç 0 olunca mevcut oy aday olur.",
+        "Adayla aynıysa +1, farklıysa -1. Çoğunluk her zaman ayakta kalır.",
+      ],
     },
   }),
   F({
@@ -317,12 +371,21 @@ export const ALGORITHM_CHALLENGES: FunctionChallenge[] = [
       en: 'Write `commonPrefix(words)` that returns the longest text every word starts with. `{ "speedrun", "speedcoil", "speed" }` gives `"speed"`; no common start gives `""`.',
       tr: 'Her kelimenin başladığı en uzun metni döndüren `commonPrefix(words)`\'ü yaz. `{ "speedrun", "speedcoil", "speed" }` sonucu `"speed"`; ortak başlangıç yoksa `""`.',
     },
-    tests: T(['{ "speedrun", "speedcoil", "speed" }', '{ "dog", "cat" }'], ['{ "solo" }', '{ "abc", "abd", "ab" }', "{}"]),
+    tests: T(
+      ['{ "speedrun", "speedcoil", "speed" }', '{ "dog", "cat" }'],
+      ['{ "solo" }', '{ "abc", "abd", "ab" }', "{}"],
+    ),
     solution:
       'local function commonPrefix(words)\n\tlocal prefix = words[1] or ""\n\tfor _, w in words do\n\t\twhile w:sub(1, #prefix) ~= prefix do\n\t\t\tprefix = prefix:sub(1, #prefix - 1)\n\t\tend\n\tend\n\treturn prefix\nend\n',
     hints: {
-      en: ["Start with the first word as the prefix.", "While a word doesn't start with it, chop the last letter off the prefix."],
-      tr: ["İlk kelimeyi önek olarak al.", "Bir kelime onunla başlamadığı sürece önekin son harfini kes."],
+      en: [
+        "Start with the first word as the prefix.",
+        "While a word doesn't start with it, chop the last letter off the prefix.",
+      ],
+      tr: [
+        "İlk kelimeyi önek olarak al.",
+        "Bir kelime onunla başlamadığı sürece önekin son harfini kes.",
+      ],
     },
   }),
   F({
@@ -336,12 +399,21 @@ export const ALGORITHM_CHALLENGES: FunctionChallenge[] = [
       en: "Two leaderboards are already sorted from low to high. Write `mergeSorted(a, b)` that returns one sorted list in a single pass with two pointers — don't use table.sort.",
       tr: "İki liderlik tablosu zaten küçükten büyüğe sıralı. Tek geçişte, iki işaretçiyle tek bir sıralı liste döndüren `mergeSorted(a, b)`'yi yaz — table.sort kullanma.",
     },
-    tests: T(["{ 1, 4, 9 }, { 2, 3, 10 }", "{}, { 5 }"], ["{ 1, 1 }, { 1 }", "{ 7, 8 }, {}", "{ 1, 2, 3 }, { 4, 5, 6 }"]),
+    tests: T(
+      ["{ 1, 4, 9 }, { 2, 3, 10 }", "{}, { 5 }"],
+      ["{ 1, 1 }, { 1 }", "{ 7, 8 }, {}", "{ 1, 2, 3 }, { 4, 5, 6 }"],
+    ),
     solution:
       "local function mergeSorted(a, b)\n\tlocal result = {}\n\tlocal i, j = 1, 1\n\twhile i <= #a or j <= #b do\n\t\tif j > #b or (i <= #a and a[i] <= b[j]) then\n\t\t\ttable.insert(result, a[i])\n\t\t\ti += 1\n\t\telse\n\t\t\ttable.insert(result, b[j])\n\t\t\tj += 1\n\t\tend\n\tend\n\treturn result\nend\n",
     hints: {
-      en: ["Keep an index into each list: i for a, j for b.", "Take the smaller front item each time; when one list runs out, take from the other."],
-      tr: ["Her liste için bir indeks tut: a için i, b için j.", "Her seferinde öndeki küçük elemanı al; bir liste bitince diğerinden al."],
+      en: [
+        "Keep an index into each list: i for a, j for b.",
+        "Take the smaller front item each time; when one list runs out, take from the other.",
+      ],
+      tr: [
+        "Her liste için bir indeks tut: a için i, b için j.",
+        "Her seferinde öndeki küçük elemanı al; bir liste bitince diğerinden al.",
+      ],
     },
   }),
   F({
@@ -417,7 +489,10 @@ export const ALGORITHM_CHALLENGES: FunctionChallenge[] = [
       en: "Write `minCoins(coins, amount)`: the fewest coins (any number of each kind) that add up to exactly `amount`, or `-1` if it can't be done. Greedy fails for `{ 1, 3, 4 }, 6` (answer 2: 3 + 3). Use dynamic programming.",
       tr: "`minCoins(coins, amount)`'u yaz: toplamı tam olarak `amount` olan en az coin sayısı (her türden istediğin kadar), yapılamıyorsa `-1`. Açgözlü yöntem `{ 1, 3, 4 }, 6` için yanılır (cevap 2: 3 + 3). Dinamik programlama kullan.",
     },
-    tests: T(["{ 1, 3, 4 }, 6", "{ 2 }, 3"], ["{ 1 }, 0", "{ 5, 10, 25 }, 30", "{ 1, 5, 10, 25 }, 999", "{ 7, 11 }, 1"]),
+    tests: T(
+      ["{ 1, 3, 4 }, 6", "{ 2 }, 3"],
+      ["{ 1 }, 0", "{ 5, 10, 25 }, 30", "{ 1, 5, 10, 25 }, 999", "{ 7, 11 }, 1"],
+    ),
     solution:
       "local function minCoins(coins, amount)\n\tlocal best = { [0] = 0 }\n\tfor total = 1, amount do\n\t\tlocal m = math.huge\n\t\tfor _, c in coins do\n\t\t\tif c <= total and best[total - c] + 1 < m then\n\t\t\t\tm = best[total - c] + 1\n\t\t\tend\n\t\tend\n\t\tbest[total] = m\n\tend\n\treturn if best[amount] == math.huge then -1 else best[amount]\nend\n",
     hints: {
@@ -444,7 +519,10 @@ export const ALGORITHM_CHALLENGES: FunctionChallenge[] = [
       en: "Each item has a weight and a value; you can take each item at most once. Write `knapsack(weights, values, capacity)`: the highest total value whose total weight fits in `capacity`.",
       tr: "Her eşyanın bir ağırlığı ve değeri var; her eşyayı en fazla bir kez alabilirsin. `knapsack(weights, values, capacity)`'yi yaz: toplam ağırlığı `capacity`'ye sığan en yüksek toplam değer.",
     },
-    tests: T(["{ 1, 3, 4 }, { 15, 20, 30 }, 4", "{ 5 }, { 10 }, 4"], ["{ 1, 2, 3 }, { 6, 10, 12 }, 5", "{}, {}, 10", "{ 2, 3, 4, 5, 9 }, { 3, 4, 5, 8, 10 }, 20"]),
+    tests: T(
+      ["{ 1, 3, 4 }, { 15, 20, 30 }, 4", "{ 5 }, { 10 }, 4"],
+      ["{ 1, 2, 3 }, { 6, 10, 12 }, 5", "{}, {}, 10", "{ 2, 3, 4, 5, 9 }, { 3, 4, 5, 8, 10 }, 20"],
+    ),
     solution:
       "local function knapsack(weights, values, capacity)\n\tlocal best = {}\n\tfor w = 0, capacity do\n\t\tbest[w] = 0\n\tend\n\tfor i = 1, #weights do\n\t\tfor w = capacity, weights[i], -1 do\n\t\t\tbest[w] = math.max(best[w], best[w - weights[i]] + values[i])\n\t\tend\n\tend\n\treturn best[capacity]\nend\n",
     hints: {
@@ -471,7 +549,10 @@ export const ALGORITHM_CHALLENGES: FunctionChallenge[] = [
       en: "Write `longestIncreasing(list)`: the length of the longest strictly increasing subsequence (items keep their order but don't have to be next to each other). `{ 10, 9, 2, 5, 3, 7, 101, 18 }` gives `4` (2, 3, 7, 18).",
       tr: "`longestIncreasing(list)`'i yaz: kesin artan en uzun alt dizinin uzunluğu (elemanlar sırasını korur ama yan yana olmak zorunda değil). `{ 10, 9, 2, 5, 3, 7, 101, 18 }` sonucu `4` (2, 3, 7, 18).",
     },
-    tests: T(["{ 10, 9, 2, 5, 3, 7, 101, 18 }", "{ 5, 4, 3 }"], ["{}", "{ 1, 2, 3, 4, 5 }", "{ 0, 8, 4, 12, 2, 10, 6, 14, 1, 9 }"]),
+    tests: T(
+      ["{ 10, 9, 2, 5, 3, 7, 101, 18 }", "{ 5, 4, 3 }"],
+      ["{}", "{ 1, 2, 3, 4, 5 }", "{ 0, 8, 4, 12, 2, 10, 6, 14, 1, 9 }"],
+    ),
     solution:
       "local function longestIncreasing(list)\n\tlocal len = {}\n\tlocal best = 0\n\tfor i = 1, #list do\n\t\tlen[i] = 1\n\t\tfor j = 1, i - 1 do\n\t\t\tif list[j] < list[i] then\n\t\t\t\tlen[i] = math.max(len[i], len[j] + 1)\n\t\t\tend\n\t\tend\n\t\tbest = math.max(best, len[i])\n\tend\n\treturn best\nend\n",
     hints: {
@@ -496,7 +577,10 @@ export const ALGORITHM_CHALLENGES: FunctionChallenge[] = [
       en: 'Chat commands should forgive typos. Write `editDistance(a, b)`: the fewest single-letter inserts, deletes or replacements that turn a into b. `editDistance("kick", "kik")` is `1`.',
       tr: 'Sohbet komutları yazım hatalarını affetmeli. `editDistance(a, b)`\'yi yaz: a\'yı b\'ye çeviren en az tek harf ekleme, silme ya da değiştirme sayısı. `editDistance("kick", "kik")` sonucu `1`.',
     },
-    tests: T(['"kick", "kik"', '"horse", "ros"'], ['"", "abc"', '"same", "same"', '"intention", "execution"']),
+    tests: T(
+      ['"kick", "kik"', '"horse", "ros"'],
+      ['"", "abc"', '"same", "same"', '"intention", "execution"'],
+    ),
     solution:
       "local function editDistance(a, b)\n\tlocal prev = {}\n\tfor j = 0, #b do\n\t\tprev[j] = j\n\tend\n\tfor i = 1, #a do\n\t\tlocal cur = { [0] = i }\n\t\tfor j = 1, #b do\n\t\t\tlocal cost = if a:sub(i, i) == b:sub(j, j) then 0 else 1\n\t\t\tcur[j] = math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost)\n\t\tend\n\t\tprev = cur\n\tend\n\treturn prev[#b]\nend\n",
     hints: {
@@ -523,7 +607,10 @@ export const ALGORITHM_CHALLENGES: FunctionChallenge[] = [
       en: 'The map is a list of strings: "#" is land, "." is water. Land cells touching up, down, left or right form one island. Write `countIslands(grid)` with a flood fill (DFS or BFS).',
       tr: 'Harita metinlerden oluşan bir liste: "#" kara, "." su. Yukarı, aşağı, sola ya da sağa değen kara hücreleri tek bir ada oluşturur. `countIslands(grid)`\'i bir flood fill (DFS ya da BFS) ile yaz.',
     },
-    tests: T(['{ "##..", "#...", "..##", "...#" }', '{ "...", "..." }'], ['{ "#" }', '{ "#.#.#", ".#.#.", "#.#.#" }', '{ "####", "#..#", "####" }']),
+    tests: T(
+      ['{ "##..", "#...", "..##", "...#" }', '{ "...", "..." }'],
+      ['{ "#" }', '{ "#.#.#", ".#.#.", "#.#.#" }', '{ "####", "#..#", "####" }'],
+    ),
     solution:
       'local function countIslands(grid)\n\tlocal seen = {}\n\tlocal rows = #grid\n\tlocal cols = if rows > 0 then #grid[1] else 0\n\tlocal function land(r, c)\n\t\treturn r >= 1 and r <= rows and c >= 1 and c <= cols and grid[r]:sub(c, c) == "#"\n\tend\n\tlocal function fill(r, c)\n\t\tif not land(r, c) or seen[r * 1000 + c] then\n\t\t\treturn\n\t\tend\n\t\tseen[r * 1000 + c] = true\n\t\tfill(r + 1, c)\n\t\tfill(r - 1, c)\n\t\tfill(r, c + 1)\n\t\tfill(r, c - 1)\n\tend\n\tlocal count = 0\n\tfor r = 1, rows do\n\t\tfor c = 1, cols do\n\t\t\tif land(r, c) and not seen[r * 1000 + c] then\n\t\t\t\tcount += 1\n\t\t\t\tfill(r, c)\n\t\t\tend\n\t\tend\n\tend\n\treturn count\nend\n',
     hints: {
@@ -550,7 +637,7 @@ export const ALGORITHM_CHALLENGES: FunctionChallenge[] = [
     },
     tests: T(['"abc"', '"ba"'], ['"x"', '"dcba"']),
     solution:
-      'local function permutations(letters)\n\tlocal chars = {}\n\tfor i = 1, #letters do\n\t\tchars[i] = letters:sub(i, i)\n\tend\n\ttable.sort(chars)\n\tlocal result, used, current = {}, {}, {}\n\tlocal function build()\n\t\tif #current == #chars then\n\t\t\ttable.insert(result, table.concat(current))\n\t\t\treturn\n\t\tend\n\t\tfor i, ch in chars do\n\t\t\tif not used[i] then\n\t\t\t\tused[i] = true\n\t\t\t\ttable.insert(current, ch)\n\t\t\t\tbuild()\n\t\t\t\ttable.remove(current)\n\t\t\t\tused[i] = false\n\t\t\tend\n\t\tend\n\tend\n\tbuild()\n\treturn result\nend\n',
+      "local function permutations(letters)\n\tlocal chars = {}\n\tfor i = 1, #letters do\n\t\tchars[i] = letters:sub(i, i)\n\tend\n\ttable.sort(chars)\n\tlocal result, used, current = {}, {}, {}\n\tlocal function build()\n\t\tif #current == #chars then\n\t\t\ttable.insert(result, table.concat(current))\n\t\t\treturn\n\t\tend\n\t\tfor i, ch in chars do\n\t\t\tif not used[i] then\n\t\t\t\tused[i] = true\n\t\t\t\ttable.insert(current, ch)\n\t\t\t\tbuild()\n\t\t\t\ttable.remove(current)\n\t\t\t\tused[i] = false\n\t\t\tend\n\t\tend\n\tend\n\tbuild()\n\treturn result\nend\n",
     hints: {
       en: [
         "Sort the letters first; then building in order gives alphabetical results.",
@@ -573,7 +660,10 @@ export const ALGORITHM_CHALLENGES: FunctionChallenge[] = [
       en: "You have gift cards with these values and may use each at most once. Write `canSum(list, target)`: can some of them add up to exactly `target`? The hidden test has 40 cards, so trying every subset is too slow.",
       tr: "Bu değerlerde hediye kartların var ve her birini en fazla bir kez kullanabilirsin. `canSum(list, target)`'ı yaz: bazıları tam olarak `target` eder mi? Gizli testte 40 kart var; her alt kümeyi denemek çok yavaş.",
     },
-    tests: T(["{ 3, 34, 4, 12, 5, 2 }, 9", "{ 3, 34, 4 }, 30"], ["{}, 0", "{ 7 }, 7", `${range(40, "i * 2")}, 1001`, `${range(40, "i * 2")}, 1000`]),
+    tests: T(
+      ["{ 3, 34, 4, 12, 5, 2 }, 9", "{ 3, 34, 4 }, 30"],
+      ["{}, 0", "{ 7 }, 7", `${range(40, "i * 2")}, 1001`, `${range(40, "i * 2")}, 1000`],
+    ),
     solution:
       "local function canSum(list, target)\n\tlocal possible = { [0] = true }\n\tfor _, v in list do\n\t\tfor t = target, v, -1 do\n\t\t\tif possible[t - v] then\n\t\t\t\tpossible[t] = true\n\t\t\tend\n\t\tend\n\tend\n\treturn possible[target] == true\nend\n",
     hints: {
@@ -623,7 +713,14 @@ export const ALGORITHM_CHALLENGES: FunctionChallenge[] = [
       en: "Write `kthSmallest(list, k)` that returns the k-th smallest number (k = 1 is the smallest) without sorting the whole list: split around a pivot and only keep the part that holds the answer.",
       tr: "Bütün listeyi sıralamadan k. en küçük sayıyı döndüren `kthSmallest(list, k)`'yi yaz (k = 1 en küçüğü): bir pivot etrafında böl ve sadece cevabı tutan kısmı sakla.",
     },
-    tests: T(["{ 7, 10, 4, 3, 20, 15 }, 3", "{ 5 }, 1"], ["{ 2, 2, 1 }, 2", "{ 9, 8, 7, 6, 5, 4, 3, 2, 1 }, 9", `${range(2000, "(i * 37) % 2003")}, 1000`]),
+    tests: T(
+      ["{ 7, 10, 4, 3, 20, 15 }, 3", "{ 5 }, 1"],
+      [
+        "{ 2, 2, 1 }, 2",
+        "{ 9, 8, 7, 6, 5, 4, 3, 2, 1 }, 9",
+        `${range(2000, "(i * 37) % 2003")}, 1000`,
+      ],
+    ),
     solution:
       "local function kthSmallest(list, k)\n\tlocal pivot = list[math.ceil(#list / 2)]\n\tlocal less, equal, more = {}, 0, {}\n\tfor _, v in list do\n\t\tif v < pivot then\n\t\t\ttable.insert(less, v)\n\t\telseif v > pivot then\n\t\t\ttable.insert(more, v)\n\t\telse\n\t\t\tequal += 1\n\t\tend\n\tend\n\tif k <= #less then\n\t\treturn kthSmallest(less, k)\n\telseif k <= #less + equal then\n\t\treturn pivot\n\tend\n\treturn kthSmallest(more, k - #less - equal)\nend\n",
     hints: {
@@ -648,7 +745,14 @@ export const ALGORITHM_CHALLENGES: FunctionChallenge[] = [
       en: "Each room of a grid costs some health. Start top-left, end bottom-right, moving only right or down. Write `minPathSum(grid)`: the smallest total cost (count the start and end rooms too).",
       tr: "Bir ızgaranın her odası biraz can harcatıyor. Sol üstten başla, sağ altta bitir, sadece sağa ya da aşağı git. `minPathSum(grid)`'i yaz: en küçük toplam maliyet (başlangıç ve bitiş odaları dahil).",
     },
-    tests: T(["{ { 1, 3, 1 }, { 1, 5, 1 }, { 4, 2, 1 } }", "{ { 5 } }"], ["{ { 1, 2, 3 } }", "{ { 1 }, { 2 }, { 3 } }", "{ { 1, 9, 1, 1 }, { 1, 1, 1, 9 }, { 9, 9, 1, 1 } }"]),
+    tests: T(
+      ["{ { 1, 3, 1 }, { 1, 5, 1 }, { 4, 2, 1 } }", "{ { 5 } }"],
+      [
+        "{ { 1, 2, 3 } }",
+        "{ { 1 }, { 2 }, { 3 } }",
+        "{ { 1, 9, 1, 1 }, { 1, 1, 1, 9 }, { 9, 9, 1, 1 } }",
+      ],
+    ),
     solution:
       "local function minPathSum(grid)\n\tlocal cost = {}\n\tfor r, row in grid do\n\t\tcost[r] = {}\n\t\tfor c, v in row do\n\t\t\tlocal up = if r > 1 then cost[r - 1][c] else math.huge\n\t\t\tlocal left = if c > 1 then cost[r][c - 1] else math.huge\n\t\t\tlocal from = math.min(up, left)\n\t\t\tcost[r][c] = v + (if from == math.huge then 0 else from)\n\t\tend\n\tend\n\treturn cost[#grid][#grid[1]]\nend\n",
     hints: {
@@ -673,7 +777,17 @@ export const ALGORITHM_CHALLENGES: FunctionChallenge[] = [
       en: 'Write `wordBreak(text, words)`: can `text` be split into pieces that are all in the `words` list (words can repeat)? `wordBreak("freepetcode", { "free", "pet", "code" })` is `true`.',
       tr: '`wordBreak(text, words)`\'ü yaz: `text`, hepsi `words` listesinde olan parçalara bölünebilir mi (kelimeler tekrar edebilir)? `wordBreak("freepetcode", { "free", "pet", "code" })` sonucu `true`.',
     },
-    tests: T(['"freepetcode", { "free", "pet", "code" }', '"catsandog", { "cats", "dog", "sand", "and", "cat" }'], ['"", { "a" }', '"aaaaaaa", { "aaa", "aaaa" }', '"' + "a".repeat(60) + 'b", { "a", "aa", "aaa" }']),
+    tests: T(
+      [
+        '"freepetcode", { "free", "pet", "code" }',
+        '"catsandog", { "cats", "dog", "sand", "and", "cat" }',
+      ],
+      [
+        '"", { "a" }',
+        '"aaaaaaa", { "aaa", "aaaa" }',
+        '"' + "a".repeat(60) + 'b", { "a", "aa", "aaa" }',
+      ],
+    ),
     solution:
       "local function wordBreak(text, words)\n\tlocal dict = {}\n\tfor _, w in words do\n\t\tdict[w] = true\n\tend\n\tlocal ok = { [0] = true }\n\tfor i = 1, #text do\n\t\tfor j = 0, i - 1 do\n\t\t\tif ok[j] and dict[text:sub(j + 1, i)] then\n\t\t\t\tok[i] = true\n\t\t\t\tbreak\n\t\t\tend\n\t\tend\n\tend\n\treturn ok[#text] == true\nend\n",
     hints: {

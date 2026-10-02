@@ -59,7 +59,16 @@ const DIFF_STYLE: Record<Difficulty, string> = {
   hard: "border-red-500/30 bg-red-500/10 text-red-400",
 };
 
-const TAGS: Tag[] = ["algorithms", "basics", "math", "strings", "tables", "loops", "game", "roblox"];
+const TAGS: Tag[] = [
+  "algorithms",
+  "basics",
+  "math",
+  "strings",
+  "tables",
+  "loops",
+  "game",
+  "roblox",
+];
 
 function Rich({ text }: { text: string }) {
   return (

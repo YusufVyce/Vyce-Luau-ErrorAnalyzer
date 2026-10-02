@@ -41,12 +41,10 @@ export const PRO_COMMENTS: Record<string, string> = {
   "version 2 added gems": "2. sürüm gems ekledi",
   "saved before gems existed": "gems yokken kaydedilmiş",
   // cross-server
-  'every server listens on the "Announcements" topic':
-    'her sunucu "Announcements" konusunu dinler',
+  'every server listens on the "Announcements" topic': 'her sunucu "Announcements" konusunu dinler',
   "any server can send to all of them": "herhangi bir sunucu hepsine gönderebilir",
   // server-authority
-  "DON'T: the client chooses how many coins it gets":
-    "YAPMA: kaç coin alacağını istemci seçiyor",
+  "DON'T: the client chooses how many coins it gets": "YAPMA: kaç coin alacağını istemci seçiyor",
   "1. the type: exploiters can send tables, numbers or nothing":
     "1. tip: exploit kullananlar tablo, sayı ya da hiçbir şey gönderebilir",
   "2. it exists: the server's own table decides the price":
@@ -107,7 +105,8 @@ export const PRO_COMMENTS: Record<string, string> = {
   "silent beyond 60 studs": "60 stud'dan ötesinde sessiz",
   "clean up when it's done": "bitince temizle",
   "the group's volume applies on top": "grubun ses seviyesi üstüne uygulanır",
-  "a settings button can mute all music at once": "bir ayar butonu bütün müziği tek seferde susturabilir",
+  "a settings button can mute all music at once":
+    "bir ayar butonu bütün müziği tek seferde susturabilir",
   // animations
   "load once, play many times": "bir kez yükle, çok kez oynat",
   "beats walking and idle": "yürüme ve beklemeyi bastırır",
@@ -144,6 +143,13 @@ export const PRO_COMMENTS: Record<string, string> = {
   "true: not a player": "true: oyuncu değil",
   // capstone
   "can't grab a coin from across the map": "haritanın öbür ucundan coin alınamaz",
+  // homework
+  "Write the Boss class below": "Boss sınıfını aşağıya yaz",
+  "Make nextColor with coroutine.wrap": "coroutine.wrap ile nextColor yap",
+  "[player] = when they last clicked": "[player] = en son ne zaman tıkladığı",
+  "Write new, Add, Remove and Count here": "new, Add, Remove ve Count'u buraya yaz",
+  "[player] = their Heartbeat connection": "[player] = Heartbeat bağlantısı",
+  "update the player's trail effect here": "oyuncunun iz efektini burada güncelle",
 };
 
 export const PRO_STRINGS: Record<string, string> = {
@@ -183,4 +189,6 @@ export const PRO_STRINGS: Record<string, string> = {
   " bought product ": " şu ürünü aldı: ",
   " joined team ": " şu takıma katıldı: ",
   " wins!": " kazandı!",
+  "Quest complete: ": "Görev tamamlandı: ",
+  "{best.Name} wins with {bestCoins} coins!": "{best.Name} {bestCoins} coinle kazandı!",
 };

@@ -77,7 +77,8 @@ This makes it easier to see exactly where an expression stops working.
 
 Vyce Parser includes a structured learning system for learning Roblox Studio scripting.
 
-- 39 lessons in 9 units, from the Studio tour to CFrames, pcall, RemoteFunctions and two full game projects (a coin shop and a dropper tycoon).
+- 67 lessons in 15 units, from the Studio tour to CFrames, pcall, RemoteFunctions and two full game projects (a coin shop and a dropper tycoon).
+- Six pro units take you the rest of the way: strict types, metatables, inheritance, closures and coroutines; session data, global leaderboards, serialization and cross-server messaging; server authority, rate limits, replication and anti-cheat; inventory, combat hitboxes, NPC pathfinding, quests and wave spawners; UI layout, sound, animation, camera and day-night cycles; project architecture, performance, monetization, teams and a final project.
 - Every lesson has homework that runs in the browser simulator.
 - English and Turkish language support.
 - Step-by-step learning path.
@@ -111,7 +112,9 @@ Write and test your code directly inside Vyce Parser.
 
 ## 🎯 Tasks
 
-The task system gives you 88 coding challenges in three difficulty levels (easy, medium, hard): game maths, text and table puzzles, a maze solver and a tic-tac-toe judge, plus Roblox world tasks like kill bricks, coin pickups, click doors and a safe RemoteEvent shop.
+The task system gives you 118 coding challenges in three difficulty levels (easy, medium, hard). The algorithms tag collects 50 of them — searching, sorting, number theory, two pointers, dynamic programming (coin change, knapsack, edit distance), backtracking (permutations, N queens) and grids (flood fill, shortest path) — with bigger hidden tests, so a slow brute-force answer runs out of time. There are also game maths, text and table puzzles and Roblox world tasks like kill bricks, coin pickups, click doors and a safe RemoteEvent shop.
+
+Every hint costs XP (a quarter of a challenge's reward, 20 XP on homework) and the panel shows how much is still on offer. Looking at the solution still marks the task as done, but it pays no XP — the page asks before showing it.
 
 Your code is executed and checked against the requirements of the task.
 

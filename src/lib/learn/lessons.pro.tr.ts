@@ -17,7 +17,7 @@ export const TR_PRO: Record<string, LessonTr> = {
       {
         h: "Değişkenlere ve fonksiyonlara tip vermek",
         t: [
-          "Tip iki noktadan sonra yazılır. Fonksiyonun parantezlerinden sonraki tip, döndürdüğü değerdir. Bu tiplerle addCoins(coins, \"50\") kırmızıyla çizilir: \"50\" bir metin, sayı değil.",
+          'Tip iki noktadan sonra yazılır. Fonksiyonun parantezlerinden sonraki tip, döndürdüğü değerdir. Bu tiplerle addCoins(coins, "50") kırmızıyla çizilir: "50" bir metin, sayı değil.',
         ],
       },
       {
@@ -110,7 +110,7 @@ export const TR_PRO: Record<string, LessonTr> = {
         tip: "Enemy.Attack(self), üst sınıfın metodunu bu nesne üzerinde çağırır. Bir alt sınıf bir metodu tamamen değiştirmek yerine ona bir şey eklemek istediğinde böyle yapar.",
       },
       {
-        h: "Kompozisyon: \"bir şeydir\" yerine \"bir şeyi vardır\"",
+        h: 'Kompozisyon: "bir şeydir" yerine "bir şeyi vardır"',
         t: [
           "Kalıtım zincirleri iki üç seviyeden sonra karışır. Birçok profesyonel kompozisyonu tercih eder: Boss uzun bir sınıf zincirinden miras almak yerine bir can parçasına ve bir saldırı düzenine sahiptir.",
           "İyi bir kural: küçük, net aileler için kalıtım (Enemy → Zombie, Boss), geri kalan her şey için kompozisyon.",
@@ -243,7 +243,7 @@ export const TR_PRO: Record<string, LessonTr> = {
       { h: "Bir çağrıyı tekrar denemek" },
       {
         h: "Oturum kalıbı",
-        tip: "Yüklenemeyen veriyi asla kaydetme: oyuncunun gerçek ilerlemesinin üstüne boş varsayılanları yazarsın. Bu tek kural \"bütün eşyalarımı kaybettim!\" şikâyetlerinin çoğunu önler.",
+        tip: 'Yüklenemeyen veriyi asla kaydetme: oyuncunun gerçek ilerlemesinin üstüne boş varsayılanları yazarsın. Bu tek kural "bütün eşyalarımı kaybettim!" şikâyetlerinin çoğunu önler.',
       },
       {
         h: "SetAsync yerine UpdateAsync",
@@ -277,12 +277,11 @@ export const TR_PRO: Record<string, LessonTr> = {
 
   "global-leaderboards": {
     title: "Global liderlik tabloları",
-    summary:
-      "Oynamış her oyuncuyu bir OrderedDataStore ile sırala ve ilk 10'u bir panoda göster.",
+    summary: "Oynamış her oyuncuyu bir OrderedDataStore ile sırala ve ilk 10'u bir panoda göster.",
     sections: [
       {
         t: [
-          "Normal bir DataStore sıralama yapamaz. OrderedDataStore sadece tam sayı saklar ama anahtarları değerlerine göre sıralı verebilir — \"tüm zamanların ilk 10'u\" panosunun ihtiyacı tam olarak bu.",
+          'Normal bir DataStore sıralama yapamaz. OrderedDataStore sadece tam sayı saklar ama anahtarları değerlerine göre sıralı verebilir — "tüm zamanların ilk 10\'u" panosunun ihtiyacı tam olarak bu.',
         ],
       },
       { h: "Bir skoru kaydetmek" },
@@ -298,7 +297,7 @@ export const TR_PRO: Record<string, LessonTr> = {
     ],
     game: {
       name: "Speedrun obby'leri ve dövüş oyunları",
-      text: "Lobilerdeki parlayan \"En Çok Galibiyet\" ve \"En Hızlı Süreler\" panoları OrderedDataStore'dur. Bir döngü onları her 60 saniyede yeniler ve en iyi oyuncuların her biri için bir satır şablonunu kopyalar.",
+      text: 'Lobilerdeki parlayan "En Çok Galibiyet" ve "En Hızlı Süreler" panoları OrderedDataStore\'dur. Bir döngü onları her 60 saniyede yeniler ve en iyi oyuncuların her biri için bir satır şablonunu kopyalar.',
     },
     tryIt: [
       "Uydurma beş oyuncu için skor kaydet ve ilk üçü yazdır.",
@@ -432,7 +431,7 @@ export const TR_PRO: Record<string, LessonTr> = {
       {
         h: "Mesafeler ve sayılar",
         t: [
-          "Bir oyuncu \"sandık açtığını\" söylüyorsa karakterinin gerçekten yakında olduğunu kontrol et. Bir sayı gönderiyorsa NaN'ı, sonsuzu ve beklediğin aralığın dışındaki her şeyi reddet.",
+          'Bir oyuncu "sandık açtığını" söylüyorsa karakterinin gerçekten yakında olduğunu kontrol et. Bir sayı gönderiyorsa NaN\'ı, sonsuzu ve beklediğin aralığın dışındaki her şeyi reddet.',
         ],
         tip: 'İstemciden gelen isimlere, fiyatlara ve miktarlara asla güvenme. Oyuncunun ne yapmak istediğini gönder ("Sword"), gerisini sunucu kendisi baksın.',
       },
@@ -566,7 +565,7 @@ export const TR_PRO: Record<string, LessonTr> = {
       {
         h: "Vuruşları kontrol etmek",
         t: [
-          "Bir istemci \"o düşmanı vurdum\" derse sunucu iddiayı kontrol eder: gerçekten yaşayan bir karakter mi, ve vurulabilecek kadar yakın mı?",
+          'Bir istemci "o düşmanı vurdum" derse sunucu iddiayı kontrol eder: gerçekten yaşayan bir karakter mi, ve vurulabilecek kadar yakın mı?',
         ],
       },
       {
@@ -734,7 +733,7 @@ export const TR_PRO: Record<string, LessonTr> = {
   quests: {
     title: "Bir görev sistemi",
     summary:
-      "\"10 coin topla\" ya da \"3 zombi yen\" gibi hedefleri veri olarak yazılmış görevler ve oyun olaylarını dinleyen bir takipçiyle izle.",
+      '"10 coin topla" ya da "3 zombi yen" gibi hedefleri veri olarak yazılmış görevler ve oyun olaylarını dinleyen bir takipçiyle izle.',
     sections: [
       {
         t: [
@@ -749,7 +748,7 @@ export const TR_PRO: Record<string, LessonTr> = {
       {
         h: "Gerçek olayları bağlamak",
         t: [
-          "Diğer sistemler sadece ne olduğunu duyurur — görevlerin varlığından haberleri bile yoktur. Haberi bir BindableEvent taşır: zombi scripti QuestEvent'i \"ZombieDefeated\" ile, coin scripti \"CoinCollected\" ile tetikler.",
+          'Diğer sistemler sadece ne olduğunu duyurur — görevlerin varlığından haberleri bile yoktur. Haberi bir BindableEvent taşır: zombi scripti QuestEvent\'i "ZombieDefeated" ile, coin scripti "CoinCollected" ile tetikler.',
         ],
       },
     ],
@@ -758,7 +757,7 @@ export const TR_PRO: Record<string, LessonTr> = {
       text: "Günlük görevler, battle pass'ler ve başarımlar aynı sistemdir: bir hedef tablosu, oyun olaylarını dinleyen bir takipçi ve bir hedefe ulaşılınca ödüller. Tasarımcılar yeni görevleri satır ekleyerek ekler — yeni kod yok.",
     },
     tryIt: [
-      "Bir Jumped olayını dinleyen \"20 kez zıpla\" görevi ekle.",
+      'Bir Jumped olayını dinleyen "20 kez zıpla" görevi ekle.',
       "Bir görev tamamlanınca Reward'ını bir coins değişkenine ekle.",
       "report'un zaten bitmiş görevleri yok saymasını sağla.",
     ],
@@ -1045,7 +1044,7 @@ export const TR_PRO: Record<string, LessonTr> = {
       { h: "Bir servis" },
       {
         h: "Her şeyi başlatan tek Script",
-        tip: "Kod yazmadan önce \"bu hangi servisin işi?\" diye sor. İki servisin aynı yardımcıya ihtiyacı varsa o Shared'a aittir.",
+        tip: 'Kod yazmadan önce "bu hangi servisin işi?" diye sor. İki servisin aynı yardımcıya ihtiyacı varsa o Shared\'a aittir.',
       },
     ],
     game: {
@@ -1199,7 +1198,7 @@ export const TR_PRO: Record<string, LessonTr> = {
     sections: [
       {
         t: [
-          "Artık profesyonel Roblox scripter'larının her gün kullandığı araçları biliyorsun. Son adım onları insanların oynayabileceği bir şeyde birleştirmek: turları, takımları, dükkânı, kaydı ve global liderlik tablosu olan bir \"coin rush\" arenası.",
+          'Artık profesyonel Roblox scripter\'larının her gün kullandığı araçları biliyorsun. Son adım onları insanların oynayabileceği bir şeyde birleştirmek: turları, takımları, dükkânı, kaydı ve global liderlik tablosu olan bir "coin rush" arenası.',
           "Her şeyi bir anda yapma. Önce küçük bir sürüm yayınla, sonra özellikleri tek tek ekle ve her birinden sonra test et.",
         ],
       },

@@ -49,7 +49,7 @@ print(playerName, coins, isVip)
 `,
         },
         text: [
-          "A type goes after a colon. The type after a function's parentheses is what it returns. With these types, addCoins(coins, \"50\") gets a red underline: \"50\" is a string, not a number.",
+          'A type goes after a colon. The type after a function\'s parentheses is what it returns. With these types, addCoins(coins, "50") gets a red underline: "50" is a string, not a number.',
         ],
       },
       {
@@ -439,7 +439,7 @@ print(shout("Hello!")) -- prints Hello! and then true
 print(shout("Again!")) -- false: still cooling down
 `,
         },
-        tip: "... (varargs) means \"any number of arguments\". Pass them on with action(...), collect them with { ... } and count them with select(\"#\", ...).",
+        tip: '... (varargs) means "any number of arguments". Pass them on with action(...), collect them with { ... } and count them with select("#", ...).',
       },
     ],
     game: {
@@ -726,7 +726,7 @@ print(store:GetAsync("Player_1").Coins) -- 100
     sections: [
       {
         text: [
-          "A normal DataStore can't sort. An OrderedDataStore only stores whole numbers, but it can give you the keys sorted by their value — exactly what an \"all-time top 10\" board needs.",
+          'A normal DataStore can\'t sort. An OrderedDataStore only stores whole numbers, but it can give you the keys sorted by their value — exactly what an "all-time top 10" board needs.',
         ],
       },
       {
@@ -796,7 +796,7 @@ print(nameOf(1))
     ],
     game: {
       name: "Speedrun obbies and fighting games",
-      text: "The glowing \"Top Wins\" and \"Fastest Times\" boards in lobbies are OrderedDataStores. A loop refreshes them every 60 seconds and clones a row template for each of the top players.",
+      text: 'The glowing "Top Wins" and "Fastest Times" boards in lobbies are OrderedDataStores. A loop refreshes them every 60 seconds and clones a row template for each of the top players.',
     },
     tryIt: [
       "Save scores for five made-up players and print the top three.",
@@ -1124,7 +1124,7 @@ end)
       {
         heading: "Distances and numbers",
         text: [
-          "If a player \"opens a chest\", check that their character is really near it. If they send a number, reject NaN, infinity and anything outside the range you expect.",
+          'If a player "opens a chest", check that their character is really near it. If they send a number, reject NaN, infinity and anything outside the range you expect.',
         ],
         code: {
           where: "ServerScriptService › Checks",
@@ -1169,7 +1169,8 @@ print(isValidNumber(math.huge, 1, 10)) -- false
         "The price comes from the client, so an exploiter can leave it out (this error) — or worse, send -1000000 and gain coins. Look the price up on the server: local price = PRICES[itemName].",
     },
     quiz: {
-      question: 'A client fires BuyItem with ("Sword", 0). What should the server use as the price?',
+      question:
+        'A client fires BuyItem with ("Sword", 0). What should the server use as the price?',
       options: [
         "0, what the client sent",
         "The price from the server's own PRICES table",
@@ -1378,8 +1379,7 @@ end)
     chapter: CHAPTERS[11],
     title: "Catching cheaters on the server",
     minutes: 10,
-    summary:
-      "Spot speed hacks and teleports from the server, and check every hit a client claims.",
+    summary: "Spot speed hacks and teleports from the server, and check every hit a client claims.",
     sections: [
       {
         text: [
@@ -1420,7 +1420,7 @@ end)
       {
         heading: "Checking hits",
         text: [
-          "If a client says \"I hit that enemy\", the server checks the claim: is it really a living character, and is it close enough to have been hit?",
+          'If a client says "I hit that enemy", the server checks the claim: is it really a living character, and is it close enough to have been hit?',
         ],
         code: {
           where: "ServerScriptService › Combat",

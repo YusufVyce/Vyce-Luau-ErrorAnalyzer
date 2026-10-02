@@ -136,7 +136,7 @@ print(craft(bag, "Axe"), bag:Count("Axe"), bag:Count("Wood")) -- true 1 2
     ],
     game: {
       name: "Survival and crafting games",
-      text: "Survival games share one Inventory module between gathering, crafting, trading and saving. A tree calls bag:Add(\"Wood\"), the crafting bench calls craft, and the save system stores bag.items — no system needs to know how the others work.",
+      text: 'Survival games share one Inventory module between gathering, crafting, trading and saving. A tree calls bag:Add("Wood"), the crafting bench calls craft, and the save system stores bag.items — no system needs to know how the others work.',
     },
     tryIt: [
       "Add a Sword recipe that needs 2 Stone and 1 Wood.",
@@ -273,7 +273,8 @@ showHitbox(CFrame.new(0, 5, -4), Vector3.new(5, 5, 6))
       "Push hit characters back with ApplyImpulse on their HumanoidRootPart.",
     ],
     mistake: {
-      error: 'ServerScriptService.Combat:2: Humanoid is not a valid member of Workspace "Workspace"',
+      error:
+        'ServerScriptService.Combat:2: Humanoid is not a valid member of Workspace "Workspace"',
       code: "for _, part in parts do\n\tpart.Parent.Humanoid:TakeDamage(25)\nend",
       explain:
         'The box also finds the floor and walls, whose parent has no Humanoid. Use FindFirstChildOfClass("Humanoid") and skip parts where it returns nil.',
@@ -426,7 +427,7 @@ print(think(nil), think(30), think(3)) -- Idle Chase Attack
     title: "A quest system",
     minutes: 10,
     summary:
-      "Track goals like \"collect 10 coins\" or \"defeat 3 zombies\" with quests written as data and a tracker that listens to game events.",
+      'Track goals like "collect 10 coins" or "defeat 3 zombies" with quests written as data and a tracker that listens to game events.',
     sections: [
       {
         text: [
@@ -479,7 +480,7 @@ report("CoinCollected", 4)
       {
         heading: "Hooking up real events",
         text: [
-          "Other systems only announce what happened — they don't even know quests exist. A BindableEvent carries the news: the zombie script fires QuestEvent with \"ZombieDefeated\", the coin script with \"CoinCollected\".",
+          'Other systems only announce what happened — they don\'t even know quests exist. A BindableEvent carries the news: the zombie script fires QuestEvent with "ZombieDefeated", the coin script with "CoinCollected".',
         ],
         code: {
           where: "ServerScriptService › Zombies",
@@ -507,7 +508,7 @@ onZombieDied("Ann")
       text: "Daily quests, battle passes and achievements are all the same system: a table of goals, a tracker listening to game events, and rewards when a goal is reached. Designers add new quests by adding rows — no new code.",
     },
     tryIt: [
-      "Add a quest \"Jump 20 times\" that listens for a Jumped event.",
+      'Add a quest "Jump 20 times" that listens for a Jumped event.',
       "Give each quest a Reward and add it to a coins variable when it completes.",
       "Make report ignore quests that are already finished.",
     ],
@@ -640,8 +641,7 @@ print(info.Count, math.floor(info.Health), info.Boss) -- 13 174 true
       "Give every player 10 coins when a wave is cleared.",
     ],
     mistake: {
-      error:
-        "The Parent property of Zombie is locked, current parent: NULL, new parent Enemies",
+      error: "The Parent property of Zombie is locked, current parent: NULL, new parent Enemies",
       code: "local template = ServerStorage.Zombie\n\nlocal function spawnEnemy()\n\ttemplate.Parent = workspace.Enemies\n\treturn template\nend",
       explain:
         "Without :Clone() you move the template itself. When that zombie is defeated and destroyed, there's nothing left to spawn. Always spawn template:Clone().",
@@ -935,7 +935,7 @@ end)
       {
         heading: "Markers: act at the right moment",
         text: [
-          "In the Animation Editor you can add a marker — say Impact — on the frame where the sword connects. GetMarkerReachedSignal(\"Impact\") fires at exactly that moment: the perfect time to create the hitbox.",
+          'In the Animation Editor you can add a marker — say Impact — on the frame where the sword connects. GetMarkerReachedSignal("Impact") fires at exactly that moment: the perfect time to create the hitbox.',
         ],
         code: {
           where: "ServerScriptService › Script",
@@ -968,7 +968,12 @@ print(typeof(onImpact)) -- function
     },
     quiz: {
       question: "Where do you load an animation for a character?",
-      options: ["workspace", "The Humanoid's Animator", "ReplicatedStorage", "The HumanoidRootPart"],
+      options: [
+        "workspace",
+        "The Humanoid's Animator",
+        "ReplicatedStorage",
+        "The HumanoidRootPart",
+      ],
       answer: 1,
       why: "The Animator (inside the Humanoid) plays tracks on the character's joints.",
     },
@@ -1172,8 +1177,7 @@ grade.Parent = Lighting
     mistake: {
       error: "Unable to assign property TimeOfDay. string expected, got number",
       code: "Lighting.TimeOfDay = 14",
-      explain:
-        'TimeOfDay is text like "14:00:00". For a number, use ClockTime = 14.',
+      explain: 'TimeOfDay is text like "14:00:00". For a number, use ClockTime = 14.',
     },
     quiz: {
       question: "What does Lighting.ClockTime = 18 show?",
@@ -1253,7 +1257,7 @@ end
 print("Server ready")
 `,
         },
-        tip: "Before writing code, ask \"which service owns this?\". If two services need the same helper, it belongs in Shared.",
+        tip: 'Before writing code, ask "which service owns this?". If two services need the same helper, it belongs in Shared.',
       },
     ],
     game: {
@@ -1267,7 +1271,7 @@ print("Server ready")
     ],
     mistake: {
       error: "Requested module was required recursively",
-      code: '-- ShopService\nlocal DataService = require(script.Parent.DataService)\n\n-- DataService\nlocal ShopService = require(script.Parent.ShopService)',
+      code: "-- ShopService\nlocal DataService = require(script.Parent.DataService)\n\n-- DataService\nlocal ShopService = require(script.Parent.ShopService)",
       explain:
         "Two modules that require each other at the top wait for each other forever. Let the loader require everything first, and only use other services inside Start.",
     },
@@ -1604,8 +1608,7 @@ end
     mistake: {
       error: "Unable to assign property Team. Object expected, got string",
       code: 'player.Team = "Red"',
-      explain:
-        "Team wants the Team object, not its name: player.Team = Teams.Red.",
+      explain: "Team wants the Team object, not its name: player.Team = Teams.Red.",
     },
     quiz: {
       question: "How do you stop friendly fire?",
@@ -1631,7 +1634,7 @@ end
     sections: [
       {
         text: [
-          "You now know the tools professional Roblox scripters use every day. The last step is putting them together into something people can play: a \"coin rush\" arena with rounds, teams, a shop, saving and a global leaderboard.",
+          'You now know the tools professional Roblox scripters use every day. The last step is putting them together into something people can play: a "coin rush" arena with rounds, teams, a shop, saving and a global leaderboard.',
           "Don't build everything at once. Ship a small version first, then add features one at a time and test after each one.",
         ],
       },
@@ -1714,7 +1717,7 @@ return CoinService
         "DataStoreService: StudioAccessToApisNotAllowed: Studio access to APIs is not allowed. API: GetAsync, Data Store: PlayerData",
       code: 'local data = store:GetAsync("Player_" .. player.UserId)',
       explain:
-        "DataStores in Studio need the game to be published and \"Enable Studio Access to API Services\" turned on in Game Settings → Security.",
+        'DataStores in Studio need the game to be published and "Enable Studio Access to API Services" turned on in Game Settings → Security.',
     },
     quiz: {
       question: "What's the best way to build a big game?",
